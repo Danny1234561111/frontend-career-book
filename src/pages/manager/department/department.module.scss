@@ -1,0 +1,87 @@
+@import '../../../variables.module';
+
+.page {
+  min-height: calc(100vh - 80px);
+  background: $background-light;
+}
+
+.header {
+  background: $white;
+  padding: $spacing-xl $spacing-xxl;
+  border-bottom: 1px solid $border-color;
+}
+
+.title {
+  font-size: $font-xxxxl;
+  color: $text-primary;
+  margin: 0;
+  font-weight: 600;
+}
+
+.content {
+  background: $white;
+  padding: $spacing-xxl;
+  min-height: calc(100vh - 80px - 80px);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xxxl;
+  
+  @include mobile {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-md;
+  }
+}
+
+.statCard {
+  background: $background-light;
+  border-radius: $border-radius-md;
+  padding: $spacing-xl $spacing-md;
+  text-align: center;
+  border: 1px solid $border-color;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: $primary;
+    box-shadow: $shadow-sm;
+  }
+}
+
+.statValue {
+  display: block;
+  font-size: $font-xxxl;
+  font-weight: 700;
+  color: $primary;
+  margin-bottom: $spacing-xs;
+}
+
+.statLabel {
+  font-size: $font-sm;
+  color: $text-secondary;
+}
+
+.tableSection {
+  h2 {
+    font-size: $font-xl;
+    color: $text-primary;
+    margin: 0 0 $spacing-lg 0;
+    font-weight: 600;
+  }
+}
+
+@include mobile {
+  .header {
+    padding: $spacing-lg $spacing-xl;
+  }
+  
+  .title {
+    font-size: $font-xxl;
+  }
+  
+  .content {
+    padding: $spacing-lg;
+  }
+}

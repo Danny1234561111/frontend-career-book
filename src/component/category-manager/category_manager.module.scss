@@ -1,0 +1,369 @@
+@import '../../variables.module';
+
+.container {
+  background: $white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-sm;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+  
+  h3 {
+    font-size: $font-xxl;
+    color: $text-primary;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  @include mobile {
+    flex-direction: column;
+    gap: $spacing-md;
+    align-items: stretch;
+  }
+}
+
+.addBlock {
+  display: flex;
+  gap: $spacing-sm;
+  
+  input {
+    padding: $spacing-sm $spacing-lg;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-md;
+    font-size: $font-md;
+    width: 300px;
+    
+    &:focus {
+      outline: none;
+      border-color: $primary;
+    }
+  }
+  
+  .addBtn {
+    @include button-reset;
+    padding: $spacing-sm $spacing-xl;
+    background: $primary;
+    border-radius: $border-radius-md;
+    color: $white;
+    font-size: $font-md;
+    font-weight: 500;
+    
+    &:hover {
+      background: $primary-hover;
+    }
+  }
+  
+  @include mobile {
+    input {
+      width: 100%;
+    }
+  }
+}
+
+.blocksList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.block {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  overflow: hidden;
+}
+
+.blockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  background: $background-hover;
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: darken($background-hover, 2%);
+  }
+}
+
+.blockTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  
+  h4 {
+    font-size: $font-lg;
+    color: $text-primary;
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.expandIcon {
+  font-size: $font-sm;
+  color: $text-secondary;
+  width: 20px;
+  text-align: center;
+}
+
+.itemCount {
+  font-size: $font-sm;
+  color: $text-secondary;
+  background: $white;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-xl;
+  margin-left: $spacing-sm;
+}
+
+.blockActions {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.iconBtn {
+  @include button-reset;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  width: 32px;
+  height: 32px;
+  font-size: $font-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: $white;
+    border-color: $primary;
+  }
+}
+
+.blockContent {
+  padding: $spacing-lg;
+  background: $white;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.competencyContainer {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  overflow: hidden;
+}
+
+.competencyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background: $background-light;
+  border-bottom: 1px solid $border-color;
+}
+
+.competencyTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  cursor: pointer;
+  flex: 1;
+  
+  .competencyName {
+    font-weight: 500;
+    color: $text-primary;
+    font-size: $font-md;
+  }
+}
+
+.levelBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-xl;
+  font-size: $font-xs;
+  font-weight: 500;
+  margin-left: $spacing-sm;
+  
+  &.level1 {
+    background: $warning-light;
+    color: $warning;
+  }
+  
+  &.level2 {
+    background: $primary-light;
+    color: $primary;
+  }
+  
+  &.level3 {
+    background: $success-light;
+    color: $success;
+  }
+}
+
+.competencyActions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.materialCount {
+  font-size: $font-xs;
+  color: $text-secondary;
+  background: $white;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-xl;
+}
+
+.smallIconBtn {
+  @include button-reset;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  width: 24px;
+  height: 24px;
+  font-size: $font-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: $primary-light;
+    border-color: $primary;
+  }
+}
+
+.materialsList {
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.materialCard {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  padding: $spacing-sm $spacing-md;
+  background: $white;
+  cursor: move;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: $primary;
+    box-shadow: $shadow-sm;
+  }
+  
+  &:active {
+    cursor: grabbing;
+    opacity: 0.8;
+  }
+}
+
+.materialHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+}
+
+.materialName {
+  font-weight: 500;
+  color: $text-primary;
+  font-size: $font-sm;
+}
+
+.materialMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: $font-xs;
+}
+
+.materialUrl a {
+  color: $primary;
+  text-decoration: none;
+  font-size: $font-xs;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.emptyMaterials {
+  padding: $spacing-lg;
+  text-align: center;
+  border: 1px dashed $border-color;
+  border-radius: $border-radius-md;
+  
+  p {
+    margin: 0 0 $spacing-xs 0;
+    color: $text-secondary;
+    font-size: $font-sm;
+  }
+  
+  small {
+    color: $text-disabled;
+    font-size: $font-xs;
+  }
+}
+
+.footer {
+  margin-top: $spacing-xl;
+  padding-top: $spacing-lg;
+  border-top: 1px solid $border-color;
+}
+
+.hint {
+  color: $text-secondary;
+  font-size: $font-sm;
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+@include mobile {
+  .header {
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+  
+  .addBlock {
+    width: 100%;
+    
+    input {
+      width: 100%;
+    }
+  }
+  
+  .blockHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-sm;
+  }
+  
+  .blockActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .competencyHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-sm;
+  }
+  
+  .competencyActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .materialMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-xs;
+  }
+}

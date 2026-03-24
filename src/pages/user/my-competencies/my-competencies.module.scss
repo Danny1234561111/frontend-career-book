@@ -1,0 +1,255 @@
+@import '../../../variables.module';
+
+.page {
+  min-height: calc(100vh - 80px);
+  background: $background-light;
+}
+
+.header {
+  background: $white;
+  padding: $spacing-xl $spacing-xxl;
+  border-bottom: 1px solid $border-color;
+}
+
+.title {
+  font-size: $font-xxxxl;
+  color: $text-primary;
+  margin: 0;
+  font-weight: 600;
+}
+
+.content {
+  background: $white;
+  padding: $spacing-xxl;
+  min-height: calc(100vh - 80px - 80px);
+}
+
+.filters {
+  margin-bottom: $spacing-xl;
+  
+  .filterGroup {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    
+    label {
+      font-size: $font-md;
+      color: $text-secondary;
+      white-space: nowrap;
+    }
+  }
+}
+
+.filterSelect {
+  padding: $spacing-sm $spacing-lg;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  font-size: $font-md;
+  color: $text-primary;
+  background: $white;
+  cursor: pointer;
+  min-width: 250px;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
+  
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.userStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xxxl;
+  padding: $spacing-xl;
+  background: $background-light;
+  border-radius: $border-radius-md;
+  border: 1px solid $border-color;
+}
+
+.statItem {
+  text-align: center;
+  
+  .statValue {
+    display: block;
+    font-size: $font-xxxl;
+    font-weight: 700;
+    color: $primary;
+    margin-bottom: $spacing-xs;
+  }
+  
+  .statLabel {
+    font-size: $font-sm;
+    color: $text-secondary;
+  }
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+  
+  th {
+    text-align: left;
+    padding: $spacing-lg $spacing-md;
+    font-size: $font-sm;
+    font-weight: 600;
+    color: $text-secondary;
+    border-bottom: 2px solid $border-color;
+    background: $background-hover;
+  }
+  
+  td {
+    padding: $spacing-lg $spacing-md;
+    border-bottom: 1px solid $border-color;
+    color: $text-primary;
+    font-size: $font-md;
+    vertical-align: middle;
+  }
+  
+  tbody tr:hover {
+    background: $background-hover;
+  }
+}
+
+.competencyName {
+  font-weight: 500;
+  color: $primary;
+}
+
+.blockBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  background: $background-light;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  color: $text-secondary;
+}
+
+.levelBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
+  
+  &.level1 {
+    background: $warning-light;
+    color: $warning;
+  }
+  
+  &.level2 {
+    background: $primary-light;
+    color: $primary;
+  }
+  
+  &.level3 {
+    background: $success-light;
+    color: $success;
+  }
+}
+
+.progressContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.progressBar {
+  width: 120px;
+  height: 8px;
+  background: $border-color;
+  border-radius: $border-radius-sm;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: $primary;
+  border-radius: $border-radius-sm;
+  transition: width 0.3s;
+}
+
+.progressText {
+  font-size: $font-sm;
+  color: $text-secondary;
+  min-width: 45px;
+}
+
+.materialsBtn {
+  @include button-reset;
+  padding: $spacing-xs $spacing-md;
+  border: 1px solid $primary;
+  color: $primary;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  white-space: nowrap;
+  
+  &:hover {
+    background: $primary-light;
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xxxl;
+  color: $text-secondary;
+  font-size: $font-lg;
+  background: $background-hover;
+  border-radius: $border-radius-md;
+  margin-top: $spacing-xl;
+}
+
+@include mobile {
+  .header {
+    padding: $spacing-lg $spacing-xl;
+  }
+  
+  .title {
+    font-size: $font-xxl;
+  }
+  
+  .content {
+    padding: $spacing-lg;
+  }
+  
+  .userStats {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+  
+  .filterGroup {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    label {
+      margin-bottom: $spacing-xs;
+    }
+  }
+  
+  .filterSelect {
+    width: 100%;
+  }
+  
+  .progressContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-xs;
+  }
+  
+  .progressBar {
+    width: 80px;
+  }
+}

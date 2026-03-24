@@ -1,0 +1,372 @@
+@import '../../../variables.module';
+
+.page {
+  min-height: calc(100vh - 80px);
+  background: $background-light;
+}
+
+.header {
+  background: $white;
+  padding: $spacing-xl $spacing-xxl;
+  border-bottom: 1px solid $border-color;
+}
+
+.title {
+  font-size: $font-xxxxl;
+  color: $text-primary;
+  margin: 0;
+  font-weight: 600;
+}
+
+.content {
+  padding: $spacing-xxl;
+}
+
+/* Двухколоночный макет */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: $spacing-xxxl;
+  width: 100%;
+  
+  @media (max-width: 1200px) {
+    gap: $spacing-xxl;
+  }
+  
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: $spacing-xl;
+  }
+}
+
+/* Колонка со статистикой */
+.statsColumn {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.statsBlock {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-lg;
+  background: white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  border: 1px solid $border-color;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.statCard {
+  background: $white;
+  border-radius: $border-radius-md;
+  padding: $spacing-xl $spacing-md;
+  text-align: center;
+  border: 1px solid $border-color;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: $primary;
+    box-shadow: $shadow-sm;
+  }
+}
+
+.statValue {
+  display: block;
+  font-size: $font-xxxxl;
+  font-weight: 700;
+  color: $primary;
+  margin-bottom: $spacing-xs;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: $font-sm;
+  color: $text-secondary;
+  font-weight: 500;
+}
+
+/* Колонка с должностями */
+.positionsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+  width: 100%;
+}
+
+/* Форма добавления */
+.addForm {
+  background: white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  border: 1px solid $border-color;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.formTitle {
+  font-size: $font-xl;
+  color: $text-primary;
+  margin: 0 0 $spacing-lg 0;
+  font-weight: 600;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+  width: 100%;
+  margin-bottom: $spacing-lg;
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: $spacing-sm;
+  }
+}
+
+.formGroup {
+  width: 100%;
+  
+  label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-size: $font-sm;
+    color: $text-secondary;
+    font-weight: 500;
+  }
+  
+  input, select {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-md;
+    font-size: $font-md;
+    color: $text-primary;
+    background: $white;
+    box-sizing: border-box;
+    
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.1);
+    }
+    
+    &::placeholder {
+      color: $text-disabled;
+    }
+  }
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 100%;
+  padding: $spacing-md;
+  background: $primary;
+  border-radius: $border-radius-md;
+  color: $white;
+  font-size: $font-md;
+  font-weight: 500;
+  
+  &:hover {
+    background: $primary-hover;
+    transform: translateY(-2px);
+    box-shadow: $shadow-sm;
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    background: $text-disabled;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Таблица должностей */
+.tableSection {
+  background: $white;
+  border-radius: $border-radius-lg;
+  border: 1px solid $border-color;
+  overflow: hidden;
+  width: 100%;
+  
+  h2 {
+    font-size: $font-xl;
+    color: $text-primary;
+    margin: 0;
+    padding: $spacing-lg $spacing-xl;
+    font-weight: 600;
+    border-bottom: 1px solid $border-color;
+    background: $background-light;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  
+  th {
+    text-align: left;
+    padding: $spacing-md $spacing-xl;
+    font-size: $font-sm;
+    font-weight: 600;
+    color: $text-secondary;
+    border-bottom: 2px solid $border-color;
+    background: $white;
+    
+    &:first-child {
+      width: 40%;
+    }
+    
+    &:nth-child(2) {
+      width: 40%;
+    }
+    
+    &:last-child {
+      width: 20%;
+    }
+  }
+  
+  td {
+    padding: $spacing-md $spacing-xl;
+    border-bottom: 1px solid $border-color;
+    color: $text-primary;
+    font-size: $font-md;
+    vertical-align: middle;
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  tbody tr:hover {
+    background: $background-hover;
+  }
+}
+
+.deleteBtn {
+  @include button-reset;
+  color: $text-secondary;
+  font-size: $font-xl;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-sm;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: $danger-light;
+    color: $danger;
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xxxl;
+  color: $text-disabled;
+  
+  p {
+    font-size: $font-md;
+    margin: 0;
+  }
+}
+
+/* Медиа-запросы */
+@media (max-width: 1400px) {
+  .title {
+    font-size: 32px;
+  }
+  
+  .statValue {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr 1.2fr;
+    gap: $spacing-xl;
+  }
+  
+  .title {
+    font-size: 28px;
+  }
+  
+  .statValue {
+    font-size: 28px;
+  }
+}
+
+@include mobile {
+  .header {
+    padding: $spacing-lg $spacing-xl;
+  }
+  
+  .title {
+    font-size: $font-xxl;
+  }
+  
+  .content {
+    padding: $spacing-xl;
+  }
+  
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .statsColumn {
+    order: 1;
+  }
+  
+  .positionsColumn {
+    order: 2;
+  }
+  
+  .statsBlock {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .table {
+    th, td {
+      padding: $spacing-md $spacing-lg;
+    }
+  }
+  
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: $spacing-sm;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsBlock {
+    grid-template-columns: 1fr;
+  }
+  
+  .statValue {
+    font-size: $font-xxxl;
+  }
+  
+  .formTitle {
+    font-size: $font-lg;
+  }
+  
+  .tableSection h2 {
+    font-size: $font-lg;
+    padding: $spacing-md $spacing-lg;
+  }
+  
+  .table {
+    th, td {
+      padding: $spacing-sm $spacing-md;
+      font-size: $font-sm;
+    }
+  }
+} 

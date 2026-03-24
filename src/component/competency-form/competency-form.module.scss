@@ -1,0 +1,453 @@
+@import '../../variables.module';
+
+.form {
+  background: $white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xxxl;
+  box-shadow: $shadow-md;
+  max-width: 800px;
+  margin: 0 auto;
+  
+  h3 {
+    font-size: $font-xxl;
+    color: $text-primary;
+    margin-bottom: $spacing-xxl;
+  }
+}
+
+.formGroup {
+  margin-bottom: $spacing-xl;
+  
+  label {
+    display: block;
+    margin-bottom: $spacing-sm;
+    font-weight: 500;
+    color: $text-primary;
+    font-size: $font-md;
+  }
+  
+  input, select, textarea {
+    width: 100%;
+    padding: $spacing-sm $spacing-lg;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-md;
+    font-size: $font-md;
+    color: $text-primary;
+    background: $white;
+    
+    &:focus {
+      outline: none;
+      border-color: $primary;
+    }
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xl;
+  
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+}
+
+.levelSelect {
+  option {
+    padding: $spacing-sm;
+  }
+}
+
+.requirementInput {
+  display: flex;
+  gap: $spacing-sm;
+  
+  input {
+    flex: 1;
+  }
+  
+  .addBtn {
+    background: none;
+    border: 1px solid $primary;
+    border-radius: $border-radius-md;
+    cursor: pointer;
+    padding: $spacing-sm $spacing-xl;
+    color: $primary;
+    font-size: $font-md;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: $primary-light;
+    }
+  }
+}
+
+.requirementsList {
+  list-style: none;
+  padding: 0;
+  margin-top: $spacing-md;
+  
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-sm $spacing-md;
+    background: $background-light;
+    border-radius: $border-radius-md;
+    margin-bottom: $spacing-sm;
+    font-size: $font-md;
+    color: $text-primary;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    .removeBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: $font-xl;
+      line-height: 1;
+      color: $text-secondary;
+      padding: 0 $spacing-xs;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: $danger;
+      }
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-xxl;
+  
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: $spacing-md $spacing-xxxl;
+    border-radius: $border-radius-md;
+    font-size: $font-md;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    
+    &.submitBtn {
+      background: $primary;
+      color: $white;
+      
+      &:hover {
+        background: $primary-hover;
+      }
+    }
+    
+    &.cancelBtn {
+      border: 1px solid $border-color;
+      color: $text-secondary;
+      
+      &:hover {
+        background: $danger-light;
+        border-color: $danger;
+        color: $danger;
+      }
+    }
+  }
+}
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -800px;
+  width: 100%;
+  max-width: 800px;
+  height: 100vh;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transition: right 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  
+  &.open {
+    right: 0;
+  }
+}
+
+.drawerHeader {
+  padding: 24px 32px;
+  background: white;
+  border-bottom: 1px solid #eaeaea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h3 {
+    font-size: 20px;
+    color: #1a1a1a;
+    margin: 0;
+  }
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 32px;
+  line-height: 1;
+  color: #666;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: #f5f4f2;
+    color: #d32f2f;
+  }
+}
+
+.drawerContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f5f4f2;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #eaeaea;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #999;
+    }
+  }
+}
+
+.drawerFooter {
+  padding: 20px 32px;
+  background: white;
+  border-top: 1px solid #eaeaea;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #1a1a1a;
+    font-size: 14px;
+  }
+  
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1a1a1a;
+    background: white;
+    transition: all 0.3s;
+    
+    &:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+    }
+    
+    &::placeholder {
+      color: #999;
+    }
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+  }
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.levelSelect {
+  option {
+    padding: 8px;
+  }
+}
+
+.requirementInput {
+  display: flex;
+  gap: 10px;
+  
+  input {
+    flex: 1;
+  }
+  
+  .addBtn {
+    background: none;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    padding: 10px 24px;
+    color: #1976d2;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s;
+    
+    &:hover {
+      background: #e3f2fd;
+    }
+  }
+}
+
+.requirementsList {
+  list-style: none;
+  padding: 0;
+  margin-top: 12px;
+  
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #f5f4f2;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #1a1a1a;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    .removeBtn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      line-height: 1;
+      color: #666;
+      cursor: pointer;
+      padding: 0 8px;
+      border-radius: 4px;
+      transition: all 0.3s;
+      
+      &:hover {
+        color: #d32f2f;
+        background: rgba(211, 47, 47, 0.1);
+      }
+    }
+  }
+}
+
+.submitBtn {
+  background: #1976d2;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.cancelBtn {
+  background: white;
+  border: 1px solid #eaeaea;
+  padding: 12px 32px;
+  border-radius: 8px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: #ffebee;
+    border-color: #d32f2f;
+    color: #d32f2f;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .drawer {
+    max-width: 100%;
+  }
+  
+  .drawerHeader {
+    padding: 16px 20px;
+  }
+  
+  .drawerContent {
+    padding: 20px;
+  }
+  
+  .drawerFooter {
+    padding: 16px 20px;
+    
+    button {
+      flex: 1;
+      text-align: center;
+    }
+  }
+}

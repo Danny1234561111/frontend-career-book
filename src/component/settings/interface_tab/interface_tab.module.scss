@@ -1,0 +1,208 @@
+@import '../../../variables.module';
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: $font-xxl;
+  color: $text-primary;
+  margin: 0 0 $spacing-xl 0;
+  font-weight: 600;
+}
+
+.settingsCard {
+  background: $white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xxl;
+  
+  h3 {
+    font-size: $font-xl;
+    color: $text-primary;
+    margin: 0 0 $spacing-xl 0;
+    font-weight: 500;
+  }
+}
+
+.themeOptions {
+  display: flex;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xxl;
+  flex-wrap: wrap;
+}
+
+.themeOption {
+  position: relative;
+  flex: 1;
+  min-width: 150px;
+  cursor: pointer;
+  
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  &.selected .themePreview {
+    border-color: $primary;
+    box-shadow: 0 0 0 2px rgba($primary, 0.2);
+  }
+  
+  span {
+    display: block;
+    text-align: center;
+    margin-top: $spacing-sm;
+    font-size: $font-md;
+    color: $text-primary;
+  }
+}
+
+.themePreview {
+  border: 2px solid $border-color;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  transition: all 0.3s;
+  height: 120px;
+  
+  &:hover {
+    border-color: $primary;
+  }
+}
+
+.previewLight {
+  background: $white;
+  height: 100%;
+  border-radius: $border-radius-sm;
+  overflow: hidden;
+  
+  .previewHeader {
+    height: 20px;
+    background: $primary;
+    margin-bottom: $spacing-sm;
+  }
+  
+  .previewContent {
+    height: calc(100% - 28px);
+    background: $background-light;
+  }
+}
+
+.previewDark {
+  background: $text-primary;
+  height: 100%;
+  border-radius: $border-radius-sm;
+  overflow: hidden;
+  
+  .previewHeader {
+    height: 20px;
+    background: #333;
+    margin-bottom: $spacing-sm;
+  }
+  
+  .previewContent {
+    height: calc(100% - 28px);
+    background: #2a2a2a;
+  }
+}
+
+.previewSystem {
+  display: flex;
+  height: 100%;
+  border-radius: $border-radius-sm;
+  overflow: hidden;
+  
+  .previewLight {
+    flex: 1;
+    border-radius: 0;
+  }
+  
+  .previewDark {
+    flex: 1;
+    border-radius: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+}
+
+.saveBtn {
+  @include button-reset;
+  padding: $spacing-md $spacing-xxl;
+  background: $primary;
+  border-radius: $border-radius-md;
+  color: $white;
+  font-size: $font-md;
+  font-weight: 500;
+  
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+.successMessage {
+  color: $success;
+  font-size: $font-md;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.note {
+  padding: $spacing-lg;
+  background: $background-light;
+  border-radius: $border-radius-md;
+  margin-top: $spacing-xl;
+  
+  p {
+    margin: 0;
+    color: $text-secondary;
+    font-size: $font-sm;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@include mobile {
+  .settingsCard {
+    padding: $spacing-xl;
+  }
+  
+  .themeOptions {
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+  
+  .themeOption {
+    min-width: 100%;
+  }
+  
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .saveBtn {
+    width: 100%;
+  }
+  
+  .successMessage {
+    text-align: center;
+  }
+}

@@ -1,0 +1,402 @@
+@import '../../variables.module';
+
+.matrix {
+  background: $white;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xl;
+  border-bottom: 1px solid $border-color;
+  
+  h3 {
+    font-size: $font-xxl;
+    color: $text-primary;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-lg;
+  }
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  
+  label {
+    font-size: $font-md;
+    color: $text-secondary;
+    white-space: nowrap;
+  }
+}
+
+.blockSelect {
+  padding: $spacing-sm $spacing-lg;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  font-size: $font-md;
+  color: $text-primary;
+  background: $white;
+  min-width: 250px;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
+  
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.table {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  margin: $spacing-xl;
+  overflow: hidden;
+  
+  @include mobile {
+    margin: $spacing-md;
+    overflow-x: auto;
+  }
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 2fr 0.8fr;
+  border-bottom: 1px solid $border-color;
+  transition: background 0.3s;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &.headerRow {
+    background: $background-hover;
+    border-bottom: 2px solid $border-color;
+    
+    .cell {
+      font-weight: 600;
+      color: $text-secondary;
+      font-size: $font-sm;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  &.dataRow {
+    cursor: pointer;
+    
+    &:hover {
+      background: rgba($primary, 0.05);
+    }
+    
+    &.expanded {
+      background: $primary-light;
+      border-bottom: none;
+    }
+  }
+  
+  @include mobile {
+    min-width: 800px;
+  }
+}
+
+.cell {
+  padding: $spacing-lg;
+  border-right: 1px solid $border-color;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: $font-md;
+  
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.competencyName {
+  font-weight: 500;
+  color: $primary;
+  display: inline-block;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.blockBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  background: $background-light;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  color: $text-secondary;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.levelBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
+  
+  &.level1 {
+    background: $warning-light;
+    color: $warning;
+  }
+  
+  &.level2 {
+    background: $primary-light;
+    color: $primary;
+  }
+  
+  &.level3 {
+    background: $success-light;
+    color: $success;
+  }
+}
+
+.levelDescription {
+  font-size: $font-sm;
+  color: $text-secondary;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.editBtn, .deleteBtn {
+  @include button-reset;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  width: 32px;
+  height: 32px;
+  font-size: $font-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: $background-hover;
+  }
+}
+
+.editBtn:hover {
+  border-color: $primary;
+  color: $primary;
+  background: $primary-light;
+}
+
+.deleteBtn:hover {
+  border-color: $danger;
+  color: $danger;
+  background: $danger-light;
+}
+
+.expandedDetails {
+  grid-column: 1 / -1;
+  background: $background-hover;
+  padding: $spacing-xl;
+  border-top: 1px solid $border-color;
+  border-bottom: 1px solid $border-color;
+  animation: slideDown 0.3s ease;
+  
+  @include mobile {
+    min-width: 800px;
+    padding: $spacing-lg;
+  }
+}
+
+.detailsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.detailSection {
+  h5 {
+    font-size: $font-lg;
+    color: $text-primary;
+    margin: 0 0 $spacing-md 0;
+    font-weight: 600;
+    position: relative;
+    padding-left: $spacing-md;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 18px;
+      background: $primary;
+      border-radius: 2px;
+    }
+  }
+  
+  p {
+    font-size: $font-md;
+    color: $text-secondary;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-line;
+  }
+}
+
+.levelsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.levelItem {
+  background: $white;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  border-left: 4px solid transparent;
+  
+  &:nth-child(1) {
+    border-left-color: $warning;
+  }
+  
+  &:nth-child(2) {
+    border-left-color: $primary;
+  }
+  
+  &:nth-child(3) {
+    border-left-color: $success;
+  }
+  
+  p {
+    margin-top: $spacing-sm;
+    font-size: $font-sm;
+  }
+}
+
+.levelTag {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  font-weight: 500;
+  
+  &.level1 {
+    background: $warning-light;
+    color: $warning;
+  }
+  
+  &.level2 {
+    background: $primary-light;
+    color: $primary;
+  }
+  
+  &.level3 {
+    background: $success-light;
+    color: $success;
+  }
+}
+
+.legend {
+  display: flex;
+  gap: $spacing-xxl;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: $spacing-md $spacing-xl;
+  background: $background-hover;
+  
+  .legendTitle {
+    font-weight: 600;
+    color: $text-secondary;
+    font-size: $font-md;
+  }
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  
+  span:last-child {
+    font-size: $font-sm;
+    color: $text-secondary;
+  }
+}
+
+.legendColor {
+  width: 20px;
+  height: 20px;
+  border-radius: $border-radius-round;
+  
+  &.level1 {
+    background: $warning-light;
+    border: 2px solid $warning;
+  }
+  
+  &.level2 {
+    background: $primary-light;
+    border: 2px solid $primary;
+  }
+  
+  &.level3 {
+    background: $success-light;
+    border: 2px solid $success;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@include mobile {
+  .filter {
+    width: 100%;
+    
+    label {
+      display: none;
+    }
+  }
+  
+  .blockSelect {
+    width: 100%;
+  }
+  
+  .legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-sm;
+  }
+}

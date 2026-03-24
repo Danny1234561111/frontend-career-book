@@ -1,0 +1,186 @@
+@import '../../../variables.module';
+
+.page {
+  min-height: calc(100vh - 80px);
+  background: $background-light;
+}
+
+.header {
+  background: $white;
+  padding: $spacing-xl $spacing-xxl;
+  border-bottom: 1px solid $border-color;
+}
+
+.title {
+  font-size: $font-xxxxl;
+  color: $text-primary;
+  margin: 0;
+  font-weight: 600;
+}
+
+.content {
+  background: $white;
+  padding: $spacing-xxl;
+  min-height: calc(100vh - 80px - 80px);
+}
+
+.infoBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xl;
+  background: $background-hover;
+  border-radius: $border-radius-md;
+  margin-bottom: $spacing-xxxl;
+  border: 1px solid $border-color;
+  
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-lg;
+  }
+}
+
+.positionGroup {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xxl;
+  
+  @include mobile {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-md;
+  }
+}
+
+.position {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  
+  .label {
+    font-size: $font-sm;
+    color: $text-secondary;
+  }
+  
+  .value {
+    font-size: $font-xl;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.progress {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-sm;
+  
+  .value {
+    font-size: $font-xxxxl;
+    font-weight: 700;
+    color: $primary;
+  }
+  
+  .label {
+    font-size: $font-lg;
+    color: $text-secondary;
+  }
+}
+
+/* Канбан-доска */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-xl;
+  
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+}
+
+.column {
+  background: $background-hover;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  min-height: 500px;
+  border: 1px solid $border-color;
+}
+
+.columnTitle {
+  font-size: $font-lg;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0 0 $spacing-lg 0;
+  padding-bottom: $spacing-sm;
+  border-bottom: 2px solid $primary;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.card {
+  background: $white;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-sm;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 4px solid transparent;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+  
+  h4 {
+    font-size: $font-lg;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 $spacing-sm 0;
+  }
+  
+  p {
+    font-size: $font-md;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+/* Цвета для разных колонок */
+.column:nth-child(1) .card {
+  border-left-color: $warning;
+}
+
+.column:nth-child(2) .card {
+  border-left-color: $primary;
+}
+
+.column:nth-child(3) .card {
+  border-left-color: #9c27b0;
+}
+
+.column:nth-child(4) .card {
+  border-left-color: $success;
+}
+
+@include mobile {
+  .header {
+    padding: $spacing-lg $spacing-xl;
+  }
+  
+  .title {
+    font-size: $font-xxl;
+  }
+  
+  .content {
+    padding: $spacing-lg;
+  }
+  
+  .progress .value {
+    font-size: $font-xxxl;
+  }
+}

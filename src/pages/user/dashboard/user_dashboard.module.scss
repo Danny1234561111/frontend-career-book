@@ -1,0 +1,169 @@
+@import '../../../variables.module';
+
+.page {
+  min-height: calc(100vh - 80px);
+  background: $background-light;
+}
+
+.header {
+  background: $white;
+  padding: $spacing-xl $spacing-xxl;
+  border-bottom: 1px solid $border-color;
+}
+
+.title {
+  font-size: $font-xxxxl;
+  color: $text-primary;
+  margin: 0;
+  font-weight: 600;
+}
+
+.content {
+  background: $white;
+  padding: $spacing-xxl;
+  min-height: calc(100vh - 80px - 80px); // учитываем высоту header
+}
+
+.welcomeSection {
+  margin-bottom: $spacing-xxxl;
+}
+
+.greeting {
+  font-size: $font-xxxl;
+  color: $text-primary;
+  margin: 0 0 $spacing-sm 0;
+  
+  strong {
+    color: $primary;
+  }
+}
+
+.positionInfo {
+  display: flex;
+  gap: $spacing-xxl;
+  font-size: $font-lg;
+  color: $text-secondary;
+  
+  span {
+    strong {
+      color: $text-primary;
+      margin-left: $spacing-xs;
+    }
+  }
+}
+
+.progressSection {
+  margin-bottom: $spacing-xxxl;
+  padding: $spacing-xl;
+  background: $background-light;
+  border-radius: $border-radius-md;
+  border: 1px solid $border-color;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.progressLabel {
+  font-size: $font-lg;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.progressPercent {
+  font-size: $font-xxxl;
+  font-weight: 600;
+  color: $primary;
+}
+
+.competenciesCount {
+  margin-top: $spacing-sm;
+  font-size: $font-md;
+  color: $text-secondary;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: $border-color;
+  border-radius: $border-radius-sm;
+  overflow: hidden;
+  margin-bottom: $spacing-sm;
+}
+
+.progressFill {
+  height: 100%;
+  background: $primary;
+  border-radius: $border-radius-sm;
+  transition: width 0.3s;
+}
+
+.updatesSection {
+  h2 {
+    font-size: $font-xxl;
+    color: $text-primary;
+    margin: 0 0 $spacing-lg 0;
+    font-weight: 600;
+  }
+}
+
+.updatesList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.updateItem {
+  display: flex;
+  gap: $spacing-xl;
+  padding: $spacing-md;
+  background: $background-hover;
+  border-radius: $border-radius-md;
+  border-left: 4px solid $primary;
+}
+
+.updateDate {
+  font-size: $font-md;
+  color: $text-secondary;
+  min-width: 100px;
+}
+
+.updateText {
+  font-size: $font-md;
+  color: $text-primary;
+}
+
+@include mobile {
+  .header {
+    padding: $spacing-lg $spacing-xl;
+  }
+  
+  .title {
+    font-size: $font-xxl;
+  }
+  
+  .content {
+    padding: $spacing-lg;
+  }
+  
+  .greeting {
+    font-size: $font-xxl;
+  }
+  
+  .positionInfo {
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+  
+  .updateItem {
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+  
+  .updateDate {
+    min-width: auto;
+  }
+}

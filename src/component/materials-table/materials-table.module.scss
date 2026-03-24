@@ -1,0 +1,275 @@
+@import '../../variables.module';
+
+.container {
+  background: $white;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  width: 100%;
+}
+
+.toolbar {
+  padding: $spacing-xl;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  gap: $spacing-lg;
+  flex-wrap: wrap;
+  align-items: center;
+  
+  @include mobile {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 300px;
+  
+  @include mobile {
+    min-width: 100%;
+  }
+}
+
+.searchInput {
+  width: 100%;
+  padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  font-size: $font-md;
+  color: $text-primary;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
+}
+
+.searchIcon {
+  position: absolute;
+  left: $spacing-md;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-disabled;
+  font-size: $font-lg;
+}
+
+.selectAllLabel {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-md;
+  color: $text-secondary;
+  cursor: pointer;
+  white-space: nowrap;
+  
+  input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: $primary;
+  }
+  
+  @include mobile {
+    justify-content: center;
+  }
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+  
+  th {
+    text-align: left;
+    padding: $spacing-lg $spacing-md;
+    font-size: $font-sm;
+    font-weight: 600;
+    color: $text-secondary;
+    border-bottom: 2px solid $border-color;
+    background: $background-hover;
+  }
+  
+  td {
+    padding: $spacing-lg $spacing-md;
+    border-bottom: 1px solid $border-color;
+    color: $text-primary;
+    font-size: $font-md;
+    vertical-align: middle;
+  }
+  
+  tbody tr {
+    transition: background 0.3s;
+    
+    &:hover {
+      background: $background-hover;
+    }
+    
+    &.clickable {
+      cursor: pointer;
+      
+      &:hover {
+        background: $primary-light;
+      }
+    }
+  }
+}
+
+.typeCell {
+  text-align: center;
+  width: 50px;
+}
+
+.typeIcon {
+  font-size: $font-xxl;
+}
+
+.typeLabel {
+  font-size: $font-sm;
+  color: $text-secondary;
+  margin-left: $spacing-xs;
+}
+
+.titleCell {
+  font-weight: 500;
+  color: $primary;
+  cursor: pointer;
+  
+  a {
+    color: $primary;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.competenciesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.competencyBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  background: $background-light;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  color: $text-secondary;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $border-radius-xl;
+  font-size: $font-sm;
+  font-weight: 500;
+  text-align: center;
+  min-width: 100px;
+  
+  &.published {
+    background: $success-light;
+    color: $success;
+  }
+  
+  &.draft {
+    background: $background-light;
+    color: $text-secondary;
+  }
+  
+  &.moderation {
+    background: $warning-light;
+    color: $warning;
+  }
+}
+
+.actionsCell {
+  display: flex;
+  gap: $spacing-sm;
+  white-space: nowrap;
+}
+
+.iconBtn {
+  @include button-reset;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-lg;
+  padding: $spacing-xs $spacing-sm;
+  color: $text-secondary;
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: $background-hover;
+  }
+  
+  &.approve:hover {
+    border-color: $success;
+    color: $success;
+    background: $success-light;
+  }
+  
+  &.edit:hover {
+    border-color: $primary;
+    color: $primary;
+    background: $primary-light;
+  }
+  
+  &.delete:hover {
+    border-color: $danger;
+    color: $danger;
+    background: $danger-light;
+  }
+}
+
+.selectionInfo {
+  padding: $spacing-md $spacing-xl;
+  background: $background-light;
+  border-top: 1px solid $border-color;
+  text-align: right;
+  font-size: $font-md;
+  color: $text-secondary;
+  
+  strong {
+    color: $primary;
+    font-size: $font-lg;
+  }
+}
+
+.emptyState {
+  padding: $spacing-xxxl;
+  text-align: center;
+  color: $text-secondary;
+  font-size: $font-lg;
+  background: $white;
+  
+  p {
+    margin: 0;
+  }
+  
+  .searchHint {
+    margin-top: $spacing-sm;
+    font-size: $font-sm;
+    color: $text-disabled;
+  }
+}
+
+@include mobile {
+  .toolbar {
+    padding: $spacing-lg;
+  }
+  
+  .selectionInfo {
+    text-align: center;
+  }
+}

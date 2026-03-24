@@ -1,0 +1,149 @@
+@import '../../../variables.module';
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: $font-xxl;
+  color: $text-primary;
+  margin: 0 0 $spacing-lg 0;
+  font-weight: 600;
+}
+
+.description {
+  background: $primary-light;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg $spacing-xl;
+  margin-bottom: $spacing-xxl;
+  
+  p {
+    margin: 0;
+    color: $primary;
+    font-size: $font-md;
+  }
+}
+
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xxl;
+}
+
+.settingItem {
+  padding: $spacing-lg;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  transition: all 0.3s;
+  
+  &:hover {
+    border-color: $primary;
+    box-shadow: $shadow-sm;
+  }
+}
+
+.settingLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-lg;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: $primary;
+}
+
+.settingInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.settingName {
+  font-size: $font-lg;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.settingDescription {
+  font-size: $font-md;
+  color: $text-secondary;
+}
+
+.actions {
+  margin-bottom: $spacing-xxl;
+}
+
+.saveBtn {
+  @include button-reset;
+  padding: $spacing-md $spacing-xxl;
+  background: $primary;
+  border-radius: $border-radius-md;
+  color: $white;
+  font-size: $font-md;
+  font-weight: 500;
+  
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+.preview {
+  background: $background-hover;
+  border-radius: $border-radius-md;
+  padding: $spacing-xl;
+  
+  h4 {
+    font-size: $font-lg;
+    color: $text-primary;
+    margin: 0 0 $spacing-xl 0;
+    font-weight: 500;
+  }
+}
+
+.eventsPreview {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.eventItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xl;
+  padding: $spacing-md;
+  background: $white;
+  border-radius: $border-radius-md;
+  border-left: 4px solid $primary;
+  
+  .eventDate {
+    font-size: $font-md;
+    color: $text-secondary;
+    min-width: 80px;
+  }
+  
+  .eventText {
+    font-size: $font-md;
+    color: $text-primary;
+  }
+}
+
+@include mobile {
+  .eventItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-sm;
+  }
+  
+  .saveBtn {
+    width: 100%;
+  }
+}

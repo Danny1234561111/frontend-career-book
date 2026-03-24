@@ -1,0 +1,118 @@
+@import '../../../variables.module';
+
+.page {
+  min-height: calc(100vh - 80px);
+  background: $background-light;
+}
+
+.header {
+  background: $white;
+  padding: $spacing-xl $spacing-xxl;
+  border-bottom: 1px solid $border-color;
+}
+
+.title {
+  font-size: $font-xxxxl;
+  color: $text-primary;
+  margin: 0;
+  font-weight: 600;
+}
+
+.content {
+  padding: $spacing-xxl;
+}
+
+.tabs {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xl;
+  border-bottom: 2px solid $border-color;
+  background: $white;
+  border-radius: $border-radius-lg $border-radius-lg 0 0;
+  padding: 0 $spacing-lg;
+  
+  @include mobile {
+    padding: 0 $spacing-md;
+    overflow-x: auto;
+    white-space: nowrap;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.tab {
+  @include button-reset;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-lg $spacing-xl;
+  font-size: $font-lg;
+  color: $text-secondary;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  
+  &:hover {
+    color: $primary;
+  }
+  
+  &.active {
+    color: $primary;
+    border-bottom-color: $primary;
+    font-weight: 500;
+  }
+  
+  @include mobile {
+    padding: $spacing-md $spacing-lg;
+    font-size: $font-md;
+  }
+}
+
+.tabIcon {
+  font-size: $font-xl;
+  
+  @include mobile {
+    font-size: $font-lg;
+  }
+}
+
+.tabLabel {
+  font-size: $font-lg;
+  
+  @include mobile {
+    font-size: $font-md;
+  }
+}
+
+.tabContent {
+  background: $white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xxl;
+  box-shadow: $shadow-sm;
+  margin-top: $spacing-xl;
+  
+  @include mobile {
+    padding: $spacing-xl;
+  }
+}
+
+@include mobile {
+  .header {
+    padding: $spacing-lg $spacing-xl;
+  }
+  
+  .title {
+    font-size: $font-xxl;
+  }
+  
+  .content {
+    padding: $spacing-xl;
+  }
+  
+  .tabContent {
+    margin-top: $spacing-lg;
+  }
+}

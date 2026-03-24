@@ -1,0 +1,138 @@
+@import '../../../variables.module';
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: $font-xxl;
+  color: $text-primary;
+  margin: 0 0 $spacing-xl 0;
+  font-weight: 600;
+}
+
+.profileCard {
+  background: $white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xxl;
+}
+
+.avatarSection {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xxl;
+  padding-bottom: $spacing-xl;
+  border-bottom: 1px solid $border-color;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: $border-radius-round;
+  background: $primary;
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-xxxxl;
+  font-weight: 500;
+}
+
+.userInfo {
+  h3 {
+    font-size: $font-xxxl;
+    color: $text-primary;
+    margin: 0 0 $spacing-xs 0;
+  }
+  
+  p {
+    font-size: $font-lg;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+.infoSections {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xxl;
+}
+
+.infoSection {
+  h4 {
+    font-size: $font-xl;
+    color: $text-primary;
+    margin: 0 0 $spacing-lg 0;
+    font-weight: 500;
+  }
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-xl;
+  
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: $spacing-lg;
+  }
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  
+  .label {
+    font-size: $font-sm;
+    color: $text-disabled;
+  }
+  
+  .value {
+    font-size: $font-lg;
+    color: $text-primary;
+    font-weight: 500;
+  }
+  
+  .link {
+    color: $primary;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.note {
+  margin-top: $spacing-xxl;
+  padding: $spacing-lg;
+  background: $background-light;
+  border-radius: $border-radius-md;
+  
+  p {
+    margin: 0;
+    color: $text-secondary;
+    font-size: $font-md;
+  }
+}
+
+@include mobile {
+  .profileCard {
+    padding: $spacing-xl;
+  }
+  
+  .avatarSection {
+    flex-direction: column;
+    text-align: center;
+    gap: $spacing-lg;
+  }
+  
+  .userInfo h3 {
+    font-size: $font-xxl;
+  }
+}
