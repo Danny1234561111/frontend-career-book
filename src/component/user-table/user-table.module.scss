@@ -1,176 +1,176 @@
 @import '../../variables.module';
 
 .container {
-  background: $white;
-  border-radius: $border-radius-lg;
-  overflow: hidden;
-  box-shadow: $shadow-sm;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
+	width: 100%;
+	max-width: 100%;
+	margin: 0 auto;
+	overflow: hidden;
+	background: $white;
+	border-radius: $border-radius-lg;
+	box-shadow: $shadow-sm;
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  
-  th {
-    text-align: left;
-    padding: $spacing-lg $spacing-md;
-    font-size: $font-md;
-    font-weight: 600;
-    color: $text-secondary;
-    border-bottom: 2px solid $border-color;
-    background: $background-hover;
-  }
-  
-  td {
-    padding: $spacing-md;
-    border-bottom: 1px solid $border-color;
-    color: $text-primary;
-    font-size: $font-md;
-    vertical-align: middle;
-  }
-  
-  tbody tr {
-    transition: background 0.2s ease;
-    
-    &:hover {
-      background: $background-hover;
-    }
-    
-    &.clickableRow {
-      cursor: pointer;
-    }
-    
-    &.editedRow {
-      background: rgba($primary, 0.05);
-      position: relative;
-      
-      &::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 4px;
-        background: $primary;
-      }
-    }
-  }
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
+
+	th {
+		padding: $spacing-lg $spacing-md;
+		color: $text-secondary;
+		font-weight: 600;
+		font-size: $font-md;
+		text-align: left;
+		background: $background-hover;
+		border-bottom: 2px solid $border-color;
+	}
+
+	td {
+		padding: $spacing-md;
+		color: $text-primary;
+		font-size: $font-md;
+		vertical-align: middle;
+		border-bottom: 1px solid $border-color;
+	}
+
+	tbody tr {
+		transition: background 0.2s ease;
+
+		&:hover {
+			background: $background-hover;
+		}
+
+		&.clickableRow {
+			cursor: pointer;
+		}
+
+		&.editedRow {
+			position: relative;
+			background: rgba($primary, 0.05);
+
+			&::after {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 4px;
+				height: 100%;
+				background: $primary;
+				content: '';
+			}
+		}
+	}
 }
 
 .roleSelect {
-  padding: $spacing-xs $spacing-sm;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-sm;
-  font-size: $font-sm;
-  color: $text-primary;
-  background: $white;
-  cursor: pointer;
-  width: 130px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
-  
-  &.admin {
-    color: $danger;
-    background: $danger-light;
-    border-color: $danger;
-  }
-  
-  &.manager {
-    color: $primary;
-    background: $primary-light;
-    border-color: $primary;
-  }
-  
-  &.user {
-    color: $success;
-    background: $success-light;
-    border-color: $success;
-  }
+	width: 130px;
+	padding: $spacing-xs $spacing-sm;
+	color: $text-primary;
+	font-size: $font-sm;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	&.admin {
+		color: $danger;
+		background: $danger-light;
+		border-color: $danger;
+	}
+
+	&.manager {
+		color: $primary;
+		background: $primary-light;
+		border-color: $primary;
+	}
+
+	&.user {
+		color: $success;
+		background: $success-light;
+		border-color: $success;
+	}
 }
 
 .positionSelect {
-  padding: $spacing-xs $spacing-sm;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-sm;
-  font-size: $font-sm;
-  color: $text-primary;
-  background: $white;
-  cursor: pointer;
-  width: 180px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
-  
-  &.edited {
-    border-color: $primary;
-    background: rgba($primary, 0.05);
-  }
+	width: 180px;
+	padding: $spacing-xs $spacing-sm;
+	color: $text-primary;
+	font-size: $font-sm;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	&.edited {
+		background: rgba($primary, 0.05);
+		border-color: $primary;
+	}
 }
 
 .tableFooter {
-  padding: $spacing-lg $spacing-md;
-  border-top: 1px solid $border-color;
-  background: $background-hover;
-  display: flex;
-  justify-content: flex-end;
+	display: flex;
+	justify-content: flex-end;
+	padding: $spacing-lg $spacing-md;
+	background: $background-hover;
+	border-top: 1px solid $border-color;
 }
 
 .saveButton {
-  @include button-reset;
-  padding: $spacing-sm $spacing-xl;
-  background: $white;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-secondary;
-  
-  &:hover:not(:disabled) {
-    background: $background-hover;
-  }
-  
-  &.active {
-    background: $primary;
-    color: $white;
-    border-color: $primary;
-    
-    &:hover {
-      background: $primary-hover;
-    }
-  }
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+	@include button-reset;
+	padding: $spacing-sm $spacing-xl;
+	color: $text-secondary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	&:hover:not(:disabled) {
+		background: $background-hover;
+	}
+
+	&.active {
+		color: $white;
+		background: $primary;
+		border-color: $primary;
+
+		&:hover {
+			background: $primary-hover;
+		}
+	}
+
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
 }
 
 .emptyState {
-  padding: $spacing-xxxl;
-  text-align: center;
-  color: $text-secondary;
-  font-size: $font-lg;
-  background: $white;
+	padding: $spacing-xxxl;
+	color: $text-secondary;
+	font-size: $font-lg;
+	text-align: center;
+	background: $white;
 }
 
-@media (max-width: 768px) {
-  .container {
-    overflow-x: auto;
-  }
-  
-  .table {
-    min-width: 1000px;
-  }
-  
-  .saveButton {
-    width: 100%;
-  }
+@media (width <= 768px) {
+	.container {
+		overflow-x: auto;
+	}
+
+	.table {
+		min-width: 1000px;
+	}
+
+	.saveButton {
+		width: 100%;
+	}
 }

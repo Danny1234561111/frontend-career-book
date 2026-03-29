@@ -1,87 +1,87 @@
 @import '../../../variables.module';
 
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	min-height: calc(100vh - 80px);
+	background: $background-light;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
 }
 
 .title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
 }
 
 .content {
-  background: $white;
-  padding: $spacing-xxl;
-  min-height: calc(100vh - 80px - 80px);
+	min-height: calc(100vh - 80px - 80px);
+	padding: $spacing-xxl;
+	background: $white;
 }
 
 .statsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: $spacing-xl;
-  margin-bottom: $spacing-xxxl;
-  
-  @include mobile {
-    grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-md;
-  }
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: $spacing-xl;
+	margin-bottom: $spacing-xxxl;
+
+	@include mobile {
+		grid-template-columns: repeat(2, 1fr);
+		gap: $spacing-md;
+	}
 }
 
 .statCard {
-  background: $background-light;
-  border-radius: $border-radius-md;
-  padding: $spacing-xl $spacing-md;
-  text-align: center;
-  border: 1px solid $border-color;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    border-color: $primary;
-    box-shadow: $shadow-sm;
-  }
+	padding: $spacing-xl $spacing-md;
+	text-align: center;
+	background: $background-light;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: $primary;
+		box-shadow: $shadow-sm;
+	}
 }
 
 .statValue {
-  display: block;
-  font-size: $font-xxxl;
-  font-weight: 700;
-  color: $primary;
-  margin-bottom: $spacing-xs;
+	display: block;
+	margin-bottom: $spacing-xs;
+	color: $primary;
+	font-weight: 700;
+	font-size: $font-xxxl;
 }
 
 .statLabel {
-  font-size: $font-sm;
-  color: $text-secondary;
+	color: $text-secondary;
+	font-size: $font-sm;
 }
 
 .tableSection {
-  h2 {
-    font-size: $font-xl;
-    color: $text-primary;
-    margin: 0 0 $spacing-lg 0;
-    font-weight: 600;
-  }
+	h2 {
+		margin: 0 0 $spacing-lg 0;
+		color: $text-primary;
+		font-weight: 600;
+		font-size: $font-xl;
+	}
 }
 
 @include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-lg;
-  }
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-lg;
+	}
 }

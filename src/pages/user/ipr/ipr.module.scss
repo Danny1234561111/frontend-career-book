@@ -1,186 +1,222 @@
-@import '../../../variables.module';
-
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	padding: 24px;
+	max-width: 1400px;
+	margin: 0 auto;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
-}
-
-.title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin-bottom: 24px;
+	
+	.title {
+		font-size: 28px;
+		font-weight: 600;
+		margin: 0;
+		color: #1a1a1a;
+	}
 }
 
 .content {
-  background: $white;
-  padding: $spacing-xxl;
-  min-height: calc(100vh - 80px - 80px);
+	background: #fff;
+	border-radius: 12px;
+	padding: 24px;
 }
 
 .infoBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-xl;
-  background: $background-hover;
-  border-radius: $border-radius-md;
-  margin-bottom: $spacing-xxxl;
-  border: 1px solid $border-color;
-  
-  @include mobile {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: $spacing-lg;
-  }
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 16px 20px;
+	background: #f5f5f5;
+	border-radius: 8px;
+	margin-bottom: 24px;
+	
+	.positionGroup {
+		display: flex;
+		gap: 32px;
+		
+		.position {
+			.label {
+				font-size: 14px;
+				color: #666;
+				margin-right: 8px;
+			}
+			
+			.value {
+				font-size: 14px;
+				font-weight: 500;
+				color: #1a1a1a;
+			}
+		}
+	}
+	
+	.progress {
+		text-align: right;
+		
+		.value {
+			font-size: 24px;
+			font-weight: 600;
+			color: #1976d2;
+		}
+		
+		.label {
+			font-size: 14px;
+			color: #666;
+			margin-left: 8px;
+		}
+	}
 }
 
-.positionGroup {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xxl;
-  
-  @include mobile {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: $spacing-md;
-  }
-}
-
-.position {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
-  
-  .label {
-    font-size: $font-sm;
-    color: $text-secondary;
-  }
-  
-  .value {
-    font-size: $font-xl;
-    font-weight: 600;
-    color: $text-primary;
-  }
-}
-
-.progress {
-  display: flex;
-  align-items: baseline;
-  gap: $spacing-sm;
-  
-  .value {
-    font-size: $font-xxxxl;
-    font-weight: 700;
-    color: $primary;
-  }
-  
-  .label {
-    font-size: $font-lg;
-    color: $text-secondary;
-  }
-}
-
-/* Канбан-доска */
 .kanban {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: $spacing-xl;
-  
-  @include mobile {
-    grid-template-columns: 1fr;
-    gap: $spacing-lg;
-  }
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
 }
 
 .column {
-  background: $background-hover;
-  border-radius: $border-radius-md;
-  padding: $spacing-lg;
-  min-height: 500px;
-  border: 1px solid $border-color;
-}
-
-.columnTitle {
-  font-size: $font-lg;
-  font-weight: 600;
-  color: $text-primary;
-  margin: 0 0 $spacing-lg 0;
-  padding-bottom: $spacing-sm;
-  border-bottom: 2px solid $primary;
+	background: #f8f9fa;
+	border-radius: 12px;
+	padding: 16px;
+	min-height: 400px;
+	
+	.columnTitle {
+		font-size: 18px;
+		font-weight: 600;
+		margin: 0 0 16px 0;
+		padding-bottom: 12px;
+		border-bottom: 2px solid #eaeaea;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		
+		.count {
+			font-size: 12px;
+			background: rgba(0, 0, 0, 0.1);
+			padding: 2px 8px;
+			border-radius: 12px;
+			font-weight: normal;
+		}
+	}
 }
 
 .cards {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
 .card {
-  background: $white;
-  border-radius: $border-radius-md;
-  padding: $spacing-lg;
-  box-shadow: $shadow-sm;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-left: 4px solid transparent;
-  
-  &:hover {
-    box-shadow: $shadow-md;
-    transform: translateY(-2px);
-  }
-  
-  h4 {
-    font-size: $font-lg;
-    font-weight: 600;
-    color: $text-primary;
-    margin: 0 0 $spacing-sm 0;
-  }
-  
-  p {
-    font-size: $font-md;
-    color: $text-secondary;
-    margin: 0;
-  }
+	background: white;
+	border: 1px solid #eaeaea;
+	border-radius: 8px;
+	padding: 12px;
+	transition: all 0.2s ease;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	
+	&:hover {
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+	
+	.cardContent {
+		flex: 1;
+		
+		h4 {
+			margin: 0 0 8px 0;
+			font-size: 16px;
+			font-weight: 500;
+			color: #1a1a1a;
+		}
+		
+		p {
+			margin: 4px 0;
+			font-size: 13px;
+			color: #666;
+		}
+		
+		.boss {
+			font-size: 12px;
+			color: #999;
+			margin-top: 8px;
+		}
+		
+		.materialLink {
+			display: inline-block;
+			margin-top: 12px;
+			padding: 6px 12px;
+			background: #1976d2;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 12px;
+			
+			&:hover {
+				background: #1565c0;
+			}
+		}
+	}
+	
+	.cardActions {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-left: 12px;
+		
+		.moveBtn {
+			width: 32px;
+			height: 32px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #f0f0f0;
+			border: 1px solid #e0e0e0;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 16px;
+			transition: all 0.2s ease;
+			
+			&:hover:not(:disabled) {
+				background: #1976d2;
+				color: white;
+				border-color: #1976d2;
+			}
+			
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+		}
+	}
 }
 
-/* Цвета для разных колонок */
-.column:nth-child(1) .card {
-  border-left-color: $warning;
+.emptyColumn {
+	text-align: center;
+	padding: 40px 20px;
+	color: #999;
+	font-size: 14px;
 }
 
-.column:nth-child(2) .card {
-  border-left-color: $primary;
+.loading, .error {
+	text-align: center;
+	padding: 40px;
+	font-size: 16px;
 }
 
-.column:nth-child(3) .card {
-  border-left-color: #9c27b0;
+.error {
+	color: #d32f2f;
 }
 
-.column:nth-child(4) .card {
-  border-left-color: $success;
-}
-
-@include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-lg;
-  }
-  
-  .progress .value {
-    font-size: $font-xxxl;
-  }
+.retryBtn {
+	margin-top: 16px;
+	padding: 8px 16px;
+	background: #1976d2;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	
+	&:hover {
+		background: #1565c0;
+	}
 }

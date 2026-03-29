@@ -1,92 +1,92 @@
 @import '../../../variables.module';
 
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	min-height: calc(100vh - 80px);
+	background: $background-light;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
 }
 
 .title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
 }
 
 .content {
-  background: $white;
-  padding: $spacing-xxl;
-  min-height: calc(100vh - 80px - 80px);
+	min-height: calc(100vh - 80px - 80px);
+	padding: $spacing-xxl;
+	background: $white;
 }
 
 .filters {
-  margin-bottom: $spacing-xl;
-  
-  .filterGroup {
-    display: flex;
-    align-items: center;
-    gap: $spacing-md;
-    
-    label {
-      font-size: $font-md;
-      color: $text-secondary;
-      white-space: nowrap;
-    }
-  }
+	margin-bottom: $spacing-xl;
+
+	.filterGroup {
+		display: flex;
+		align-items: center;
+		gap: $spacing-md;
+
+		label {
+			color: $text-secondary;
+			font-size: $font-md;
+			white-space: nowrap;
+		}
+	}
 }
 
 .filterSelect {
-  padding: $spacing-sm $spacing-lg;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  background: $white;
-  cursor: pointer;
-  min-width: 250px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
-  
-  @include mobile {
-    width: 100%;
-  }
+	min-width: 250px;
+	padding: $spacing-sm $spacing-lg;
+	color: $text-primary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	@include mobile {
+		width: 100%;
+	}
 }
 
 .matrixWrapper {
-  margin-top: $spacing-xl;
+	margin-top: $spacing-xl;
 }
 
 @include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-lg;
-  }
-  
-  .filterGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    
-    label {
-      margin-bottom: $spacing-xs;
-    }
-  }
-  
-  .filterSelect {
-    width: 100%;
-  }
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-lg;
+	}
+
+	.filterGroup {
+		flex-direction: column;
+		align-items: flex-start;
+
+		label {
+			margin-bottom: $spacing-xs;
+		}
+	}
+
+	.filterSelect {
+		width: 100%;
+	}
 }

@@ -1,133 +1,134 @@
 @import '../../variables.module';
 
 .filters {
-  background: $white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-xl;
-  margin-bottom: $spacing-xl;
-  box-shadow: $shadow-sm;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto $spacing-xl auto;
+	width: 100%;
+	max-width: 100%;
+	margin: 0 auto $spacing-xl auto;
+	margin-bottom: $spacing-xl;
+	padding: $spacing-xl;
+	background: $white;
+	border-radius: $border-radius-lg;
+	box-shadow: $shadow-sm;
 }
 
 .header {
-  display: flex;
-  gap: $spacing-lg;
-  align-items: center;
-  
-  @include mobile {
-    flex-direction: column;
-    align-items: stretch;
-  }
+	display: flex;
+	align-items: center;
+	gap: $spacing-lg;
+
+	@include mobile {
+		flex-direction: column;
+		align-items: stretch;
+	}
 }
 
 .searchWrapper {
-  position: relative;
-  flex: 1;
+	position: relative;
+	flex: 1;
 }
 
 .searchInput {
-  width: 100%;
-  padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
+	width: 100%;
+	padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
+	color: $text-primary;
+	font-size: $font-md;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
 }
 
 .searchIcon {
-  position: absolute;
-  left: $spacing-md;
-  top: 50%;
-  transform: translateY(-50%);
-  color: $text-disabled;
-  font-size: $font-lg;
+	position: absolute;
+	top: 50%;
+	left: $spacing-md;
+	color: $text-disabled;
+	font-size: $font-lg;
+	transform: translateY(-50%);
 }
 
 .expandBtn {
-  @include button-reset;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  padding: $spacing-sm $spacing-lg;
-  color: $text-secondary;
-  font-size: $font-md;
-  white-space: nowrap;
-  
-  &:hover {
-    background: $background-hover;
-    color: $primary;
-  }
-  
-  @include mobile {
-    width: 100%;
-  }
+	@include button-reset;
+	padding: $spacing-sm $spacing-lg;
+	color: $text-secondary;
+	font-size: $font-md;
+	white-space: nowrap;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	&:hover {
+		color: $primary;
+		background: $background-hover;
+	}
+
+	@include mobile {
+		width: 100%;
+	}
 }
 
 .advancedFilters {
-  margin-top: $spacing-xl;
-  padding-top: $spacing-xl;
-  border-top: 1px solid $border-color;
+	margin-top: $spacing-xl;
+	padding-top: $spacing-xl;
+	border-top: 1px solid $border-color;
 }
 
 .filterRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-xl;
-  margin-bottom: $spacing-xl;
-  
-  @include mobile {
-    grid-template-columns: 1fr;
-    gap: $spacing-lg;
-  }
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: $spacing-xl;
+	margin-bottom: $spacing-xl;
+
+	@include mobile {
+		grid-template-columns: 1fr;
+		gap: $spacing-lg;
+	}
 }
 
 .filterGroup {
-  label {
-    display: block;
-    margin-bottom: $spacing-sm;
-    font-weight: 500;
-    color: $text-primary;
-    font-size: $font-md;
-  }
-  
-  select, input {
-    width: 100%;
-    padding: $spacing-sm $spacing-lg;
-    border: 1px solid $border-color;
-    border-radius: $border-radius-md;
-    font-size: $font-md;
-    color: $text-primary;
-    background: $white;
-    
-    &:focus {
-      outline: none;
-      border-color: $primary;
-    }
-  }
+	label {
+		display: block;
+		margin-bottom: $spacing-sm;
+		color: $text-primary;
+		font-weight: 500;
+		font-size: $font-md;
+	}
+
+	select,
+	input {
+		width: 100%;
+		padding: $spacing-sm $spacing-lg;
+		color: $text-primary;
+		font-size: $font-md;
+		background: $white;
+		border: 1px solid $border-color;
+		border-radius: $border-radius-md;
+
+		&:focus {
+			border-color: $primary;
+			outline: none;
+		}
+	}
 }
 
 .actions {
-  display: flex;
-  justify-content: flex-end;
+	display: flex;
+	justify-content: flex-end;
 }
 
 .clearBtn {
-  @include button-reset;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  padding: $spacing-sm $spacing-xl;
-  color: $text-secondary;
-  font-size: $font-md;
-  
-  &:hover {
-    background: $danger-light;
-    border-color: $danger;
-    color: $danger;
-  }
+	@include button-reset;
+	padding: $spacing-sm $spacing-xl;
+	color: $text-secondary;
+	font-size: $font-md;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+		border-color: $danger;
+	}
 }

@@ -1,241 +1,242 @@
 @import '../../../variables.module';
 
 .container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
+	width: 100%;
+	max-width: 100%;
+	margin: 0 auto;
 }
 
 .sectionTitle {
-  font-size: $font-xxl;
-  color: $text-primary;
-  margin: 0 0 $spacing-xl 0;
-  font-weight: 600;
+	margin: 0 0 $spacing-xl 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxl;
 }
 
 .adminSection {
-  margin-bottom: $spacing-xxxl;
-  
-  h3 {
-    font-size: $font-xl;
-    color: $text-primary;
-    margin: 0 0 $spacing-xl 0;
-    font-weight: 500;
-  }
-  
-  h4 {
-    font-size: $font-lg;
-    color: $text-primary;
-    margin: 0 0 $spacing-lg 0;
-    font-weight: 500;
-  }
+	margin-bottom: $spacing-xxxl;
+
+	h3 {
+		margin: 0 0 $spacing-xl 0;
+		color: $text-primary;
+		font-weight: 500;
+		font-size: $font-xl;
+	}
+
+	h4 {
+		margin: 0 0 $spacing-lg 0;
+		color: $text-primary;
+		font-weight: 500;
+		font-size: $font-lg;
+	}
 }
 
 .filters {
-  display: flex;
-  gap: $spacing-lg;
-  margin-bottom: $spacing-xl;
-  flex-wrap: wrap;
+	display: flex;
+	flex-wrap: wrap;
+	gap: $spacing-lg;
+	margin-bottom: $spacing-xl;
 }
 
 .searchWrapper {
-  position: relative;
-  flex: 1;
-  min-width: 300px;
+	position: relative;
+	flex: 1;
+	min-width: 300px;
 }
 
 .searchInput {
-  width: 100%;
-  padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
+	width: 100%;
+	padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
+	color: $text-primary;
+	font-size: $font-md;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
 }
 
 .searchIcon {
-  position: absolute;
-  left: $spacing-md;
-  top: 50%;
-  transform: translateY(-50%);
-  color: $text-disabled;
-  font-size: $font-lg;
+	position: absolute;
+	top: 50%;
+	left: $spacing-md;
+	color: $text-disabled;
+	font-size: $font-lg;
+	transform: translateY(-50%);
 }
 
 .filterSelect {
-  padding: $spacing-sm $spacing-lg;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  background: $white;
-  min-width: 200px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
+	min-width: 200px;
+	padding: $spacing-sm $spacing-lg;
+	color: $text-primary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
 }
 
 .tableWrapper {
-  overflow-x: auto;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  margin-bottom: $spacing-xl;
+	margin-bottom: $spacing-xl;
+	overflow-x: auto;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
 }
 
-.userTable, .importTable {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-  
-  th {
-    text-align: left;
-    padding: $spacing-lg $spacing-md;
-    font-size: $font-md;
-    font-weight: 600;
-    color: $text-secondary;
-    border-bottom: 2px solid $border-color;
-    background: $background-hover;
-  }
-  
-  td {
-    padding: $spacing-lg $spacing-md;
-    border-bottom: 1px solid $border-color;
-    color: $text-primary;
-    font-size: $font-md;
-  }
-  
-  tbody tr:hover {
-    background: $background-hover;
-  }
+.userTable,
+.importTable {
+	width: 100%;
+	min-width: 800px;
+	border-collapse: collapse;
+
+	th {
+		padding: $spacing-lg $spacing-md;
+		color: $text-secondary;
+		font-weight: 600;
+		font-size: $font-md;
+		text-align: left;
+		background: $background-hover;
+		border-bottom: 2px solid $border-color;
+	}
+
+	td {
+		padding: $spacing-lg $spacing-md;
+		color: $text-primary;
+		font-size: $font-md;
+		border-bottom: 1px solid $border-color;
+	}
+
+	tbody tr:hover {
+		background: $background-hover;
+	}
 }
 
 .roleSelect {
-  padding: $spacing-xs $spacing-sm;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-sm;
-  font-size: $font-sm;
-  color: $text-primary;
-  background: $white;
-  cursor: pointer;
-  min-width: 140px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
+	min-width: 140px;
+	padding: $spacing-xs $spacing-sm;
+	color: $text-primary;
+	font-size: $font-sm;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
 }
 
 .saveRowBtn {
-  @include button-reset;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-sm;
-  width: 32px;
-  height: 32px;
-  font-size: $font-lg;
-  color: $success;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:hover {
-    background: $success-light;
-    border-color: $success;
-  }
+	@include button-reset;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 32px;
+	height: 32px;
+	color: $success;
+	font-size: $font-lg;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+
+	&:hover {
+		background: $success-light;
+		border-color: $success;
+	}
 }
 
 .tableActions {
-  display: flex;
-  justify-content: flex-end;
+	display: flex;
+	justify-content: flex-end;
 }
 
 .saveBtn {
-  @include button-reset;
-  padding: $spacing-sm $spacing-xl;
-  background: $primary;
-  border-radius: $border-radius-md;
-  color: $white;
-  font-size: $font-md;
-  font-weight: 500;
-  
-  &:hover {
-    background: $primary-hover;
-  }
+	@include button-reset;
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $primary;
+	border-radius: $border-radius-md;
+
+	&:hover {
+		background: $primary-hover;
+	}
 }
 
 .templateBlock {
-  background: $background-hover;
-  border-radius: $border-radius-md;
-  padding: $spacing-xl;
-  margin-bottom: $spacing-xl;
+	margin-bottom: $spacing-xl;
+	padding: $spacing-xl;
+	background: $background-hover;
+	border-radius: $border-radius-md;
 }
 
 .downloadBtn {
-  @include button-reset;
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  padding: $spacing-sm $spacing-xl;
-  background: $white;
-  border: 1px solid $primary;
-  border-radius: $border-radius-md;
-  color: $primary;
-  font-size: $font-md;
-  font-weight: 500;
-  
-  &:hover {
-    background: $primary-light;
-  }
+	@include button-reset;
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	padding: $spacing-sm $spacing-xl;
+	color: $primary;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $primary;
+	border-radius: $border-radius-md;
+
+	&:hover {
+		background: $primary-light;
+	}
 }
 
 .importLogBlock h4 {
-  margin-bottom: $spacing-lg;
+	margin-bottom: $spacing-lg;
 }
 
 .statusBadge {
-  display: inline-block;
-  padding: $spacing-xs $spacing-md;
-  border-radius: $border-radius-xl;
-  font-size: $font-sm;
-  font-weight: 500;
-  
-  &.success {
-    background: $success-light;
-    color: $success;
-  }
-  
-  &.error {
-    background: $danger-light;
-    color: $danger;
-  }
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	font-weight: 500;
+	font-size: $font-sm;
+	border-radius: $border-radius-xl;
+
+	&.success {
+		color: $success;
+		background: $success-light;
+	}
+
+	&.error {
+		color: $danger;
+		background: $danger-light;
+	}
 }
 
 @include mobile {
-  .filters {
-    flex-direction: column;
-  }
-  
-  .searchWrapper {
-    min-width: 100%;
-  }
-  
-  .filterSelect {
-    width: 100%;
-  }
-  
-  .saveBtn {
-    width: 100%;
-    text-align: center;
-  }
-  
-  .downloadBtn {
-    width: 100%;
-    justify-content: center;
-  }
+	.filters {
+		flex-direction: column;
+	}
+
+	.searchWrapper {
+		min-width: 100%;
+	}
+
+	.filterSelect {
+		width: 100%;
+	}
+
+	.saveBtn {
+		width: 100%;
+		text-align: center;
+	}
+
+	.downloadBtn {
+		justify-content: center;
+		width: 100%;
+	}
 }

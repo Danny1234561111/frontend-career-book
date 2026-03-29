@@ -1,372 +1,443 @@
 @import '../../../variables.module';
 
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	min-height: calc(100vh - 80px);
+	background: $background-light;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
 }
 
 .title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
 }
 
 .content {
-  padding: $spacing-xxl;
+	padding: $spacing-xxl;
+}
+
+/* Уведомления */
+.loading,
+.errorMessage,
+.successMessage {
+	text-align: center;
+	padding: $spacing-md $spacing-lg;
+	border-radius: $border-radius-md;
+	margin-bottom: $spacing-xl;
+}
+
+.loading {
+	background: $primary-light;
+	color: $primary;
+}
+
+.successMessage {
+	background: $success-light;
+	color: $success;
+}
+
+.errorMessage {
+	background: $danger-light;
+	color: $danger;
 }
 
 /* Двухколоночный макет */
 .dashboardGrid {
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  gap: $spacing-xxxl;
-  width: 100%;
-  
-  @media (max-width: 1200px) {
-    gap: $spacing-xxl;
-  }
-  
-  @include mobile {
-    grid-template-columns: 1fr;
-    gap: $spacing-xl;
-  }
+	display: grid;
+	grid-template-columns: 0.8fr 1.2fr;
+	gap: $spacing-xxxl;
+	width: 100%;
+
+	@media (width <= 1200px) {
+		gap: $spacing-xxl;
+	}
+
+	@include mobile {
+		grid-template-columns: 1fr;
+		gap: $spacing-xl;
+	}
 }
 
 /* Колонка со статистикой */
 .statsColumn {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
 }
 
 .statsBlock {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-lg;
-  background: white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-xl;
-  border: 1px solid $border-color;
-  width: 100%;
-  box-sizing: border-box;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: $spacing-lg;
+	box-sizing: border-box;
+	width: 100%;
+	padding: $spacing-xl;
+	background: white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-lg;
 }
 
 .statCard {
-  background: $white;
-  border-radius: $border-radius-md;
-  padding: $spacing-xl $spacing-md;
-  text-align: center;
-  border: 1px solid $border-color;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    border-color: $primary;
-    box-shadow: $shadow-sm;
-  }
+	padding: $spacing-xl $spacing-md;
+	text-align: center;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	transition: all 0.2s ease;
+
+	&:hover {
+		border-color: $primary;
+		box-shadow: $shadow-sm;
+	}
 }
 
 .statValue {
-  display: block;
-  font-size: $font-xxxxl;
-  font-weight: 700;
-  color: $primary;
-  margin-bottom: $spacing-xs;
-  line-height: 1.2;
+	display: block;
+	margin-bottom: $spacing-xs;
+	color: $primary;
+	font-weight: 700;
+	font-size: $font-xxxxl;
+	line-height: 1.2;
 }
 
 .statLabel {
-  font-size: $font-sm;
-  color: $text-secondary;
-  font-weight: 500;
+	color: $text-secondary;
+	font-weight: 500;
+	font-size: $font-sm;
 }
 
-/* Колонка с должностями */
-.positionsColumn {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-  width: 100%;
+/* Колонка с управлением */
+.managementColumn {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-xl;
+	width: 100%;
+}
+
+/* Вкладки */
+.tabs {
+	display: flex;
+	gap: $spacing-xs;
+	margin-bottom: $spacing-lg;
+	border-bottom: 1px solid $border-color;
+	padding-bottom: $spacing-sm;
+}
+
+.tab {
+	@include button-reset;
+	padding: $spacing-sm $spacing-lg;
+	font-size: $font-md;
+	color: $text-secondary;
+	border-radius: $border-radius-md;
+	
+	&:hover {
+		background: $background-hover;
+		color: $primary;
+	}
+	
+	&.active {
+		color: $primary;
+		background: $primary-light;
+	}
+}
+
+/* Секции */
+.section {
+	width: 100%;
 }
 
 /* Форма добавления */
 .addForm {
-  background: white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-xl;
-  border: 1px solid $border-color;
-  width: 100%;
-  box-sizing: border-box;
+	box-sizing: border-box;
+	width: 100%;
+	padding: $spacing-xl;
+	background: white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-lg;
+	margin-bottom: $spacing-xl;
 }
 
 .formTitle {
-  font-size: $font-xl;
-  color: $text-primary;
-  margin: 0 0 $spacing-lg 0;
-  font-weight: 600;
+	margin: 0 0 $spacing-lg 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xl;
 }
 
 .formRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-md;
-  width: 100%;
-  margin-bottom: $spacing-lg;
-  
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: $spacing-sm;
-  }
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: $spacing-md;
+	width: 100%;
+	margin-bottom: $spacing-lg;
+
+	@media (width <= 480px) {
+		grid-template-columns: 1fr;
+		gap: $spacing-sm;
+	}
 }
 
 .formGroup {
-  width: 100%;
-  
-  label {
-    display: block;
-    margin-bottom: $spacing-xs;
-    font-size: $font-sm;
-    color: $text-secondary;
-    font-weight: 500;
-  }
-  
-  input, select {
-    width: 100%;
-    padding: $spacing-sm $spacing-md;
-    border: 1px solid $border-color;
-    border-radius: $border-radius-md;
-    font-size: $font-md;
-    color: $text-primary;
-    background: $white;
-    box-sizing: border-box;
-    
-    &:focus {
-      outline: none;
-      border-color: $primary;
-      box-shadow: 0 0 0 3px rgba($primary, 0.1);
-    }
-    
-    &::placeholder {
-      color: $text-disabled;
-    }
-  }
+	width: 100%;
+
+	label {
+		display: block;
+		margin-bottom: $spacing-xs;
+		color: $text-secondary;
+		font-weight: 500;
+		font-size: $font-sm;
+	}
+
+	input,
+	select {
+		box-sizing: border-box;
+		width: 100%;
+		padding: $spacing-sm $spacing-md;
+		color: $text-primary;
+		font-size: $font-md;
+		background: $white;
+		border: 1px solid $border-color;
+		border-radius: $border-radius-md;
+
+		&:focus {
+			border-color: $primary;
+			outline: none;
+			box-shadow: 0 0 0 3px rgba($primary, 0.1);
+		}
+
+		&::placeholder {
+			color: $text-disabled;
+		}
+	}
 }
 
 .submitBtn {
-  @include button-reset;
-  width: 100%;
-  padding: $spacing-md;
-  background: $primary;
-  border-radius: $border-radius-md;
-  color: $white;
-  font-size: $font-md;
-  font-weight: 500;
-  
-  &:hover {
-    background: $primary-hover;
-    transform: translateY(-2px);
-    box-shadow: $shadow-sm;
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    background: $text-disabled;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
+	@include button-reset;
+	width: 100%;
+	padding: $spacing-md;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $primary;
+	border-radius: $border-radius-md;
+
+	&:hover:not(:disabled) {
+		background: $primary-hover;
+		box-shadow: $shadow-sm;
+		transform: translateY(-2px);
+	}
+
+	&:active:not(:disabled) {
+		transform: translateY(0);
+	}
+
+	&:disabled {
+		background: $text-disabled;
+		box-shadow: none;
+		cursor: not-allowed;
+		transform: none;
+	}
 }
 
-/* Таблица должностей */
+/* Таблица */
 .tableSection {
-  background: $white;
-  border-radius: $border-radius-lg;
-  border: 1px solid $border-color;
-  overflow: hidden;
-  width: 100%;
-  
-  h2 {
-    font-size: $font-xl;
-    color: $text-primary;
-    margin: 0;
-    padding: $spacing-lg $spacing-xl;
-    font-weight: 600;
-    border-bottom: 1px solid $border-color;
-    background: $background-light;
-  }
+	width: 100%;
+	overflow: hidden;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-lg;
+
+	h2 {
+		margin: 0;
+		padding: $spacing-lg $spacing-xl;
+		color: $text-primary;
+		font-weight: 600;
+		font-size: $font-xl;
+		background: $background-light;
+		border-bottom: 1px solid $border-color;
+	}
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  
-  th {
-    text-align: left;
-    padding: $spacing-md $spacing-xl;
-    font-size: $font-sm;
-    font-weight: 600;
-    color: $text-secondary;
-    border-bottom: 2px solid $border-color;
-    background: $white;
-    
-    &:first-child {
-      width: 40%;
-    }
-    
-    &:nth-child(2) {
-      width: 40%;
-    }
-    
-    &:last-child {
-      width: 20%;
-    }
-  }
-  
-  td {
-    padding: $spacing-md $spacing-xl;
-    border-bottom: 1px solid $border-color;
-    color: $text-primary;
-    font-size: $font-md;
-    vertical-align: middle;
-  }
-  
-  tr:last-child td {
-    border-bottom: none;
-  }
-  
-  tbody tr:hover {
-    background: $background-hover;
-  }
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
+
+	th {
+		padding: $spacing-md $spacing-xl;
+		color: $text-secondary;
+		font-weight: 600;
+		font-size: $font-sm;
+		text-align: left;
+		background: $white;
+		border-bottom: 2px solid $border-color;
+
+		&:first-child {
+			width: 40%;
+		}
+
+		&:nth-child(2) {
+			width: 40%;
+		}
+
+		&:last-child {
+			width: 20%;
+		}
+	}
+
+	td {
+		padding: $spacing-md $spacing-xl;
+		color: $text-primary;
+		font-size: $font-md;
+		vertical-align: middle;
+		border-bottom: 1px solid $border-color;
+	}
+
+	tr:last-child td {
+		border-bottom: none;
+	}
+
+	tbody tr:hover {
+		background: $background-hover;
+	}
+}
+
+.idCell {
+	font-family: monospace;
+	font-size: $font-xs;
+	color: $text-disabled;
 }
 
 .deleteBtn {
-  @include button-reset;
-  color: $text-secondary;
-  font-size: $font-xl;
-  padding: $spacing-xs $spacing-sm;
-  border-radius: $border-radius-sm;
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:hover {
-    background: $danger-light;
-    color: $danger;
-  }
+	@include button-reset;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	width: 32px;
+	height: 32px;
+	padding: $spacing-xs $spacing-sm;
+	color: $text-secondary;
+	font-size: $font-xl;
+	border-radius: $border-radius-sm;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+	}
 }
 
 .emptyState {
-  text-align: center;
-  padding: $spacing-xxxl;
-  color: $text-disabled;
-  
-  p {
-    font-size: $font-md;
-    margin: 0;
-  }
+	padding: $spacing-xxxl;
+	color: $text-disabled;
+	text-align: center;
+
+	p {
+		margin: 0;
+		font-size: $font-md;
+	}
 }
 
 /* Медиа-запросы */
-@media (max-width: 1400px) {
-  .title {
-    font-size: 32px;
-  }
-  
-  .statValue {
-    font-size: 30px;
-  }
+@media (width <= 1400px) {
+	.title {
+		font-size: 32px;
+	}
+
+	.statValue {
+		font-size: 30px;
+	}
 }
 
-@media (max-width: 1024px) {
-  .dashboardGrid {
-    grid-template-columns: 1fr 1.2fr;
-    gap: $spacing-xl;
-  }
-  
-  .title {
-    font-size: 28px;
-  }
-  
-  .statValue {
-    font-size: 28px;
-  }
+@media (width <= 1024px) {
+	.dashboardGrid {
+		grid-template-columns: 1fr 1.2fr;
+		gap: $spacing-xl;
+	}
+
+	.title {
+		font-size: 28px;
+	}
+
+	.statValue {
+		font-size: 28px;
+	}
 }
 
 @include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-xl;
-  }
-  
-  .dashboardGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .statsColumn {
-    order: 1;
-  }
-  
-  .positionsColumn {
-    order: 2;
-  }
-  
-  .statsBlock {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .table {
-    th, td {
-      padding: $spacing-md $spacing-lg;
-    }
-  }
-  
-  .formRow {
-    grid-template-columns: 1fr;
-    gap: $spacing-sm;
-  }
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-xl;
+	}
+
+	.dashboardGrid {
+		grid-template-columns: 1fr;
+	}
+
+	.statsColumn {
+		order: 1;
+	}
+
+	.managementColumn {
+		order: 2;
+	}
+
+	.statsBlock {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.table {
+		th,
+		td {
+			padding: $spacing-md $spacing-lg;
+		}
+	}
+
+	.tabs {
+		flex-wrap: wrap;
+	}
 }
 
-@media (max-width: 480px) {
-  .statsBlock {
-    grid-template-columns: 1fr;
-  }
-  
-  .statValue {
-    font-size: $font-xxxl;
-  }
-  
-  .formTitle {
-    font-size: $font-lg;
-  }
-  
-  .tableSection h2 {
-    font-size: $font-lg;
-    padding: $spacing-md $spacing-lg;
-  }
-  
-  .table {
-    th, td {
-      padding: $spacing-sm $spacing-md;
-      font-size: $font-sm;
-    }
-  }
-} 
+@media (width <= 480px) {
+	.statsBlock {
+		grid-template-columns: 1fr;
+	}
+
+	.statValue {
+		font-size: $font-xxxl;
+	}
+
+	.formTitle {
+		font-size: $font-lg;
+	}
+
+	.tableSection h2 {
+		padding: $spacing-md $spacing-lg;
+		font-size: $font-lg;
+	}
+
+	.table {
+		th,
+		td {
+			padding: $spacing-sm $spacing-md;
+			font-size: $font-sm;
+		}
+	}
+
+	.tab {
+		flex: 1;
+		text-align: center;
+	}
+}

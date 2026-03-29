@@ -1,182 +1,183 @@
 @import '../../../variables.module';
 
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	min-height: calc(100vh - 80px);
+	background: $background-light;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
 }
 
 .title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
 }
 
 .content {
-  background: $white;
-  padding: $spacing-xxl;
-  min-height: calc(100vh - 80px - 80px);
+	min-height: calc(100vh - 80px - 80px);
+	padding: $spacing-xxl;
+	background: $white;
 }
 
 .filters {
-  display: flex;
-  gap: $spacing-lg;
-  margin-bottom: $spacing-xxxl;
-  flex-wrap: wrap;
-  
-  @include mobile {
-    flex-direction: column;
-    gap: $spacing-md;
-  }
+	display: flex;
+	flex-wrap: wrap;
+	gap: $spacing-lg;
+	margin-bottom: $spacing-xxxl;
+
+	@include mobile {
+		flex-direction: column;
+		gap: $spacing-md;
+	}
 }
 
 .filterSelect {
-  padding: $spacing-sm $spacing-lg;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  background: $white;
-  cursor: pointer;
-  min-width: 200px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
-  
-  &:hover {
-    border-color: $primary;
-  }
-  
-  @include mobile {
-    width: 100%;
-    min-width: auto;
-  }
+	min-width: 200px;
+	padding: $spacing-sm $spacing-lg;
+	color: $text-primary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	&:hover {
+		border-color: $primary;
+	}
+
+	@include mobile {
+		width: 100%;
+		min-width: auto;
+	}
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: $spacing-xl;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: $spacing-xl;
 }
 
 .card {
-  background: $white;
-  border-radius: $border-radius-md;
-  padding: $spacing-xl;
-  transition: all 0.3s;
-  border: 1px solid $border-color;
-  border-top: 4px solid transparent;
-  box-shadow: $shadow-sm;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: $shadow-md;
-    border-color: $primary;
-  }
-  
-  h3 {
-    font-size: $font-xl;
-    font-weight: 600;
-    color: $text-primary;
-    margin: 0 0 $spacing-md 0;
-    line-height: 1.4;
-  }
-  
-  p {
-    font-size: $font-md;
-    color: $text-secondary;
-    margin: $spacing-xs 0;
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    
-    &::before {
-      content: "•";
-      color: $primary;
-      font-weight: bold;
-    }
-  }
+	padding: $spacing-xl;
+	background: $white;
+	border: 1px solid $border-color;
+	border-top: 4px solid transparent;
+	border-radius: $border-radius-md;
+	box-shadow: $shadow-sm;
+	transition: all 0.3s;
+
+	&:hover {
+		border-color: $primary;
+		box-shadow: $shadow-md;
+		transform: translateY(-4px);
+	}
+
+	h3 {
+		margin: 0 0 $spacing-md 0;
+		color: $text-primary;
+		font-weight: 600;
+		font-size: $font-xl;
+		line-height: 1.4;
+	}
+
+	p {
+		display: flex;
+		align-items: center;
+		gap: $spacing-sm;
+		margin: $spacing-xs 0;
+		color: $text-secondary;
+		font-size: $font-md;
+
+		&::before {
+			content: '•';
+			color: $primary;
+			font-weight: bold;
+		}
+	}
 }
 
 .link {
-  display: inline-block;
-  margin-top: $spacing-lg;
-  padding: $spacing-sm $spacing-xl;
-  background: $primary;
-  color: $white;
-  text-decoration: none;
-  border-radius: $border-radius-xl;
-  font-size: $font-md;
-  font-weight: 500;
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
-  
-  &:hover {
-    background: $primary-hover;
-    transform: scale(1.05);
-    box-shadow: $shadow-sm;
-  }
+	display: inline-block;
+	margin-top: $spacing-lg;
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	text-decoration: none;
+	background: $primary;
+	border: none;
+	border-radius: $border-radius-xl;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: $primary-hover;
+		box-shadow: $shadow-sm;
+		transform: scale(1.05);
+	}
 }
 
 /* Типы материалов */
-.card[data-type="Видеокурс"] {
-  border-top-color: $warning;
+
+.card[data-type='Видеокурс'] {
+	border-top-color: $warning;
 }
 
-.card[data-type="Статья"] {
-  border-top-color: $primary;
+.card[data-type='Статья'] {
+	border-top-color: $primary;
 }
 
-.card[data-type="Книга"] {
-  border-top-color: #9c27b0;
+.card[data-type='Книга'] {
+	border-top-color: #9c27b0;
 }
 
-.card[data-type="Курс"] {
-  border-top-color: $success;
+.card[data-type='Курс'] {
+	border-top-color: $success;
 }
 
 .emptyState {
-  text-align: center;
-  padding: $spacing-xxxl;
-  color: $text-secondary;
-  font-size: $font-lg;
-  background: $background-hover;
-  border-radius: $border-radius-md;
-  grid-column: 1 / -1;
+	grid-column: 1 / -1;
+	padding: $spacing-xxxl;
+	color: $text-secondary;
+	font-size: $font-lg;
+	text-align: center;
+	background: $background-hover;
+	border-radius: $border-radius-md;
 }
 
 @include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-lg;
-  }
-  
-  .grid {
-    grid-template-columns: 1fr;
-    gap: $spacing-lg;
-  }
-  
-  .card {
-    padding: $spacing-lg;
-    
-    h3 {
-      font-size: $font-lg;
-    }
-  }
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-lg;
+	}
+
+	.grid {
+		grid-template-columns: 1fr;
+		gap: $spacing-lg;
+	}
+
+	.card {
+		padding: $spacing-lg;
+
+		h3 {
+			font-size: $font-lg;
+		}
+	}
 }

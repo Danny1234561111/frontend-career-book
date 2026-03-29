@@ -1,20 +1,20 @@
 @import '../../variables.module';
 
 .container {
+  width: 100%;
+  overflow: hidden;
   background: $white;
   border-radius: $border-radius-lg;
-  overflow: hidden;
   box-shadow: $shadow-sm;
-  width: 100%;
 }
 
 .toolbar {
-  padding: $spacing-xl;
-  border-bottom: 1px solid $border-color;
   display: flex;
-  gap: $spacing-lg;
   flex-wrap: wrap;
   align-items: center;
+  gap: $spacing-lg;
+  padding: $spacing-xl;
+  border-bottom: 1px solid $border-color;
   
   @include mobile {
     flex-direction: column;
@@ -35,34 +35,34 @@
 .searchInput {
   width: 100%;
   padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
+  color: $text-primary;
+  font-size: $font-md;
   border: 1px solid $border-color;
   border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
   
   &:focus {
-    outline: none;
     border-color: $primary;
+    outline: none;
   }
 }
 
 .searchIcon {
   position: absolute;
-  left: $spacing-md;
   top: 50%;
-  transform: translateY(-50%);
+  left: $spacing-md;
   color: $text-disabled;
   font-size: $font-lg;
+  transform: translateY(-50%);
 }
 
 .selectAllLabel {
   display: flex;
   align-items: center;
   gap: $spacing-sm;
-  font-size: $font-md;
   color: $text-secondary;
-  cursor: pointer;
+  font-size: $font-md;
   white-space: nowrap;
+  cursor: pointer;
   
   input {
     width: 18px;
@@ -82,25 +82,25 @@
 
 .table {
   width: 100%;
+  min-width: 800px;
   border-collapse: collapse;
-  min-width: 1000px;
   
   th {
-    text-align: left;
     padding: $spacing-lg $spacing-md;
-    font-size: $font-sm;
-    font-weight: 600;
     color: $text-secondary;
-    border-bottom: 2px solid $border-color;
+    font-weight: 600;
+    font-size: $font-sm;
+    text-align: left;
     background: $background-hover;
+    border-bottom: 2px solid $border-color;
   }
   
   td {
     padding: $spacing-lg $spacing-md;
-    border-bottom: 1px solid $border-color;
     color: $text-primary;
     font-size: $font-md;
     vertical-align: middle;
+    border-bottom: 1px solid $border-color;
   }
   
   tbody tr {
@@ -121,24 +121,25 @@
 }
 
 .typeCell {
-  text-align: center;
-  width: 50px;
+  width: 100px;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .typeIcon {
-  font-size: $font-xxl;
+  font-size: $font-lg;
+  margin-right: $spacing-xs;
+  display: inline-block;
 }
 
 .typeLabel {
-  font-size: $font-sm;
   color: $text-secondary;
-  margin-left: $spacing-xs;
+  font-size: $font-sm;
+  display: inline-block;
 }
 
 .titleCell {
   font-weight: 500;
-  color: $primary;
-  cursor: pointer;
   
   a {
     color: $primary;
@@ -150,95 +151,64 @@
   }
 }
 
-.competenciesList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $spacing-xs;
-}
-
-.competencyBadge {
-  display: inline-block;
-  padding: $spacing-xs $spacing-md;
-  background: $background-light;
-  border-radius: $border-radius-xl;
-  font-size: $font-sm;
+.durationCell,
+.dateCell {
   color: $text-secondary;
-}
-
-.statusBadge {
-  display: inline-block;
-  padding: $spacing-xs $spacing-md;
-  border-radius: $border-radius-xl;
-  font-size: $font-sm;
-  font-weight: 500;
-  text-align: center;
-  min-width: 100px;
-  
-  &.published {
-    background: $success-light;
-    color: $success;
-  }
-  
-  &.draft {
-    background: $background-light;
-    color: $text-secondary;
-  }
-  
-  &.moderation {
-    background: $warning-light;
-    color: $warning;
-  }
+  white-space: nowrap;
 }
 
 .actionsCell {
-  display: flex;
-  gap: $spacing-sm;
   white-space: nowrap;
+  
+  button {
+    margin: 0 $spacing-xs;
+  }
 }
 
 .iconBtn {
   @include button-reset;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  padding: $spacing-xs;
+  color: $text-secondary;
+  font-size: $font-lg;
   border: 1px solid $border-color;
   border-radius: $border-radius-sm;
-  font-size: $font-lg;
-  padding: $spacing-xs $spacing-sm;
-  color: $text-secondary;
-  min-width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  cursor: pointer;
   
   &:hover {
     background: $background-hover;
   }
   
   &.approve:hover {
-    border-color: $success;
     color: $success;
     background: $success-light;
+    border-color: $success;
   }
   
   &.edit:hover {
-    border-color: $primary;
     color: $primary;
     background: $primary-light;
+    border-color: $primary;
   }
   
   &.delete:hover {
-    border-color: $danger;
     color: $danger;
     background: $danger-light;
+    border-color: $danger;
   }
 }
 
 .selectionInfo {
   padding: $spacing-md $spacing-xl;
+  color: $text-secondary;
+  font-size: $font-md;
+  text-align: right;
   background: $background-light;
   border-top: 1px solid $border-color;
-  text-align: right;
-  font-size: $font-md;
-  color: $text-secondary;
   
   strong {
     color: $primary;
@@ -248,9 +218,9 @@
 
 .emptyState {
   padding: $spacing-xxxl;
-  text-align: center;
   color: $text-secondary;
   font-size: $font-lg;
+  text-align: center;
   background: $white;
   
   p {
@@ -259,8 +229,8 @@
   
   .searchHint {
     margin-top: $spacing-sm;
-    font-size: $font-sm;
     color: $text-disabled;
+    font-size: $font-sm;
   }
 }
 
@@ -271,5 +241,21 @@
   
   .selectionInfo {
     text-align: center;
+  }
+  
+  .table {
+    min-width: 600px;
+  }
+  
+  .typeCell {
+    width: 80px;
+  }
+  
+  .typeIcon {
+    font-size: $font-md;
+  }
+  
+  .typeLabel {
+    font-size: $font-xs;
   }
 }

@@ -14,8 +14,23 @@ import MonitoringTab from './settings/monitoring_tab';
 import ProfileTab from './settings/profile_tab';
 import ManagerUserTable from './manager-user-table';
 
-
-export { TodoList, OnlyAuth, OnlyUnAuth,Navigation,UserFilters,UserTable,SystemParameters,RoleSettings,CategoryManager, ManagerUserTable,
-    MaterialForm,CompetencyForm,CompetenciesMatrix,MaterialsTable,
-    AdminTab,InterfaceTab,MonitoringTab,ProfileTab
+export {
+	TodoList,
+	OnlyAuth,
+	OnlyUnAuth,
+	Navigation,
+	UserFilters,
+	UserTable,
+	SystemParameters,
+	RoleSettings,
+	CategoryManager,
+	ManagerUserTable,
+	MaterialForm,
+	CompetencyForm,
+	CompetenciesMatrix,
+	MaterialsTable,
+	AdminTab,
+	InterfaceTab,
+	MonitoringTab,
+	ProfileTab,
 };

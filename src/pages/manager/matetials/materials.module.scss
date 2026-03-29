@@ -1,238 +1,239 @@
 @import '../../../variables.module';
 
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	min-height: calc(100vh - 80px);
+	background: $background-light;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
 }
 
 .title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
 }
 
 .content {
-  background: $white;
-  padding: $spacing-xxl;
-  min-height: calc(100vh - 80px - 80px);
+	min-height: calc(100vh - 80px - 80px);
+	padding: $spacing-xxl;
+	background: $white;
 }
 
 .filters {
-  margin-bottom: $spacing-xl;
-  
-  .filterGroup {
-    display: flex;
-    align-items: center;
-    gap: $spacing-md;
-    
-    label {
-      font-size: $font-md;
-      color: $text-secondary;
-      white-space: nowrap;
-    }
-  }
+	margin-bottom: $spacing-xl;
+
+	.filterGroup {
+		display: flex;
+		align-items: center;
+		gap: $spacing-md;
+
+		label {
+			color: $text-secondary;
+			font-size: $font-md;
+			white-space: nowrap;
+		}
+	}
 }
 
 .filterSelect {
-  padding: $spacing-sm $spacing-lg;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  background: $white;
-  cursor: pointer;
-  min-width: 250px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
-  
-  @include mobile {
-    width: 100%;
-  }
+	min-width: 250px;
+	padding: $spacing-sm $spacing-lg;
+	color: $text-primary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	@include mobile {
+		width: 100%;
+	}
 }
 
 .tableWrapper {
-  margin-bottom: $spacing-xxxl;
+	margin-bottom: $spacing-xxxl;
 }
 
 .assignmentResult {
-  margin-bottom: $spacing-xl;
-  padding: $spacing-md $spacing-lg;
-  border-radius: $border-radius-md;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
-  
-  &.success {
-    background: $success-light;
-    color: $success;
-    border: 1px solid $success;
-  }
-  
-  &.error {
-    background: $danger-light;
-    color: $danger;
-    border: 1px solid $danger;
-  }
+	margin-bottom: $spacing-xl;
+	padding: $spacing-md $spacing-lg;
+	text-align: center;
+	border-radius: $border-radius-md;
+	animation: fadeIn 0.3s ease;
+
+	&.success {
+		color: $success;
+		background: $success-light;
+		border: 1px solid $success;
+	}
+
+	&.error {
+		color: $danger;
+		background: $danger-light;
+		border: 1px solid $danger;
+	}
 }
 
 .quickAssign {
-  padding: $spacing-xl;
-  background: $background-light;
-  border-radius: $border-radius-md;
-  border: 1px solid $border-color;
-  
-  h3 {
-    font-size: $font-xl;
-    color: $text-primary;
-    margin: 0 0 $spacing-lg 0;
-    font-weight: 600;
-  }
+	padding: $spacing-xl;
+	background: $background-light;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	h3 {
+		margin: 0 0 $spacing-lg 0;
+		color: $text-primary;
+		font-weight: 600;
+		font-size: $font-xl;
+	}
 }
 
 .assignForm {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
 }
 
 .assignFields {
-  display: flex;
-  gap: $spacing-xl;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  
-  @include mobile {
-    flex-direction: column;
-    gap: $spacing-md;
-    align-items: stretch;
-  }
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: $spacing-xl;
+
+	@include mobile {
+		flex-direction: column;
+		align-items: stretch;
+		gap: $spacing-md;
+	}
 }
 
 .formGroup {
-  flex: 1;
-  
-  label {
-    display: block;
-    margin-bottom: $spacing-xs;
-    font-size: $font-sm;
-    color: $text-secondary;
-  }
+	flex: 1;
+
+	label {
+		display: block;
+		margin-bottom: $spacing-xs;
+		color: $text-secondary;
+		font-size: $font-sm;
+	}
 }
 
 .employeeSelect {
-  width: 100%;
-  padding: $spacing-sm $spacing-lg;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  background: $white;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
+	width: 100%;
+	padding: $spacing-sm $spacing-lg;
+	color: $text-primary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
 }
 
 .selectedCount {
-  padding: $spacing-sm $spacing-lg;
-  background: $primary-light;
-  border-radius: $border-radius-md;
-  color: $primary;
-  font-size: $font-md;
-  font-weight: 500;
-  white-space: nowrap;
-  
-  strong {
-    font-size: $font-xl;
-    margin: 0 $spacing-xs;
-  }
-  
-  @include mobile {
-    text-align: center;
-    white-space: normal;
-  }
+	padding: $spacing-sm $spacing-lg;
+	color: $primary;
+	font-weight: 500;
+	font-size: $font-md;
+	white-space: nowrap;
+	background: $primary-light;
+	border-radius: $border-radius-md;
+
+	strong {
+		margin: 0 $spacing-xs;
+		font-size: $font-xl;
+	}
+
+	@include mobile {
+		white-space: normal;
+		text-align: center;
+	}
 }
 
 .assignBtn {
-  @include button-reset;
-  padding: $spacing-md $spacing-xl;
-  background: $primary;
-  border-radius: $border-radius-md;
-  color: $white;
-  font-size: $font-md;
-  font-weight: 500;
-  text-align: center;
-  
-  &:hover {
-    background: $primary-hover;
-    transform: translateY(-2px);
-    box-shadow: $shadow-sm;
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-  
-  &:disabled {
-    background: $text-disabled;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-  
-  @include mobile {
-    width: 100%;
-  }
+	@include button-reset;
+	padding: $spacing-md $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	text-align: center;
+	background: $primary;
+	border-radius: $border-radius-md;
+
+	&:hover {
+		background: $primary-hover;
+		box-shadow: $shadow-sm;
+		transform: translateY(-2px);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+
+	&:disabled {
+		background: $text-disabled;
+		box-shadow: none;
+		cursor: not-allowed;
+		transform: none;
+	}
+
+	@include mobile {
+		width: 100%;
+	}
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		transform: translateY(-10px);
+		opacity: 0;
+	}
+
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
 }
 
 @include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-lg;
-  }
-  
-  .filterGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    
-    label {
-      margin-bottom: $spacing-xs;
-    }
-  }
-  
-  .filterSelect {
-    width: 100%;
-  }
-  
-  .quickAssign {
-    padding: $spacing-lg;
-  }
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-lg;
+	}
+
+	.filterGroup {
+		flex-direction: column;
+		align-items: flex-start;
+
+		label {
+			margin-bottom: $spacing-xs;
+		}
+	}
+
+	.filterSelect {
+		width: 100%;
+	}
+
+	.quickAssign {
+		padding: $spacing-lg;
+	}
 }

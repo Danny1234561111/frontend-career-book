@@ -1,64 +1,64 @@
 @import '../../../variables.module';
 
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	min-height: calc(100vh - 80px);
+	background: $background-light;
 }
 
 .container {
-  max-width: 1400px;
-  margin: 0 auto;
+	max-width: 1400px;
+	margin: 0 auto;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
 }
 
 .title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
 }
 
 .content {
-  padding: $spacing-xxl;
+	padding: $spacing-xxl;
 }
 
 .stats {
-  margin-top: $spacing-xl;
-  padding: $spacing-md;
-  background: $white;
-  border-radius: $border-radius-md;
-  color: $text-secondary;
-  font-size: $font-md;
-  text-align: right;
-  border: 1px solid $border-color;
-  
-  strong {
-    color: $primary;
-    font-size: $font-lg;
-    margin-left: $spacing-xs;
-  }
+	margin-top: $spacing-xl;
+	padding: $spacing-md;
+	color: $text-secondary;
+	font-size: $font-md;
+	text-align: right;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	strong {
+		margin-left: $spacing-xs;
+		color: $primary;
+		font-size: $font-lg;
+	}
 }
 
 @include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-xl;
-  }
-  
-  .stats {
-    margin-top: $spacing-lg;
-    text-align: center;
-  }
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-xl;
+	}
+
+	.stats {
+		margin-top: $spacing-lg;
+		text-align: center;
+	}
 }

@@ -1,149 +1,149 @@
 @import '../../../variables.module';
 
 .container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
+	width: 100%;
+	max-width: 100%;
+	margin: 0 auto;
 }
 
 .sectionTitle {
-  font-size: $font-xxl;
-  color: $text-primary;
-  margin: 0 0 $spacing-lg 0;
-  font-weight: 600;
+	margin: 0 0 $spacing-lg 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxl;
 }
 
 .description {
-  background: $primary-light;
-  border-radius: $border-radius-md;
-  padding: $spacing-lg $spacing-xl;
-  margin-bottom: $spacing-xxl;
-  
-  p {
-    margin: 0;
-    color: $primary;
-    font-size: $font-md;
-  }
+	margin-bottom: $spacing-xxl;
+	padding: $spacing-lg $spacing-xl;
+	background: $primary-light;
+	border-radius: $border-radius-md;
+
+	p {
+		margin: 0;
+		color: $primary;
+		font-size: $font-md;
+	}
 }
 
 .settingsList {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
-  margin-bottom: $spacing-xxl;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
+	margin-bottom: $spacing-xxl;
 }
 
 .settingItem {
-  padding: $spacing-lg;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  transition: all 0.3s;
-  
-  &:hover {
-    border-color: $primary;
-    box-shadow: $shadow-sm;
-  }
+	padding: $spacing-lg;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	transition: all 0.3s;
+
+	&:hover {
+		border-color: $primary;
+		box-shadow: $shadow-sm;
+	}
 }
 
 .settingLabel {
-  display: flex;
-  align-items: flex-start;
-  gap: $spacing-lg;
-  cursor: pointer;
+	display: flex;
+	align-items: flex-start;
+	gap: $spacing-lg;
+	cursor: pointer;
 }
 
 .checkbox {
-  width: 20px;
-  height: 20px;
-  margin-top: 2px;
-  cursor: pointer;
-  accent-color: $primary;
+	width: 20px;
+	height: 20px;
+	margin-top: 2px;
+	cursor: pointer;
+	accent-color: $primary;
 }
 
 .settingInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: $spacing-xs;
 }
 
 .settingName {
-  font-size: $font-lg;
-  font-weight: 500;
-  color: $text-primary;
+	color: $text-primary;
+	font-weight: 500;
+	font-size: $font-lg;
 }
 
 .settingDescription {
-  font-size: $font-md;
-  color: $text-secondary;
+	color: $text-secondary;
+	font-size: $font-md;
 }
 
 .actions {
-  margin-bottom: $spacing-xxl;
+	margin-bottom: $spacing-xxl;
 }
 
 .saveBtn {
-  @include button-reset;
-  padding: $spacing-md $spacing-xxl;
-  background: $primary;
-  border-radius: $border-radius-md;
-  color: $white;
-  font-size: $font-md;
-  font-weight: 500;
-  
-  &:hover {
-    background: $primary-hover;
-  }
+	@include button-reset;
+	padding: $spacing-md $spacing-xxl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $primary;
+	border-radius: $border-radius-md;
+
+	&:hover {
+		background: $primary-hover;
+	}
 }
 
 .preview {
-  background: $background-hover;
-  border-radius: $border-radius-md;
-  padding: $spacing-xl;
-  
-  h4 {
-    font-size: $font-lg;
-    color: $text-primary;
-    margin: 0 0 $spacing-xl 0;
-    font-weight: 500;
-  }
+	padding: $spacing-xl;
+	background: $background-hover;
+	border-radius: $border-radius-md;
+
+	h4 {
+		margin: 0 0 $spacing-xl 0;
+		color: $text-primary;
+		font-weight: 500;
+		font-size: $font-lg;
+	}
 }
 
 .eventsPreview {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-md;
 }
 
 .eventItem {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xl;
-  padding: $spacing-md;
-  background: $white;
-  border-radius: $border-radius-md;
-  border-left: 4px solid $primary;
-  
-  .eventDate {
-    font-size: $font-md;
-    color: $text-secondary;
-    min-width: 80px;
-  }
-  
-  .eventText {
-    font-size: $font-md;
-    color: $text-primary;
-  }
+	display: flex;
+	align-items: center;
+	gap: $spacing-xl;
+	padding: $spacing-md;
+	background: $white;
+	border-left: 4px solid $primary;
+	border-radius: $border-radius-md;
+
+	.eventDate {
+		min-width: 80px;
+		color: $text-secondary;
+		font-size: $font-md;
+	}
+
+	.eventText {
+		color: $text-primary;
+		font-size: $font-md;
+	}
 }
 
 @include mobile {
-  .eventItem {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: $spacing-sm;
-  }
-  
-  .saveBtn {
-    width: 100%;
-  }
+	.eventItem {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-sm;
+	}
+
+	.saveBtn {
+		width: 100%;
+	}
 }

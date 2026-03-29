@@ -14,6 +14,20 @@ import ManagerDashboard from './manager/dashboard';
 import EmployeeDashboard from './user/dashboard';
 import AdminDashboard from './admin/dashboard';
 
-export { Auth, ProfilePage, MyCompetenciesPage,IprPage,MaterialsPage,SettingsPage,MaterialsAdminPage,CompetenciesPage,UsersPage,
-    DepartmentCompetenciesPage, DepartmentPage,DepartmentMaterialsPage, AdminDashboard,ManagerDashboard,EmployeeDashboard
+export {
+	Auth,
+	ProfilePage,
+	MyCompetenciesPage,
+	IprPage,
+	MaterialsPage,
+	SettingsPage,
+	MaterialsAdminPage,
+	CompetenciesPage,
+	UsersPage,
+	DepartmentCompetenciesPage,
+	DepartmentPage,
+	DepartmentMaterialsPage,
+	AdminDashboard,
+	ManagerDashboard,
+	EmployeeDashboard,
 };

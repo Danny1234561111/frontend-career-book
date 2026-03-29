@@ -2,144 +2,149 @@ import React, { useState } from 'react';
 import styles from './user-table.module.scss';
 
 type User = {
-  id: string;
-  fullName: string;
-  email: string;
-  role: 'admin' | 'manager' | 'user';
-  department?: string;
-  targetPosition?: string;
-  createdAt: string;
+	id: string;
+	fullName: string;
+	email: string;
+	role: 'admin' | 'manager' | 'user';
+	department?: string;
+	currentPosition?: string;
+	targetPosition?: string;
+	createdAt: string;
 };
 
 interface UserTableProps {
-  users: User[]; // теперь принимаем отфильтрованных пользователей
-  onUserSelect?: (user: User) => void;
-  onSaveChanges?: (updatedUsers: User[]) => void;
+	users: User[];
+	onUserSelect?: (user: User) => void;
+	onSaveChanges?: (updatedUsers: User[]) => void;
 }
 
-const UserTable: React.FC<UserTableProps> = ({ 
-  users,
-  onUserSelect,
-  onSaveChanges,
+const UserTable: React.FC<UserTableProps> = ({
+	users,
+	onUserSelect,
+	onSaveChanges,
 }) => {
-  const [editedUsers, setEditedUsers] = useState<Record<string, Partial<User>>>({});
+	const [editedUsers, setEditedUsers] = useState<Record<string, Partial<User>>>(
+		{}
+	);
 
-  const targetPositions = [
-    'Специалист',
-    'Ведущий специалист',
-    'Главный специалист',
-    'Руководитель отдела',
-    'Начальник управления',
-    'Главный бухгалтер'
-  ];
+	const handleRoleChange = (
+		userId: string,
+		newRole: 'admin' | 'manager' | 'user'
+	) => {
+		setEditedUsers((prev) => ({
+			...prev,
+			[userId]: { ...prev[userId], role: newRole },
+		}));
+	};
 
-  const handleRoleChange = (userId: string, newRole: 'admin' | 'manager' | 'user') => {
-    setEditedUsers(prev => ({
-      ...prev,
-      [userId]: { ...prev[userId], role: newRole }
-    }));
-  };
+	const handleSaveAll = () => {
+		if (Object.keys(editedUsers).length === 0) {
+			alert('Нет изменений для сохранения');
+			return;
+		}
 
-  const handleTargetPositionChange = (userId: string, newPosition: string) => {
-    setEditedUsers(prev => ({
-      ...prev,
-      [userId]: { ...prev[userId], targetPosition: newPosition }
-    }));
-  };
+		const updatedUsers = users.map((user) =>
+			editedUsers[user.id] ? { ...user, ...editedUsers[user.id] } : user
+		);
 
-  const handleSaveAll = () => {
-    if (Object.keys(editedUsers).length === 0) {
-      alert('Нет изменений для сохранения');
-      return;
-    }
+		onSaveChanges?.(updatedUsers);
+		setEditedUsers({});
+	};
 
-    const updatedUsers = users.map(user => 
-      editedUsers[user.id] ? { ...user, ...editedUsers[user.id] } : user
-    );
-    
-    onSaveChanges?.(updatedUsers);
-    setEditedUsers({});
-  };
+	const hasChanges = Object.keys(editedUsers).length > 0;
 
-  const hasChanges = Object.keys(editedUsers).length > 0;
+	const getRoleClass = (role: string) => {
+		switch (role) {
+			case 'admin':
+				return styles.admin;
+			case 'manager':
+				return styles.manager;
+			default:
+				return styles.user;
+		}
+	};
 
-  return (
-    <div className={styles.container}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th style={{ width: '20%' }}>ФИО</th>
-            <th style={{ width: '20%' }}>Email</th>
-            <th style={{ width: '15%' }}>Роль</th>
-            <th style={{ width: '15%' }}>Отдел</th>
-            <th style={{ width: '20%' }}>Целевая должность</th>
-            <th style={{ width: '10%' }}>Дата рег.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(user => {
-            const currentRole = editedUsers[user.id]?.role ?? user.role;
-            const currentTargetPosition = editedUsers[user.id]?.targetPosition ?? user.targetPosition;
-            const isEdited = !!editedUsers[user.id];
+	const getRoleLabel = (role: string) => {
+		switch (role) {
+			case 'admin':
+				return 'Администратор';
+			case 'manager':
+				return 'Руководитель';
+			default:
+				return 'Сотрудник';
+		}
+	};
 
-            return (
-              <tr 
-                key={user.id} 
-                onClick={() => onUserSelect?.(user)}
-                className={`${onUserSelect ? styles.clickableRow : ''} ${isEdited ? styles.editedRow : ''}`}
-              >
-                <td>{user.fullName}</td>
-                <td>{user.email}</td>
-                <td>
-                  <select 
-                    className={`${styles.roleSelect} ${styles[currentRole]}`}
-                    value={currentRole}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value as any)}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <option value="user">Сотрудник</option>
-                    <option value="manager">Руководитель</option>
-                    <option value="admin">Администратор</option>
-                  </select>
-                </td>
-                <td>{user.department || '-'}</td>
-                <td>
-                  <select 
-                    className={`${styles.positionSelect} ${isEdited ? styles.edited : ''}`}
-                    value={currentTargetPosition || ''}
-                    onChange={(e) => handleTargetPositionChange(user.id, e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <option value="">Выберите должность</option>
-                    {targetPositions.map(pos => (
-                      <option key={pos} value={pos}>{pos}</option>
-                    ))}
-                  </select>
-                </td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      
-      {users.length === 0 && (
-        <div className={styles.emptyState}>
-          Пользователи не найдены
-        </div>
-      )}
+	return (
+		<div className={styles.container}>
+			<table className={styles.table}>
+				<thead>
+					<tr>
+						<th style={{ width: '20%' }}>ФИО</th>
+						<th style={{ width: '18%' }}>Email</th>
+						<th style={{ width: '12%' }}>Роль</th>
+						<th style={{ width: '12%' }}>Отдел</th>
+						<th style={{ width: '15%' }}>Текущая должность</th>
+						<th style={{ width: '13%' }}>Дата рег.</th>
+						<th style={{ width: '10%' }}>Статус</th>
+					</tr>
+				</thead>
+				<tbody>
+					{users.map((user) => {
+						const currentRole = editedUsers[user.id]?.role ?? user.role;
+						const isEdited = !!editedUsers[user.id];
 
-      <div className={styles.tableFooter}>
-        <button 
-          className={`${styles.saveButton} ${hasChanges ? styles.active : ''}`}
-          onClick={handleSaveAll}
-          disabled={!hasChanges}
-        >
-          Сохранить изменения {hasChanges && `(${Object.keys(editedUsers).length})`}
-        </button>
-      </div>
-    </div>
-  );
+						return (
+							<tr
+								key={user.id}
+								onClick={() => onUserSelect?.(user)}
+								className={`${onUserSelect ? styles.clickableRow : ''} ${
+									isEdited ? styles.editedRow : ''
+								}`}>
+								<td style={{ fontWeight: 500 }}>{user.fullName}</td>
+								<td style={{ color: '#666' }}>{user.email}</td>
+								<td>
+									<select
+										className={`${styles.roleSelect} ${getRoleClass(currentRole)}`}
+										value={currentRole}
+										onChange={(e) =>
+											handleRoleChange(user.id, e.target.value as any)
+										}
+										onClick={(e) => e.stopPropagation()}>
+										<option value='user'>Сотрудник</option>
+										<option value='manager'>Руководитель</option>
+										<option value='admin'>Администратор</option>
+									</select>
+								</td>
+								<td>{user.department || '-'}</td>
+								<td>{user.currentPosition || '-'}</td>
+								<td>{new Date(user.createdAt).toLocaleDateString()}</td>
+								<td>
+									{isEdited && (
+										<span className={styles.editedBadge}>Изменено</span>
+									)}
+								</td>
+							</tr>
+						);
+					})}
+				</tbody>
+			</table>
+
+			{users.length === 0 && (
+				<div className={styles.emptyState}>Пользователи не найдены</div>
+			)}
+
+			<div className={styles.tableFooter}>
+				<button
+					className={`${styles.saveButton} ${hasChanges ? styles.active : ''}`}
+					onClick={handleSaveAll}
+					disabled={!hasChanges}>
+					Сохранить изменения{' '}
+					{hasChanges && `(${Object.keys(editedUsers).length})`}
+				</button>
+			</div>
+		</div>
+	);
 };
 
 export default UserTable;

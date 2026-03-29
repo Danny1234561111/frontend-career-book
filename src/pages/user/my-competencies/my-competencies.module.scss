@@ -1,255 +1,370 @@
 @import '../../../variables.module';
 
 .page {
-  min-height: calc(100vh - 80px);
-  background: $background-light;
+	min-height: calc(100vh - 80px);
+	background: $background-light;
 }
 
 .header {
-  background: $white;
-  padding: $spacing-xl $spacing-xxl;
-  border-bottom: 1px solid $border-color;
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
 }
 
 .title {
-  font-size: $font-xxxxl;
-  color: $text-primary;
-  margin: 0;
-  font-weight: 600;
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
 }
 
 .content {
-  background: $white;
-  padding: $spacing-xxl;
-  min-height: calc(100vh - 80px - 80px);
+	min-height: calc(100vh - 80px - 80px);
+	padding: $spacing-xxl;
+	background: $white;
 }
 
 .filters {
-  margin-bottom: $spacing-xl;
-  
-  .filterGroup {
-    display: flex;
-    align-items: center;
-    gap: $spacing-md;
-    
-    label {
-      font-size: $font-md;
-      color: $text-secondary;
-      white-space: nowrap;
-    }
-  }
+	margin-bottom: $spacing-xl;
+
+	.filterGroup {
+		display: flex;
+		align-items: center;
+		gap: $spacing-md;
+
+		label {
+			color: $text-secondary;
+			font-size: $font-md;
+			white-space: nowrap;
+		}
+	}
 }
 
 .filterSelect {
-  padding: $spacing-sm $spacing-lg;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  font-size: $font-md;
-  color: $text-primary;
-  background: $white;
-  cursor: pointer;
-  min-width: 250px;
-  
-  &:focus {
-    outline: none;
-    border-color: $primary;
-  }
-  
-  @include mobile {
-    width: 100%;
-  }
+	min-width: 250px;
+	padding: $spacing-sm $spacing-lg;
+	color: $text-primary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	@include mobile {
+		width: 100%;
+	}
 }
 
 .userStats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-xl;
-  margin-bottom: $spacing-xxxl;
-  padding: $spacing-xl;
-  background: $background-light;
-  border-radius: $border-radius-md;
-  border: 1px solid $border-color;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: $spacing-xl;
+	margin-bottom: $spacing-xxxl;
+	padding: $spacing-xl;
+	background: $background-light;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
 }
 
 .statItem {
-  text-align: center;
-  
-  .statValue {
-    display: block;
-    font-size: $font-xxxl;
-    font-weight: 700;
-    color: $primary;
-    margin-bottom: $spacing-xs;
-  }
-  
-  .statLabel {
-    font-size: $font-sm;
-    color: $text-secondary;
-  }
+	text-align: center;
+
+	.statValue {
+		display: block;
+		margin-bottom: $spacing-xs;
+		color: $primary;
+		font-weight: 700;
+		font-size: $font-xxxl;
+	}
+
+	.statLabel {
+		color: $text-secondary;
+		font-size: $font-sm;
+	}
 }
 
 .tableWrapper {
-  overflow-x: auto;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
+	overflow-x: auto;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
 }
 
 .table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 900px;
-  
-  th {
-    text-align: left;
-    padding: $spacing-lg $spacing-md;
-    font-size: $font-sm;
-    font-weight: 600;
-    color: $text-secondary;
-    border-bottom: 2px solid $border-color;
-    background: $background-hover;
-  }
-  
-  td {
-    padding: $spacing-lg $spacing-md;
-    border-bottom: 1px solid $border-color;
-    color: $text-primary;
-    font-size: $font-md;
-    vertical-align: middle;
-  }
-  
-  tbody tr:hover {
-    background: $background-hover;
-  }
+	width: 100%;
+	min-width: 900px;
+	border-collapse: collapse;
+
+	th {
+		padding: $spacing-lg $spacing-md;
+		color: $text-secondary;
+		font-weight: 600;
+		font-size: $font-sm;
+		text-align: left;
+		background: $background-hover;
+		border-bottom: 2px solid $border-color;
+	}
+
+	td {
+		padding: $spacing-lg $spacing-md;
+		color: $text-primary;
+		font-size: $font-md;
+		vertical-align: middle;
+		border-bottom: 1px solid $border-color;
+	}
+
+	tbody tr:hover {
+		background: $background-hover;
+	}
 }
 
 .competencyName {
-  font-weight: 500;
-  color: $primary;
+	color: $primary;
+	font-weight: 500;
 }
 
 .blockBadge {
-  display: inline-block;
-  padding: $spacing-xs $spacing-md;
-  background: $background-light;
-  border-radius: $border-radius-xl;
-  font-size: $font-sm;
-  color: $text-secondary;
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	color: $text-secondary;
+	font-size: $font-sm;
+	background: $background-light;
+	border-radius: $border-radius-xl;
 }
 
 .levelBadge {
-  display: inline-block;
-  padding: $spacing-xs $spacing-md;
-  border-radius: $border-radius-xl;
-  font-size: $font-sm;
-  font-weight: 500;
-  min-width: 120px;
-  text-align: center;
-  
-  &.level1 {
-    background: $warning-light;
-    color: $warning;
-  }
-  
-  &.level2 {
-    background: $primary-light;
-    color: $primary;
-  }
-  
-  &.level3 {
-    background: $success-light;
-    color: $success;
-  }
+	display: inline-block;
+	min-width: 120px;
+	padding: $spacing-xs $spacing-md;
+	font-weight: 500;
+	font-size: $font-sm;
+	text-align: center;
+	border-radius: $border-radius-xl;
+
+	&.level1 {
+		color: $warning;
+		background: $warning-light;
+	}
+
+	&.level2 {
+		color: $primary;
+		background: $primary-light;
+	}
+
+	&.level3 {
+		color: $success;
+		background: $success-light;
+	}
 }
 
 .progressContainer {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
 }
 
 .progressBar {
-  width: 120px;
-  height: 8px;
-  background: $border-color;
-  border-radius: $border-radius-sm;
-  overflow: hidden;
+	width: 120px;
+	height: 8px;
+	overflow: hidden;
+	background: $border-color;
+	border-radius: $border-radius-sm;
 }
 
 .progressFill {
-  height: 100%;
-  background: $primary;
-  border-radius: $border-radius-sm;
-  transition: width 0.3s;
+	height: 100%;
+	background: $primary;
+	border-radius: $border-radius-sm;
+	transition: width 0.3s;
 }
 
 .progressText {
-  font-size: $font-sm;
-  color: $text-secondary;
-  min-width: 45px;
+	min-width: 45px;
+	color: $text-secondary;
+	font-size: $font-sm;
 }
 
 .materialsBtn {
-  @include button-reset;
-  padding: $spacing-xs $spacing-md;
-  border: 1px solid $primary;
-  color: $primary;
-  border-radius: $border-radius-xl;
-  font-size: $font-sm;
-  white-space: nowrap;
-  
-  &:hover {
-    background: $primary-light;
-  }
+	@include button-reset;
+	padding: $spacing-xs $spacing-md;
+	color: $primary;
+	font-size: $font-sm;
+	white-space: nowrap;
+	border: 1px solid $primary;
+	border-radius: $border-radius-xl;
+
+	&:hover {
+		background: $primary-light;
+	}
 }
 
 .emptyState {
-  text-align: center;
-  padding: $spacing-xxxl;
-  color: $text-secondary;
-  font-size: $font-lg;
-  background: $background-hover;
-  border-radius: $border-radius-md;
-  margin-top: $spacing-xl;
+	margin-top: $spacing-xl;
+	padding: $spacing-xxxl;
+	color: $text-secondary;
+	font-size: $font-lg;
+	text-align: center;
+	background: $background-hover;
+	border-radius: $border-radius-md;
 }
 
 @include mobile {
-  .header {
-    padding: $spacing-lg $spacing-xl;
-  }
-  
-  .title {
-    font-size: $font-xxl;
-  }
-  
-  .content {
-    padding: $spacing-lg;
-  }
-  
-  .userStats {
-    grid-template-columns: 1fr;
-    gap: $spacing-lg;
-  }
-  
-  .filterGroup {
-    flex-direction: column;
-    align-items: flex-start;
-    
-    label {
-      margin-bottom: $spacing-xs;
-    }
-  }
-  
-  .filterSelect {
-    width: 100%;
-  }
-  
-  .progressContainer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: $spacing-xs;
-  }
-  
-  .progressBar {
-    width: 80px;
-  }
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-lg;
+	}
+
+	.userStats {
+		grid-template-columns: 1fr;
+		gap: $spacing-lg;
+	}
+
+	.filterGroup {
+		flex-direction: column;
+		align-items: flex-start;
+
+		label {
+			margin-bottom: $spacing-xs;
+		}
+	}
+
+	.filterSelect {
+		width: 100%;
+	}
+
+	.progressContainer {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-xs;
+	}
+
+	.progressBar {
+		width: 80px;
+	}
+}
+.tabs {
+	display: flex;
+	gap: $spacing-sm;
+	margin-bottom: $spacing-xl;
+	border-bottom: 1px solid $border-color;
+	
+	.tab {
+		@include button-reset;
+		padding: $spacing-sm $spacing-lg;
+		font-size: $font-md;
+		color: $text-secondary;
+		border-bottom: 2px solid transparent;
+		
+		&.active {
+			color: $primary;
+			border-bottom-color: $primary;
+		}
+		
+		&:hover {
+			color: $primary;
+		}
+	}
+}
+
+.requiredSection,
+.otherSection {
+	margin-bottom: $spacing-xxxl;
+}
+
+.requiredHeader,
+.otherHeader {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	margin-bottom: $spacing-lg;
+	padding-bottom: $spacing-sm;
+	border-bottom: 2px solid $border-color;
+	
+	.requiredIcon,
+	.otherIcon {
+		font-size: $font-xl;
+	}
+	
+	.requiredTitle,
+	.otherTitle {
+		margin: 0;
+		font-size: $font-xl;
+		font-weight: 600;
+	}
+	
+	.requiredBadge {
+		background: $warning-light;
+		color: $warning;
+		padding: $spacing-xs $spacing-sm;
+		border-radius: $border-radius-xl;
+		font-size: $font-sm;
+		font-weight: 500;
+	}
+	
+	.otherBadge {
+		background: $background-light;
+		color: $text-secondary;
+		padding: $spacing-xs $spacing-sm;
+		border-radius: $border-radius-xl;
+		font-size: $font-sm;
+		font-weight: 500;
+	}
+}
+
+.sectionTitle {
+	font-size: $font-lg;
+	font-weight: 600;
+	margin: $spacing-lg 0 $spacing-md;
+	color: $text-primary;
+}
+
+.addBtn {
+	@include button-reset;
+	padding: $spacing-sm $spacing-lg;
+	background: $primary;
+	color: white;
+	border-radius: $border-radius-md;
+	font-size: $font-sm;
+	
+	&:hover:not(:disabled) {
+		background: $primary-hover;
+	}
+	
+	&:disabled {
+		background: $text-disabled;
+		cursor: not-allowed;
+	}
+}
+
+.descriptionCell {
+	max-width: 300px;
+	color: $text-secondary;
+	font-size: $font-sm;
+}
+
+.successMessage {
+	padding: $spacing-md $spacing-lg;
+	background: $success-light;
+	color: $success;
+	border-radius: $border-radius-md;
+	margin-bottom: $spacing-xl;
+}
+
+.errorMessage {
+	padding: $spacing-md $spacing-lg;
+	background: $danger-light;
+	color: $danger;
+	border-radius: $border-radius-md;
+	margin-bottom: $spacing-xl;
 }
