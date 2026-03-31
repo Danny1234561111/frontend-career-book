@@ -18,10 +18,43 @@
 	font-size: $font-xxxxl;
 }
 
+.departmentName {
+	margin-top: $spacing-sm;
+	color: $text-secondary;
+	font-size: $font-md;
+}
+
 .content {
 	min-height: calc(100vh - 80px - 80px);
 	padding: $spacing-xxl;
 	background: $white;
+}
+
+.successMessage {
+	margin-bottom: $spacing-xl;
+	padding: $spacing-md $spacing-lg;
+	color: $success;
+	font-size: $font-md;
+	background: $success-light;
+	border-radius: $border-radius-md;
+}
+
+.error {
+	margin-bottom: $spacing-xl;
+	padding: $spacing-md $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+}
+
+.loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 400px;
+	color: $text-secondary;
+	font-size: $font-lg;
 }
 
 .filters {
@@ -62,6 +95,176 @@
 
 .matrixWrapper {
 	margin-top: $spacing-xl;
+
+	h2 {
+		margin: 0 0 $spacing-lg 0;
+		color: $text-primary;
+		font-weight: 600;
+		font-size: $font-xl;
+	}
+}
+
+.addCompetencySection {
+	margin-top: $spacing-xxl;
+	padding-top: $spacing-xl;
+	border-top: 1px solid $border-color;
+
+	h2 {
+		margin: 0 0 $spacing-lg 0;
+		color: $text-primary;
+		font-weight: 600;
+		font-size: $font-xl;
+	}
+}
+
+.addBtn {
+	padding: $spacing-md $spacing-xl;
+	color: $white;
+	font-size: $font-md;
+	font-weight: 500;
+	background: $primary;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: background 0.3s;
+
+	&:hover {
+		background: $primary-dark;
+	}
+}
+
+.competencySelector {
+	margin-top: $spacing-lg;
+}
+
+.searchWrapper {
+	position: relative;
+	margin-bottom: $spacing-lg;
+}
+
+.searchInput {
+	width: 100%;
+	padding: $spacing-md $spacing-xl $spacing-md $spacing-lg;
+	font-size: $font-md;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	outline: none;
+	transition: border-color 0.3s;
+
+	&:focus {
+		border-color: $primary;
+	}
+}
+
+.closeSearchBtn {
+	position: absolute;
+	top: 50%;
+	right: $spacing-md;
+	width: 32px;
+	height: 32px;
+	font-size: $font-xl;
+	color: $text-secondary;
+	background: none;
+	border: none;
+	border-radius: $border-radius-round;
+	cursor: pointer;
+	transform: translateY(-50%);
+	transition: all 0.3s;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+	}
+}
+
+.competencyList {
+	max-height: 400px;
+	overflow-y: auto;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+
+	@include mobile {
+		max-height: 300px;
+	}
+}
+
+.competencyItem {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: $spacing-lg;
+	border-bottom: 1px solid $border-color;
+	cursor: pointer;
+	transition: background 0.3s;
+
+	&:hover {
+		background: $background-hover;
+	}
+
+	&:last-child {
+		border-bottom: none;
+	}
+
+	@include mobile {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-md;
+	}
+}
+
+.competencyItemName {
+	flex: 2;
+	color: $text-primary;
+	font-weight: 500;
+	font-size: $font-md;
+}
+
+.competencyItemDesc {
+	flex: 3;
+	color: $text-secondary;
+	font-size: $font-sm;
+	line-height: 1.4;
+
+	@include mobile {
+		width: 100%;
+	}
+}
+
+.assignBtn {
+	padding: $spacing-xs $spacing-lg;
+	color: $primary;
+	font-size: $font-sm;
+	font-weight: 500;
+	background: $primary-light;
+	border: 1px solid $primary;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.3s;
+
+	&:hover {
+		color: $white;
+		background: $primary;
+	}
+
+	@include mobile {
+		width: 100%;
+	}
+}
+
+.emptyState {
+	padding: $spacing-xxl;
+	text-align: center;
+	color: $text-secondary;
+	font-size: $font-md;
+	background: $background-light;
+	border-radius: $border-radius-md;
+}
+
+.emptySearch {
+	padding: $spacing-xxl;
+	text-align: center;
+	color: $text-secondary;
+	font-size: $font-md;
 }
 
 @include mobile {
@@ -88,5 +291,20 @@
 
 	.filterSelect {
 		width: 100%;
+	}
+
+	.matrixWrapper {
+		h2 {
+			font-size: $font-lg;
+		}
+	}
+
+	.addCompetencySection {
+		margin-top: $spacing-xl;
+		padding-top: $spacing-lg;
+
+		h2 {
+			font-size: $font-lg;
+		}
 	}
 }

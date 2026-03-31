@@ -367,3 +367,155 @@
 		gap: $spacing-xs;
 	}
 }
+// category_manager.module.scss - добавить в секцию .header
+
+.saveBtn {
+	@include button-reset;
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $success;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: background 0.2s;
+
+	&:hover {
+		background: darken($success, 10%);
+	}
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+}
+
+// Добавить стили для модального окна
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 1000;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.5);
+}
+
+.modalContent {
+	width: 500px;
+	max-width: 90%;
+	padding: $spacing-xl;
+	background: $white;
+	border-radius: $border-radius-lg;
+	box-shadow: $shadow-lg;
+
+	h3 {
+		margin: 0 0 $spacing-lg 0;
+		color: $text-primary;
+		font-size: $font-xl;
+	}
+}
+
+.formGroup {
+	margin-bottom: $spacing-lg;
+
+	label {
+		display: block;
+		margin-bottom: $spacing-xs;
+		color: $text-secondary;
+		font-size: $font-sm;
+		font-weight: 500;
+	}
+
+	select {
+		width: 100%;
+		padding: $spacing-sm $spacing-md;
+		font-size: $font-md;
+		border: 1px solid $border-color;
+		border-radius: $border-radius-md;
+
+		&:focus {
+			border-color: $primary;
+			outline: none;
+		}
+	}
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: $spacing-md;
+	margin-top: $spacing-xl;
+
+	button {
+		padding: $spacing-sm $spacing-xl;
+		font-size: $font-md;
+		border: none;
+		border-radius: $border-radius-md;
+		cursor: pointer;
+
+		&:first-child {
+			color: $text-secondary;
+			background: $background-light;
+
+			&:hover {
+				background: $border-color;
+			}
+		}
+
+		&:last-child {
+			color: $white;
+			background: $primary;
+
+			&:hover:not(:disabled) {
+				background: $primary-hover;
+			}
+
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+		}
+	}
+}
+
+.materialActions {
+	display: flex;
+	gap: $spacing-xs;
+}
+
+.removeMaterialBtn {
+	@include button-reset;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 24px;
+	height: 24px;
+	font-size: $font-sm;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+		border-color: $danger;
+	}
+}
+
+.addMaterialBtn {
+	@include button-reset;
+	padding: $spacing-xs $spacing-md;
+	color: $primary;
+	font-size: $font-sm;
+	background: $primary-light;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+
+	&:hover {
+		background: darken($primary-light, 5%);
+	}
+}

@@ -454,3 +454,107 @@
 		}
 	}
 }
+// Добавьте в competency-form.module.scss
+
+.hint {
+	margin-top: $spacing-md;
+	padding: $spacing-md;
+	color: $text-secondary;
+	font-size: $font-sm;
+	background: $background-light;
+	border-radius: $border-radius-md;
+	border-left: 3px solid $primary;
+}
+
+.materialsHeader {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	cursor: pointer;
+	padding: $spacing-sm 0;
+	
+	&:hover {
+		opacity: 0.8;
+	}
+	
+	label {
+		margin-bottom: 0;
+		cursor: pointer;
+	}
+}
+
+.materialsCount {
+	color: $text-secondary;
+	font-size: $font-sm;
+}
+
+.materialsSection {
+	margin-top: $spacing-md;
+	padding: $spacing-md;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+}
+
+.searchWrapper {
+	position: relative;
+	margin-bottom: $spacing-md;
+	
+	.searchInput {
+		width: 100%;
+		padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
+		font-size: $font-sm;
+	}
+	
+	.searchIcon {
+		position: absolute;
+		top: 50%;
+		left: $spacing-md;
+		transform: translateY(-50%);
+	}
+}
+
+.materialsList {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-sm;
+	max-height: 300px;
+	overflow-y: auto;
+	
+	.materialItem {
+		display: flex;
+		align-items: center;
+		gap: $spacing-sm;
+		padding: $spacing-sm;
+		cursor: pointer;
+		border: 1px solid $border-color;
+		border-radius: $border-radius-sm;
+		transition: all 0.2s;
+		
+		&:hover {
+			background: $background-hover;
+		}
+		
+		input {
+			width: auto;
+			margin: 0;
+		}
+		
+		.materialName {
+			flex: 1;
+			font-size: $font-md;
+		}
+		
+		.materialType {
+			padding: $spacing-xs $spacing-sm;
+			font-size: $font-xs;
+			background: $background-light;
+			border-radius: $border-radius-sm;
+		}
+	}
+}
+
+.emptyMaterials {
+	padding: $spacing-xl;
+	text-align: center;
+	color: $text-secondary;
+}

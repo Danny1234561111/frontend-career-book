@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// competency-form.module.tsx
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './competency-form.module.scss';
 
 interface CompetencyData {
@@ -20,8 +21,10 @@ interface CompetencyFormProps {
 	onSubmit?: (competency: CompetencyData) => void;
 	initialData?: CompetencyData | null;
 	mode?: 'create' | 'edit';
-	competencyBlocks?: { id: string; name: string }[];
+	competencyBlocks?: { id: string; name: string; categories?: Array<{ id: string; name: string; groups?: Array<{ id: string; name: string }> }> }[];
 	materials?: { id: string; name: string; type: string }[];
+	selectedMaterialIds?: string[];
+	levels?: Array<{ id: string; name: string; value: number }>;
 }
 
 const levelLabels = {
@@ -38,43 +41,89 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 	mode = 'create',
 	competencyBlocks = [],
 	materials = [],
+	selectedMaterialIds = [],
+	levels = [],
 }) => {
-	const [formData, setFormData] = useState<CompetencyData>(
-		initialData || {
-			name: '',
-			blockId: '',
-			blockName: '',
-			description: '',
-			level: 1,
-			defenseTasks: '',
-			acceptanceCriteria: '',
-			article: '',
-			materialIds: [],
-		}
-	);
+	const [formData, setFormData] = useState<CompetencyData>({
+		name: '',
+		blockId: '',
+		blockName: '',
+		description: '',
+		level: 1,
+		defenseTasks: '',
+		acceptanceCriteria: '',
+		article: '',
+		materialIds: [],
+	});
 
 	const [expandedMaterials, setExpandedMaterials] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	
+	// Используем ref для отслеживания предыдущего initialData
+	const prevInitialDataRef = useRef<CompetencyData | null | undefined>(null);
+	const isFirstOpenRef = useRef(true);
 
+	// Обновляем форму только при изменении initialData (когда открывается новая компетенция)
 	useEffect(() => {
-		if (initialData) {
-			console.log('Form received initialData:', initialData);
+		// Проверяем, действительно ли изменился initialData
+		const hasChanged = initialData?.id !== prevInitialDataRef.current?.id;
+		
+		if (initialData && hasChanged) {
+			console.log('Form received new initialData:', initialData);
 			setFormData(initialData);
 			
 			if (initialData.materialIds && initialData.materialIds.length > 0) {
 				setExpandedMaterials(true);
 			}
+			prevInitialDataRef.current = initialData;
+		} else if (!initialData && mode === 'create' && isFirstOpenRef.current) {
+			// При создании новой компетенции, если переданы выбранные материалы
+			if (selectedMaterialIds.length > 0) {
+				setFormData(prev => ({
+					...prev,
+					materialIds: selectedMaterialIds,
+				}));
+				setExpandedMaterials(true);
+			}
+			isFirstOpenRef.current = false;
 		}
-	}, [initialData]);
+	}, [initialData, selectedMaterialIds, mode]);
+
+	// Сбрасываем форму при закрытии
+	useEffect(() => {
+		if (!isOpen) {
+			// Не сбрасываем сразу, чтобы избежать моргания
+			const timeout = setTimeout(() => {
+				if (mode === 'create') {
+					setFormData({
+						name: '',
+						blockId: '',
+						blockName: '',
+						description: '',
+						level: 1,
+						defenseTasks: '',
+						acceptanceCriteria: '',
+						article: '',
+						materialIds: [],
+					});
+					setSearchQuery('');
+					setExpandedMaterials(false);
+				}
+				isFirstOpenRef.current = true;
+				prevInitialDataRef.current = null;
+			}, 300);
+			return () => clearTimeout(timeout);
+		}
+	}, [isOpen, mode]);
 
 	const handleBlockChange = (blockId: string) => {
 		const selectedBlock = competencyBlocks.find((b) => b.id === blockId);
-		setFormData({
-			...formData,
+		setFormData((prev) => ({
+			...prev,
 			blockId,
 			blockName: selectedBlock?.name || '',
-		});
+		}));
 	};
 
 	const handleMaterialToggle = (materialId: string) => {
@@ -117,21 +166,6 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 	};
 
 	const handleClose = () => {
-		if (mode === 'create') {
-			setFormData({
-				name: '',
-				blockId: '',
-				blockName: '',
-				description: '',
-				level: 1,
-				defenseTasks: '',
-				acceptanceCriteria: '',
-				article: '',
-				materialIds: [],
-			});
-			setSearchQuery('');
-			setExpandedMaterials(false);
-		}
 		onClose();
 	};
 
@@ -268,7 +302,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 									<span className={styles.expandIcon}>
 										{expandedMaterials ? '▼' : '▶'}
 									</span>
-									<label>Привязанные материалы</label>
+									<label>Привязанные материалы (опционально)</label>
 									<span className={styles.materialsCount}>
 										({formData.materialIds?.length || 0} выбрано)
 									</span>
@@ -306,10 +340,20 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 												</label>
 											))}
 										</div>
+										{filteredMaterials.length === 0 && (
+											<div className={styles.emptyMaterials}>
+												<p>Материалы не найдены</p>
+											</div>
+										)}
 									</div>
 								)}
 							</div>
 						)}
+						
+						{/* Подсказка о необязательности материалов */}
+						<div className={styles.hint}>
+							💡 <strong>Примечание:</strong> Привязка материалов к компетенции необязательна. Вы можете создать компетенцию без материалов и добавить их позже через управление материалами.
+						</div>
 					</form>
 				</div>
 

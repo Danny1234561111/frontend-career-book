@@ -31,6 +31,31 @@ interface User {
 	};
 }
 
+interface Department {
+	id: string;
+	name: string;
+	shortName?: string;
+}
+
+interface CompetencyResponse {
+	blocks: Array<{
+		id: string;
+		name: string;
+		categories: Array<{
+			id: string;
+			name: string;
+			groups: Array<{
+				id: string;
+				name: string;
+				competencies: Array<{
+					id: string;
+					name: string;
+				}>;
+			}>;
+		}>;
+	}>;
+}
+
 const AdminDashboard: React.FC = () => {
 	const accessToken = localStorage.getItem('accessToken');
 	
@@ -46,6 +71,21 @@ const AdminDashboard: React.FC = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+	// Подсчет общего количества компетенций из древовидной структуры
+	const countCompetencies = (data: CompetencyResponse): number => {
+		let count = 0;
+		if (data?.blocks) {
+			for (const block of data.blocks) {
+				for (const category of block.categories) {
+					for (const group of category.groups) {
+						count += group.competencies.length;
+					}
+				}
+			}
+		}
+		return count;
+	};
 
 	// Получение статистики
 	const fetchStats = async () => {
@@ -81,8 +121,40 @@ const AdminDashboard: React.FC = () => {
 				console.error('Failed to fetch positions:', positionsRes.status);
 			}
 
-			// Временно отключаем компетенции и отделы, так как эндпоинтов нет
-			setStats(prev => ({ ...prev, totalCompetencies: 0, totalDepartments: 0 }));
+			// Получаем компетенции через /api/competencies
+			const competenciesRes = await fetch('http://localhost:5217/api/competencies', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'text/plain',
+				},
+			});
+			if (competenciesRes.ok) {
+				const competenciesData: CompetencyResponse = await competenciesRes.json();
+				const totalCompetencies = countCompetencies(competenciesData);
+				setStats(prev => ({ ...prev, totalCompetencies }));
+				console.log('Competencies count:', totalCompetencies);
+			} else {
+				console.error('Failed to fetch competencies:', competenciesRes.status);
+				setStats(prev => ({ ...prev, totalCompetencies: 0 }));
+			}
+
+			// Получаем отделы через /api/departments
+			const departmentsRes = await fetch('http://localhost:5217/api/departments', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'text/plain',
+				},
+			});
+			if (departmentsRes.ok) {
+				const departmentsData: Department[] = await departmentsRes.json();
+				setStats(prev => ({ ...prev, totalDepartments: departmentsData.length }));
+				console.log('Departments count:', departmentsData.length);
+			} else {
+				console.error('Failed to fetch departments:', departmentsRes.status);
+				setStats(prev => ({ ...prev, totalDepartments: 0 }));
+			}
 			
 		} catch (error) {
 			console.error('Error fetching stats:', error);

@@ -330,20 +330,18 @@
 }
 
 .addBtn {
-	@include button-reset;
-	padding: $spacing-sm $spacing-lg;
+	padding: $spacing-md $spacing-xl;
+	color: $white;
+	font-size: $font-md;
+	font-weight: 500;
 	background: $primary;
-	color: white;
+	border: none;
 	border-radius: $border-radius-md;
-	font-size: $font-sm;
-	
-	&:hover:not(:disabled) {
-		background: $primary-hover;
-	}
-	
-	&:disabled {
-		background: $text-disabled;
-		cursor: not-allowed;
+	cursor: pointer;
+	transition: background 0.3s;
+
+	&:hover {
+		background: $primary-hover; 
 	}
 }
 

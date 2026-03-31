@@ -1,34 +1,38 @@
+// category_manager.module.tsx
 import React, { useState, useEffect } from 'react';
 import styles from './category_manager.module.scss';
 
 interface CompetencyBlock {
 	id: string;
 	name: string;
-	competencies: CompetencyItem[];
+	categories?: Array<{
+		id: string;
+		name: string;
+		groups?: Array<{
+			id: string;
+			name: string;
+			competencies: CompetencyItem[];
+		}>;
+	}>;
 }
 
 interface CompetencyItem {
 	id: string;
 	name: string;
 	description?: string;
-	level: number;
+	requiredLevel?: number;
 	materials: MaterialItem[];
 }
 
 interface MaterialItem {
 	id: string;
 	name: string;
-	type: 'video' | 'article' | 'book' | 'course';
+	typeName: string;
 	url: string;
-	targetLevel: number;
-	competencyId?: string;
-}
-
-interface CompetencyFromApi {
-	id: string;
-	name: string;
-	description?: string;
-	proficiencyLevels?: Array<{ value: number; name: string }>;
+	targetLevel?: number;
+	duration?: number;
+	_linkId?: string; // ID связи для удаления
+	_isNew?: boolean; // Флаг для новых связей
 }
 
 interface MaterialFromApi {
@@ -38,33 +42,65 @@ interface MaterialFromApi {
 	type: { id: string; name: string };
 	link: string;
 	duration: number;
-	competencies?: Array<{
-		id: string;
-		name: string;
-		targetLevelId: string;
-		targetLevel?: { id: string; name: string; value: number };
-	}>;
+	description?: string;
+}
+
+interface EducationalMaterialLink {
+	id: string;
+	competencyId: string;
+	educationalMaterialId: string;
+	targetLevelId?: string;
+	targetLevel?: { id: string; name: string; value: number };
+	educationalMaterial: MaterialFromApi;
 }
 
 const CategoryManager: React.FC = () => {
 	const accessToken = localStorage.getItem('accessToken');
 	
 	const [blocks, setBlocks] = useState<CompetencyBlock[]>([]);
-	const [newBlockName, setNewBlockName] = useState('');
+	const [originalBlocks, setOriginalBlocks] = useState<CompetencyBlock[]>([]);
+	const [materials, setMaterials] = useState<MaterialFromApi[]>([]);
 	const [expandedBlocks, setExpandedBlocks] = useState<string[]>([]);
 	const [expandedCompetencies, setExpandedCompetencies] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isSaving, setIsSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [showMaterialSelector, setShowMaterialSelector] = useState<{competencyId: string} | null>(null);
+	const [selectedMaterialId, setSelectedMaterialId] = useState<string>('');
+	const [selectedTargetLevel, setSelectedTargetLevel] = useState<string>('');
+	const [levels, setLevels] = useState<Array<{id: string; name: string; value: number}>>([]);
 	
 	const [draggedItem, setDraggedItem] = useState<{
-		type: 'competency' | 'material';
-		item: CompetencyItem | MaterialItem;
+		type: 'material';
+		item: MaterialItem;
 		sourceBlockId: string;
+		sourceCategoryId?: string;
+		sourceGroupId?: string;
 		sourceCompetencyId?: string;
 	} | null>(null);
 
-	// Получение компетенций из API (порт 5217)
+	// Получение уровней владения
+	const fetchLevels = async () => {
+		try {
+			const response = await fetch('http://localhost:5217/api/levels?withDeleted=false', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'text/plain',
+				},
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				setLevels(data);
+			}
+		} catch (error) {
+			console.error('Error fetching levels:', error);
+		}
+	};
+
+	// Получение компетенций из API
 	const fetchCompetencies = async () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/competencies', {
@@ -81,41 +117,30 @@ const CategoryManager: React.FC = () => {
 				
 				if (data.blocks && Array.isArray(data.blocks)) {
 					data.blocks.forEach((block: any) => {
-						const blockCompetencies: CompetencyItem[] = [];
-						
-						block.categories?.forEach((category: any) => {
-							category.groups?.forEach((group: any) => {
-								group.competencies?.forEach((comp: CompetencyFromApi) => {
-									let level = 1;
-									if (comp.proficiencyLevels && comp.proficiencyLevels.length > 0) {
-										level = comp.proficiencyLevels[0].value || 1;
-									}
-									
-									blockCompetencies.push({
+						blocksData.push({
+							id: block.id,
+							name: block.name,
+							categories: block.categories?.map((cat: any) => ({
+								id: cat.id,
+								name: cat.name,
+								groups: cat.groups?.map((group: any) => ({
+									id: group.id,
+									name: group.name,
+									competencies: group.competencies?.map((comp: any) => ({
 										id: comp.id,
 										name: comp.name,
-										description: comp.description || 'Описание компетенции',
-										level: level,
+										description: comp.description,
+										requiredLevel: comp.requiredLevel,
 										materials: [],
-									});
-								});
-							});
+									})) || []
+								})) || []
+							})) || []
 						});
-						
-						if (blockCompetencies.length > 0) {
-							blocksData.push({
-								id: block.id,
-								name: block.name,
-								competencies: blockCompetencies,
-							});
-						}
 					});
 				}
 				
 				setBlocks(blocksData);
 				return blocksData;
-			} else {
-				console.error('Failed to fetch competencies:', response.status);
 			}
 		} catch (error) {
 			console.error('Error fetching competencies:', error);
@@ -124,8 +149,8 @@ const CategoryManager: React.FC = () => {
 		return [];
 	};
 
-	// Получение материалов из API (порт 5217)
-	const fetchMaterials = async (blocksData: CompetencyBlock[]) => {
+	// Получение всех материалов
+	const fetchMaterials = async () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/materials?withDeleted=false', {
 				method: 'GET',
@@ -137,255 +162,362 @@ const CategoryManager: React.FC = () => {
 
 			if (response.ok) {
 				const data: MaterialFromApi[] = await response.json();
-				
-				const competencyMap = new Map<string, CompetencyItem>();
-				blocksData.forEach(block => {
-					block.competencies.forEach(comp => {
-						competencyMap.set(comp.id, comp);
-					});
-				});
-				
-				data.forEach(material => {
-					if (material.competencies && material.competencies.length > 0) {
-						material.competencies.forEach(comp => {
-							const targetComp = competencyMap.get(comp.id);
-							if (targetComp) {
-								const targetLevel = comp.targetLevel?.value || 1;
-								targetComp.materials.push({
-									id: material.id,
-									name: material.name,
-									type: getTypeFromId(material.typeId),
-									url: material.link,
-									targetLevel: targetLevel,
-								});
-							}
-						});
-					}
-				});
-				
-				setBlocks([...blocksData]);
+				setMaterials(data);
 			}
 		} catch (error) {
 			console.error('Error fetching materials:', error);
 		}
 	};
 
-	const getTypeFromId = (typeId: string): 'video' | 'article' | 'book' | 'course' => {
-		const typeMap: Record<string, 'video' | 'article' | 'book' | 'course'> = {
-			'video-type-id': 'video',
-			'article-type-id': 'article',
-			'book-type-id': 'book',
-			'course-type-id': 'course',
-		};
-		return typeMap[typeId] || 'article';
-	};
-
-	const handleAddBlock = async () => {
-		if (!newBlockName.trim()) return;
-		
+	// Получение связей материалов с компетенциями
+	const fetchAllMaterialLinks = async () => {
 		try {
-			const newBlock: CompetencyBlock = {
-				id: Date.now().toString(),
-				name: newBlockName.trim(),
-				competencies: [],
-			};
-			setBlocks([...blocks, newBlock]);
-			setNewBlockName('');
-			setExpandedBlocks([...expandedBlocks, newBlock.id]);
-			setSuccessMessage('Блок создан');
-			setTimeout(() => setSuccessMessage(null), 3000);
-		} catch (error) {
-			setError('Ошибка при создании блока');
-			setTimeout(() => setError(null), 3000);
-		}
-	};
+			const response = await fetch('http://localhost:5217/api/educational-material-competencies?withDeleted=false', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'text/plain',
+				},
+			});
 
-	const handleDeleteBlock = async (blockId: string) => {
-		if (!window.confirm('Вы уверены, что хотите удалить этот блок компетенций?')) return;
-		
-		try {
-			setBlocks(blocks.filter((block) => block.id !== blockId));
-			setSuccessMessage('Блок удален');
-			setTimeout(() => setSuccessMessage(null), 3000);
-		} catch (error) {
-			setError('Ошибка при удалении блока');
-			setTimeout(() => setError(null), 3000);
-		}
-	};
-
-	const handleDuplicateBlock = (block: CompetencyBlock) => {
-		const duplicatedBlock: CompetencyBlock = {
-			id: Date.now().toString(),
-			name: `${block.name} (копия)`,
-			competencies: block.competencies.map((comp) => ({
-				...comp,
-				id: `${comp.id}-copy-${Date.now()}`,
-				materials: comp.materials.map((mat) => ({
-					...mat,
-					id: `${mat.id}-copy-${Date.now()}`,
-				})),
-			})),
-		};
-		setBlocks([...blocks, duplicatedBlock]);
-		setExpandedBlocks([...expandedBlocks, duplicatedBlock.id]);
-		setSuccessMessage('Блок дублирован');
-		setTimeout(() => setSuccessMessage(null), 3000);
-	};
-
-	const handleDuplicateCompetency = (competency: CompetencyItem, blockId: string) => {
-		const block = blocks.find((b) => b.id === blockId);
-		if (!block) return;
-
-		const competencyCopy: CompetencyItem = {
-			...competency,
-			id: `${competency.id}-copy-${Date.now()}`,
-			materials: competency.materials.map((mat) => ({
-				...mat,
-				id: `${mat.id}-copy-${Date.now()}`,
-			})),
-		};
-
-		const updatedBlocks = blocks.map((b) => {
-			if (b.id === blockId) {
-				return {
-					...b,
-					competencies: [...b.competencies, competencyCopy],
-				};
+			if (response.ok) {
+				const data: EducationalMaterialLink[] = await response.json();
+				return data;
 			}
-			return b;
-		});
-
-		setBlocks(updatedBlocks);
-		setExpandedCompetencies([...expandedCompetencies, competencyCopy.id]);
-		setSuccessMessage('Компетенция дублирована');
-		setTimeout(() => setSuccessMessage(null), 3000);
+		} catch (error) {
+			console.error('Error fetching material links:', error);
+		}
+		return [];
 	};
 
-	const handleDuplicateMaterial = (material: MaterialItem, competencyId: string, blockId: string) => {
-		const block = blocks.find((b) => b.id === blockId);
-		if (!block) return;
+	// Загрузка всех материалов для компетенций
+	const loadAllCompetencyMaterials = async (blocksData: CompetencyBlock[], links: EducationalMaterialLink[]) => {
+		const materialMap = new Map<string, MaterialFromApi>();
+		materials.forEach(m => materialMap.set(m.id, m));
 
-		const materialCopy: MaterialItem = {
-			...material,
-			id: `${material.id}-copy-${Date.now()}`,
-		};
-
-		const updatedBlocks = blocks.map((b) => {
-			if (b.id === blockId) {
-				return {
-					...b,
-					competencies: b.competencies.map((comp) => {
-						if (comp.id === competencyId) {
-							return {
-								...comp,
-								materials: [...comp.materials, materialCopy],
-							};
+		for (const block of blocksData) {
+			if (block.categories) {
+				for (const category of block.categories) {
+					if (category.groups) {
+						for (const group of category.groups) {
+							for (const competency of group.competencies) {
+								const competencyLinks = links.filter(l => l.competencyId === competency.id);
+								competency.materials = competencyLinks.map(link => ({
+									id: link.educationalMaterial.id,
+									name: link.educationalMaterial.name,
+									typeName: link.educationalMaterial.type?.name || 'unknown',
+									url: link.educationalMaterial.link,
+									targetLevel: link.targetLevel?.value,
+									duration: link.educationalMaterial.duration,
+									_linkId: link.id,
+								}));
+							}
 						}
-						return comp;
-					}),
-				};
+					}
+				}
 			}
-			return b;
-		});
-
-		setBlocks(updatedBlocks);
-		setSuccessMessage('Материал скопирован в эту компетенцию');
-		setTimeout(() => setSuccessMessage(null), 3000);
+		}
+		setBlocks([...blocksData]);
+		setOriginalBlocks(JSON.parse(JSON.stringify(blocksData)));
 	};
 
+	// Сохранение всех изменений
+	const handleSaveChanges = async () => {
+		setIsSaving(true);
+		setError(null);
+		
+		try {
+			// Находим удаленные связи
+			const removedLinks: string[] = [];
+			// Находим добавленные связи
+			const addedLinks: Array<{competencyId: string, materialId: string, targetLevelId: string}> = [];
+			
+			// Сравниваем текущие блоки с оригинальными
+			for (const currentBlock of blocks) {
+				if (currentBlock.categories) {
+					for (const currentCategory of currentBlock.categories) {
+						if (currentCategory.groups) {
+							for (const currentGroup of currentCategory.groups) {
+								for (const currentComp of currentGroup.competencies) {
+									// Находим оригинальную компетенцию
+									let originalComp: CompetencyItem | undefined;
+									
+									for (const origBlock of originalBlocks) {
+										if (origBlock.categories) {
+											for (const origCategory of origBlock.categories) {
+												if (origCategory.groups) {
+													for (const origGroup of origCategory.groups) {
+														originalComp = origGroup.competencies.find(c => c.id === currentComp.id);
+														if (originalComp) break;
+													}
+												}
+												if (originalComp) break;
+											}
+										}
+										if (originalComp) break;
+									}
+									
+									// Проверяем удаленные связи
+									if (originalComp) {
+										for (const originalMaterial of originalComp.materials) {
+											const stillExists = currentComp.materials.some(m => 
+												m.id === originalMaterial.id && m._linkId === originalMaterial._linkId
+											);
+											if (!stillExists && originalMaterial._linkId) {
+												removedLinks.push(originalMaterial._linkId);
+											}
+										}
+									}
+									
+									// Проверяем добавленные связи
+									for (const currentMaterial of currentComp.materials) {
+										if (currentMaterial._isNew) {
+											const levelId = levels.find(l => l.value === currentMaterial.targetLevel)?.id;
+											if (levelId) {
+												addedLinks.push({
+													competencyId: currentComp.id,
+													materialId: currentMaterial.id,
+													targetLevelId: levelId
+												});
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			// Удаляем связи
+			for (const linkId of removedLinks) {
+				await fetch(`http://localhost:5217/api/educational-material-competencies/${linkId}`, {
+					method: 'DELETE',
+					headers: {
+						'Authorization': `Bearer ${accessToken}`,
+					},
+				});
+			}
+			
+			// Добавляем связи (материалы могут существовать в нескольких компетенциях)
+			for (const addition of addedLinks) {
+				await fetch('http://localhost:5217/api/educational-material-competencies', {
+					method: 'POST',
+					headers: {
+						'Authorization': `Bearer ${accessToken}`,
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						competencyId: addition.competencyId,
+						educationalMaterialId: addition.materialId,
+						targetLevelId: addition.targetLevelId,
+					}),
+				});
+			}
+			
+			// Обновляем оригинальные данные
+			setOriginalBlocks(JSON.parse(JSON.stringify(blocks)));
+			
+			// Убираем временные флаги
+			for (const block of blocks) {
+				if (block.categories) {
+					for (const category of block.categories) {
+						if (category.groups) {
+							for (const group of category.groups) {
+								for (const comp of group.competencies) {
+									for (const material of comp.materials) {
+										delete material._isNew;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			setSuccessMessage('Изменения успешно сохранены');
+			setTimeout(() => setSuccessMessage(null), 3000);
+		} catch (error) {
+			console.error('Error saving changes:', error);
+			setError('Ошибка при сохранении изменений');
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	// Drag handlers - только для копирования материалов
 	const handleDragStart = (
-		item: CompetencyItem | MaterialItem,
-		type: 'competency' | 'material',
+		item: MaterialItem,
 		sourceBlockId: string,
+		sourceCategoryId?: string,
+		sourceGroupId?: string,
 		sourceCompetencyId?: string
 	) => {
-		setDraggedItem({ type, item, sourceBlockId, sourceCompetencyId });
+		setDraggedItem({ type: 'material', item, sourceBlockId, sourceCategoryId, sourceGroupId, sourceCompetencyId });
 	};
 
 	const handleDragOver = (e: React.DragEvent) => {
 		e.preventDefault();
 	};
 
-	const handleDrop = (targetBlockId: string, targetCompetencyId?: string) => {
-		if (!draggedItem) return;
-
-		if (
-			draggedItem.sourceBlockId === targetBlockId &&
-			draggedItem.sourceCompetencyId === targetCompetencyId
-		) {
-			setDraggedItem(null);
-			return;
-		}
-
-		setBlocks((prevBlocks) => {
-			const sourceBlock = prevBlocks.find(b => b.id === draggedItem.sourceBlockId);
-			const targetBlock = prevBlocks.find(b => b.id === targetBlockId);
-
-			if (!sourceBlock || !targetBlock) return prevBlocks;
-
-			if (draggedItem.type === 'competency') {
-				const competency = draggedItem.item as CompetencyItem;
-
-				return prevBlocks.map((block) => {
-					if (block.id === draggedItem.sourceBlockId) {
-						return {
-							...block,
-							competencies: block.competencies.filter(c => c.id !== competency.id),
-						};
-					}
-					if (block.id === targetBlockId) {
-						const competencyCopy = {
-							...competency,
-							id: `${competency.id}-moved-${Date.now()}`,
-							materials: [...competency.materials],
-						};
-						return {
-							...block,
-							competencies: [...block.competencies, competencyCopy],
-						};
-					}
-					return block;
-				});
-			} else {
-				const material = draggedItem.item as MaterialItem;
-				if (!targetCompetencyId) return prevBlocks;
-
-				return prevBlocks.map((block) => {
-					if (block.id === targetBlockId) {
-						return {
-							...block,
-							competencies: block.competencies.map((comp) => {
-								if (comp.id === targetCompetencyId) {
-									const materialCopy = {
-										...material,
-										id: `${material.id}-moved-${Date.now()}`,
-									};
-									return {
-										...comp,
-										materials: [...comp.materials, materialCopy],
-									};
+	const handleDrop = (
+		targetBlockId: string,
+		targetCategoryId?: string,
+		targetGroupId?: string,
+		targetCompetencyId?: string
+	) => {
+		if (!draggedItem || !targetCompetencyId) return;
+		
+		// Копируем материал в целевую компетенцию (не перемещаем!)
+		setBlocks(prevBlocks => {
+			const newBlocks = JSON.parse(JSON.stringify(prevBlocks));
+			
+			// Находим целевую компетенцию
+			for (const block of newBlocks) {
+				if (block.id === targetBlockId && block.categories) {
+					for (const category of block.categories) {
+						if (category.id === targetCategoryId && category.groups) {
+							for (const group of category.groups) {
+								if (group.id === targetGroupId) {
+									const targetComp = group.competencies.find((c: CompetencyItem) => c.id === targetCompetencyId);
+									if (targetComp) {
+										// Проверяем, существует ли уже такой материал в компетенции
+										const exists = targetComp.materials.some((m: MaterialItem) => m.id === draggedItem.item.id);
+										if (!exists) {
+											// Копируем материал
+											targetComp.materials.push({
+												...draggedItem.item,
+												_isNew: true,
+												_linkId: undefined,
+											});
+										}
+									}
+									break;
 								}
-								if (
-									draggedItem.sourceCompetencyId &&
-									comp.id === draggedItem.sourceCompetencyId
-								) {
-									return {
-										...comp,
-										materials: comp.materials.filter(m => m.id !== material.id),
-									};
-								}
-								return comp;
-							}),
-						};
+							}
+							break;
+						}
 					}
-					return block;
-				});
+					break;
+				}
 			}
+			
+			return newBlocks;
 		});
-
+		
 		setDraggedItem(null);
-		setSuccessMessage('Элемент перемещен');
+		setSuccessMessage('Материал скопирован в компетенцию');
 		setTimeout(() => setSuccessMessage(null), 2000);
+	};
+
+	const handleDuplicateMaterial = (material: MaterialItem, competencyId: string, blockId: string, categoryId: string, groupId: string) => {
+		setBlocks(prevBlocks => {
+			const newBlocks = [...prevBlocks];
+			const block = newBlocks.find(b => b.id === blockId);
+			if (block?.categories) {
+				const category = block.categories.find(c => c.id === categoryId);
+				if (category?.groups) {
+					const group = category.groups.find(g => g.id === groupId);
+					if (group) {
+						const targetComp = group.competencies.find(c => c.id === competencyId);
+						if (targetComp) {
+							// Проверяем, существует ли уже такой материал
+							const exists = targetComp.materials.some(m => m.id === material.id);
+							if (!exists) {
+								targetComp.materials.push({
+									...material,
+									_isNew: true,
+									_linkId: undefined,
+								});
+							}
+						}
+					}
+				}
+			}
+			return newBlocks;
+		});
+		
+		setSuccessMessage('Материал скопирован');
+		setTimeout(() => setSuccessMessage(null), 3000);
+	};
+
+	const handleAddMaterialClick = (competencyId: string) => {
+		setShowMaterialSelector({ competencyId });
+		setSelectedMaterialId('');
+		setSelectedTargetLevel('');
+	};
+
+	const handleConfirmAddMaterial = async () => {
+		if (showMaterialSelector && selectedMaterialId && selectedTargetLevel) {
+			const selectedMaterial = materials.find(m => m.id === selectedMaterialId);
+			const targetLevel = levels.find(l => l.id === selectedTargetLevel);
+			
+			if (selectedMaterial && targetLevel) {
+				setBlocks(prevBlocks => {
+					const newBlocks = [...prevBlocks];
+					for (const block of newBlocks) {
+						if (block.categories) {
+							for (const category of block.categories) {
+								if (category.groups) {
+									for (const group of category.groups) {
+										const compIndex = group.competencies.findIndex(c => c.id === showMaterialSelector.competencyId);
+										if (compIndex !== -1) {
+											// Проверяем, существует ли уже такой материал
+											const exists = group.competencies[compIndex].materials.some(
+												m => m.id === selectedMaterial.id
+											);
+											if (!exists) {
+												group.competencies[compIndex].materials.push({
+													id: selectedMaterial.id,
+													name: selectedMaterial.name,
+													typeName: selectedMaterial.type?.name || 'unknown',
+													url: selectedMaterial.link,
+													targetLevel: targetLevel.value,
+													duration: selectedMaterial.duration,
+													_isNew: true,
+												});
+											}
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+					return newBlocks;
+				});
+				
+				setSuccessMessage('Материал добавлен');
+				setTimeout(() => setSuccessMessage(null), 3000);
+			}
+			
+			setShowMaterialSelector(null);
+		}
+	};
+
+	const handleRemoveMaterial = (competencyId: string, materialId: string) => {
+		setBlocks(prevBlocks => {
+			const newBlocks = [...prevBlocks];
+			for (const block of newBlocks) {
+				if (block.categories) {
+					for (const category of block.categories) {
+						if (category.groups) {
+							for (const group of category.groups) {
+								const compIndex = group.competencies.findIndex(c => c.id === competencyId);
+								if (compIndex !== -1) {
+									// Удаляем материал только из этой компетенции
+									group.competencies[compIndex].materials = group.competencies[compIndex].materials.filter(
+										m => m.id !== materialId
+									);
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			return newBlocks;
+		});
 	};
 
 	const toggleBlockExpand = (blockId: string) => {
@@ -400,30 +532,30 @@ const CategoryManager: React.FC = () => {
 		);
 	};
 
-	const getLevelLabel = (level: number) => {
-		const labels: Record<number, string> = {
-			1: 'Базовые знания',
-			2: 'Профессионал',
-			3: 'Эксперт',
-		};
-		return labels[level] || `Уровень ${level}`;
+	const getLevelLabel = (level?: number) => {
+		if (!level) return 'Не указан';
+		const foundLevel = levels.find(l => l.value === level);
+		return foundLevel?.name || `Уровень ${level}`;
 	};
 
-	const getTypeIcon = (type: string) => {
-		const icons = {
+	const getTypeIcon = (typeName: string) => {
+		const icons: Record<string, string> = {
 			video: '🎥',
 			article: '📄',
 			book: '📚',
 			course: '🎓',
 		};
-		return icons[type as keyof typeof icons] || '📁';
+		return icons[typeName.toLowerCase()] || '📁';
 	};
 
 	useEffect(() => {
 		const loadData = async () => {
 			setIsLoading(true);
+			await fetchLevels();
+			await fetchMaterials();
 			const blocksData = await fetchCompetencies();
-			await fetchMaterials(blocksData);
+			const links = await fetchAllMaterialLinks();
+			await loadAllCompetencyMaterials(blocksData, links);
 			setIsLoading(false);
 		};
 		loadData();
@@ -447,20 +579,54 @@ const CategoryManager: React.FC = () => {
 			)}
 
 			<div className={styles.header}>
-				<h3>Управление блоками компетенций</h3>
-				<div className={styles.addBlock}>
-					<input
-						type='text'
-						value={newBlockName}
-						onChange={(e) => setNewBlockName(e.target.value)}
-						placeholder='Название нового блока'
-						onKeyPress={(e) => e.key === 'Enter' && handleAddBlock()}
-					/>
-					<button onClick={handleAddBlock} className={styles.addBtn}>
-						+ Добавить блок
-					</button>
-				</div>
+				<h3>Управление компетенциями и материалами</h3>
+				<button 
+					className={styles.saveBtn} 
+					onClick={handleSaveChanges}
+					disabled={isSaving}>
+					{isSaving ? 'Сохранение...' : '💾 Сохранить изменения'}
+				</button>
 			</div>
+
+			{showMaterialSelector && (
+				<div className={styles.modal}>
+					<div className={styles.modalContent}>
+						<h3>Добавить материал к компетенции</h3>
+						<div className={styles.formGroup}>
+							<label>Материал</label>
+							<select
+								value={selectedMaterialId}
+								onChange={(e) => setSelectedMaterialId(e.target.value)}>
+								<option value=''>Выберите материал</option>
+								{materials.map(m => (
+									<option key={m.id} value={m.id}>
+										{m.name} ({m.type?.name})
+									</option>
+								))}
+							</select>
+						</div>
+						<div className={styles.formGroup}>
+							<label>Целевой уровень</label>
+							<select
+								value={selectedTargetLevel}
+								onChange={(e) => setSelectedTargetLevel(e.target.value)}>
+								<option value=''>Выберите уровень</option>
+								{levels.map(l => (
+									<option key={l.id} value={l.id}>
+										{l.name}
+									</option>
+								))}
+							</select>
+						</div>
+						<div className={styles.modalActions}>
+							<button onClick={() => setShowMaterialSelector(null)}>Отмена</button>
+							<button onClick={handleConfirmAddMaterial} disabled={!selectedMaterialId || !selectedTargetLevel}>
+								Добавить
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 
 			<div className={styles.blocksList}>
 				{blocks.map((block) => (
@@ -473,128 +639,103 @@ const CategoryManager: React.FC = () => {
 									{expandedBlocks.includes(block.id) ? '▼' : '▶'}
 								</span>
 								<h4>{block.name}</h4>
-								<span className={styles.itemCount}>
-									{block.competencies.length} компетенций
-								</span>
-							</div>
-							<div className={styles.blockActions}>
-								<button
-									onClick={(e) => {
-										e.stopPropagation();
-										handleDuplicateBlock(block);
-									}}
-									className={styles.iconBtn}
-									title='Дублировать блок'>
-									📋
-								</button>
-								<button
-									onClick={(e) => {
-										e.stopPropagation();
-										handleDeleteBlock(block.id);
-									}}
-									className={styles.iconBtn}
-									title='Удалить блок'>
-									🗑️
-								</button>
 							</div>
 						</div>
 
-						{expandedBlocks.includes(block.id) && (
-							<div
-								className={styles.blockContent}
-								onDragOver={handleDragOver}
-								onDrop={(e) => {
-									e.preventDefault();
-									handleDrop(block.id);
-								}}>
-								{block.competencies.map((comp) => (
-									<div
-										key={comp.id}
-										className={styles.competencyContainer}
-										onDragOver={handleDragOver}
-										onDrop={(e) => {
-											e.preventDefault();
-											handleDrop(block.id, comp.id);
-										}}>
-										<div className={styles.competencyHeader}>
-											<div
-												className={styles.competencyTitle}
-												onClick={() => toggleCompetencyExpand(comp.id)}>
-												<span className={styles.expandIcon}>
-													{expandedCompetencies.includes(comp.id) ? '▼' : '▶'}
-												</span>
-												<span className={styles.competencyName}>
-													{comp.name}
-												</span>
-												<span
-													className={`${styles.levelBadge} ${
-														styles[`level${comp.level}`]
-													}`}>
-													{getLevelLabel(comp.level)}
-												</span>
-											</div>
-											<div className={styles.competencyActions}>
-												<button
-													onClick={() => handleDuplicateCompetency(comp, block.id)}
-													className={styles.smallIconBtn}
-													title='Дублировать компетенцию'>
-													📄
-												</button>
-												<span className={styles.materialCount}>
-													{comp.materials.length} материалов
-												</span>
-											</div>
-										</div>
-
-										{expandedCompetencies.includes(comp.id) && (
-											<div className={styles.materialsList}>
-												{comp.materials.map((material) => (
+						{expandedBlocks.includes(block.id) && block.categories && (
+							<div className={styles.blockContent}>
+								{block.categories.map((category) => (
+									<div key={category.id} className={styles.category}>
+										<h5>{category.name}</h5>
+										{category.groups?.map((group) => (
+											<div key={group.id} className={styles.group}>
+												<h6>{group.name}</h6>
+												{group.competencies.map((comp) => (
 													<div
-														key={material.id}
-														className={styles.materialCard}
-														draggable
-														onDragStart={() =>
-															handleDragStart(material, 'material', block.id, comp.id)
-														}>
-														<div className={styles.materialHeader}>
-															<span className={styles.materialName}>
-																{getTypeIcon(material.type)} {material.name}
-															</span>
-															<button
-																onClick={() =>
-																	handleDuplicateMaterial(material, comp.id, block.id)
-																}
-																className={styles.smallIconBtn}
-																title='Скопировать в эту компетенцию'>
-																📋
-															</button>
+														key={comp.id}
+														className={styles.competencyContainer}
+														onDragOver={handleDragOver}
+														onDrop={(e) => {
+															e.preventDefault();
+															handleDrop(block.id, category.id, group.id, comp.id);
+														}}>
+														<div className={styles.competencyHeader}>
+															<div
+																className={styles.competencyTitle}
+																onClick={() => toggleCompetencyExpand(comp.id)}>
+																<span className={styles.expandIcon}>
+																	{expandedCompetencies.includes(comp.id) ? '▼' : '▶'}
+																</span>
+																<span className={styles.competencyName}>
+																	{comp.name}
+																</span>
+																<span className={`${styles.levelBadge} ${styles[`level${comp.requiredLevel || 1}`]}`}>
+																	{getLevelLabel(comp.requiredLevel)}
+																</span>
+															</div>
+															<div className={styles.competencyActions}>
+																<button
+																	className={styles.addMaterialBtn}
+																	onClick={() => handleAddMaterialClick(comp.id)}>
+																	+ Материал
+																</button>
+															</div>
 														</div>
-														<div className={styles.materialMeta}>
-															<span className={styles.materialUrl}>
-																<a
-																	href={material.url}
-																	target='_blank'
-																	rel='noopener noreferrer'>
-																	{material.url}
-																</a>
-															</span>
-															<span
-																className={`${styles.levelBadge} ${
-																	styles[`level${material.targetLevel}`]
-																}`}>
-																Ур. {material.targetLevel}
-															</span>
-														</div>
+
+														{expandedCompetencies.includes(comp.id) && (
+															<div className={styles.materialsList}>
+																{comp.materials.map((material) => (
+																	<div
+																		key={material._linkId || material.id}
+																		className={styles.materialCard}
+																		draggable
+																		onDragStart={() => handleDragStart(material, block.id, category.id, group.id, comp.id)}>
+																		<div className={styles.materialHeader}>
+																			<span className={styles.materialName}>
+																				{getTypeIcon(material.typeName)} {material.name}
+																			</span>
+																			<div className={styles.materialActions}>
+																				<button
+																					className={styles.smallIconBtn}
+																					onClick={() => handleDuplicateMaterial(material, comp.id, block.id, category.id, group.id)}
+																					title='Скопировать в эту компетенцию'>
+																					📋
+																				</button>
+																				<button
+																					className={styles.removeMaterialBtn}
+																					onClick={() => handleRemoveMaterial(comp.id, material.id)}
+																					title='Удалить из компетенции'>
+																					🗑️
+																				</button>
+																			</div>
+																		</div>
+																		<div className={styles.materialMeta}>
+																			<span className={styles.materialUrl}>
+																				<a href={material.url} target='_blank' rel='noopener noreferrer'>
+																					{material.url.length > 50 ? material.url.substring(0, 50) + '...' : material.url}
+																				</a>
+																			</span>
+																			<span className={`${styles.levelBadge} ${styles[`level${material.targetLevel || 1}`]}`}>
+																				{getLevelLabel(material.targetLevel)}
+																			</span>
+																			{material.duration && (
+																				<span className={styles.duration}>⏱️ {material.duration} мин</span>
+																			)}
+																		</div>
+																	</div>
+																))}
+																{comp.materials.length === 0 && (
+																	<div className={styles.emptyMaterials}>
+																		<p>Нет учебных материалов</p>
+																		<small>Перетащите материалы из других компетенций или нажмите "+ Материал"</small>
+																	</div>
+																)}
+															</div>
+														)}
 													</div>
 												))}
-												{comp.materials.length === 0 && (
-													<div className={styles.emptyMaterials}>
-														<p>Нет учебных материалов</p>
-														<small>Перетащите материалы из других компетенций</small>
-													</div>
-												)}
 											</div>
-										)}
+										))}
 									</div>
 								))}
 							</div>
@@ -605,10 +746,10 @@ const CategoryManager: React.FC = () => {
 
 			<div className={styles.footer}>
 				<p className={styles.hint}>
-					💡 Компетенции можно перетаскивать между блоками. Материалы
-					перетаскиваются между компетенциями. Используйте кнопки 📋 для
-					дублирования блоков и 📄 для дублирования компетенций. Кнопка 📋 на
-					материале копирует его в текущую компетенцию.
+					💡 <strong>Drag & Drop (копирование):</strong> Перетаскивайте материалы между компетенциями — они копируются, а не перемещаются. Один материал может быть привязан к нескольким компетенциям.<br/>
+					📋 <strong>Дублирование:</strong> Используйте кнопку 📋 для копирования материала в текущую компетенцию.<br/>
+					💾 <strong>Сохранение:</strong> Все изменения сохраняются только после нажатия кнопки "Сохранить изменения".<br/>
+					🗑️ <strong>Удаление:</strong> Удаление материала из компетенции не удаляет сам материал, только связь с этой компетенцией.
 				</p>
 			</div>
 		</div>

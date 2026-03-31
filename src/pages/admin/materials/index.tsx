@@ -1,3 +1,4 @@
+// materials.module.tsx
 import React, { useState, useEffect } from 'react';
 import {
 	MaterialsTable,
@@ -9,18 +10,10 @@ import styles from './materials.module.scss';
 interface MaterialData {
 	id?: string;
 	name: string;
-	type: 'video' | 'article' | 'book' | 'course';
-	competencyIds: string[];
+	typeId: string;
 	url: string;
 	description?: string;
-	status?: 'published' | 'draft' | 'moderation';
-}
-
-interface Competency {
-	id: string;
-	name: string;
-	blockId: string;
-	blockName: string;
+	duration?: number;
 }
 
 interface MaterialFromApi {
@@ -31,14 +24,12 @@ interface MaterialFromApi {
 	link: string;
 	duration: number;
 	description?: string;
-	status?: string;
 	createdAt?: string;
-	competencies?: Array<{
-		id: string;
-		name: string;
-		targetLevelId: string;
-		targetLevel?: { id: string; name: string; value: number };
-	}>;
+}
+
+interface MaterialType {
+	id: string;
+	name: string;
 }
 
 const MaterialsAdminPage: React.FC = () => {
@@ -47,7 +38,7 @@ const MaterialsAdminPage: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<'all' | 'moderation' | 'categories'>('all');
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingMaterial, setEditingMaterial] = useState<MaterialData | undefined>();
-	const [competencies, setCompetencies] = useState<Competency[]>([]);
+	const [materialTypes, setMaterialTypes] = useState<MaterialType[]>([]);
 	const [materials, setMaterials] = useState<MaterialFromApi[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -66,53 +57,10 @@ const MaterialsAdminPage: React.FC = () => {
 
 			if (response.ok) {
 				const data = await response.json();
-				console.log('Material types:', data);
-				const typeMap: Record<string, string> = {};
-				data.forEach((type: any) => {
-					typeMap[type.id] = type.name;
-				});
-				localStorage.setItem('materialTypes', JSON.stringify(typeMap));
+				setMaterialTypes(data);
 			}
 		} catch (error) {
 			console.error('Error fetching material types:', error);
-		}
-	};
-
-	// Получение компетенций
-	const fetchCompetencies = async () => {
-		try {
-			const response = await fetch('http://localhost:5217/api/competencies', {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
-				},
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				const comps: Competency[] = [];
-				
-				if (data.blocks && Array.isArray(data.blocks)) {
-					data.blocks.forEach((block: any) => {
-						block.categories?.forEach((category: any) => {
-							category.groups?.forEach((group: any) => {
-								group.competencies?.forEach((comp: any) => {
-									comps.push({
-										id: comp.id,
-										name: comp.name,
-										blockId: block.id,
-										blockName: block.name,
-									});
-								});
-							});
-						});
-					});
-				}
-				setCompetencies(comps);
-			}
-		} catch (error) {
-			console.error('Error fetching competencies:', error);
 		}
 	};
 
@@ -141,8 +89,6 @@ const MaterialsAdminPage: React.FC = () => {
 	// Создание материала
 	const createMaterial = async (material: MaterialData) => {
 		try {
-			const typeId = getTypeId(material.type);
-			
 			const response = await fetch('http://localhost:5217/api/materials', {
 				method: 'POST',
 				headers: {
@@ -151,11 +97,10 @@ const MaterialsAdminPage: React.FC = () => {
 				},
 				body: JSON.stringify({
 					name: material.name,
-					typeId: typeId,
+					typeId: material.typeId,
 					link: material.url,
-					duration: 0,
+					duration: material.duration || 0,
 					description: material.description || '',
-					competencyIds: material.competencyIds,
 				}),
 			});
 
@@ -180,8 +125,6 @@ const MaterialsAdminPage: React.FC = () => {
 	// Обновление материала
 	const updateMaterial = async (id: string, material: MaterialData) => {
 		try {
-			const typeId = getTypeId(material.type);
-			
 			const response = await fetch(`http://localhost:5217/api/materials/${id}`, {
 				method: 'PATCH',
 				headers: {
@@ -190,9 +133,9 @@ const MaterialsAdminPage: React.FC = () => {
 				},
 				body: JSON.stringify({
 					name: material.name,
-					typeId: typeId,
+					typeId: material.typeId,
 					link: material.url,
-					duration: 0,
+					duration: material.duration || 0,
 					description: material.description || '',
 				}),
 			});
@@ -203,7 +146,9 @@ const MaterialsAdminPage: React.FC = () => {
 				setTimeout(() => setSuccessMessage(null), 3000);
 				return true;
 			} else {
-				setError('Ошибка при обновлении материала');
+				const errorText = await response.text();
+				setError(`Ошибка: ${errorText}`);
+				setTimeout(() => setError(null), 3000);
 				return false;
 			}
 		} catch (error) {
@@ -239,61 +184,14 @@ const MaterialsAdminPage: React.FC = () => {
 		}
 	};
 
-	// Одобрение материала
-	const approveMaterial = async (id: string) => {
-		try {
-			const response = await fetch(`http://localhost:5217/api/materials/${id}/approve`, {
-				method: 'PATCH',
-				headers: {
-					'Authorization': `Bearer ${accessToken}`,
-				},
-			});
-
-			if (response.ok) {
-				setSuccessMessage('Материал одобрен');
-				await fetchMaterials();
-				setTimeout(() => setSuccessMessage(null), 3000);
-			} else {
-				setError('Ошибка при одобрении материала');
-				setTimeout(() => setError(null), 3000);
-			}
-		} catch (error) {
-			console.error('Error approving material:', error);
-			setError('Ошибка при одобрении материала');
-		}
-	};
-
-	const getTypeId = (typeName: string): string => {
-		const typeMap: Record<string, string> = {
-			video: 'video-type-id',
-			article: 'article-type-id',
-			book: 'book-type-id',
-			course: 'course-type-id',
-		};
-		return typeMap[typeName] || '';
-	};
-
-	const getTypeFromId = (typeId: string): 'video' | 'article' | 'book' | 'course' => {
-		const typeMap: Record<string, 'video' | 'article' | 'book' | 'course'> = {
-			'video-type-id': 'video',
-			'article-type-id': 'article',
-			'book-type-id': 'book',
-			'course-type-id': 'course',
-		};
-		return typeMap[typeId] || 'article';
-	};
-
 	const convertMaterialForForm = (material: MaterialFromApi): MaterialData => {
-		const competencyIds = material.competencies?.map((c: any) => c.id) || [];
-		
 		return {
 			id: material.id,
 			name: material.name,
-			type: getTypeFromId(material.typeId),
-			competencyIds: competencyIds,
+			typeId: material.typeId,
 			url: material.link,
 			description: material.description || '',
-			status: material.status as any,
+			duration: material.duration,
 		};
 	};
 
@@ -306,19 +204,9 @@ const MaterialsAdminPage: React.FC = () => {
 		const fullMaterial = materials.find(m => m.id === materialFromTable.id);
 		if (fullMaterial) {
 			const converted = convertMaterialForForm(fullMaterial);
-			console.log('Editing material:', converted);
 			setEditingMaterial(converted);
-		} else {
-			setEditingMaterial({
-				id: materialFromTable.id,
-				name: materialFromTable.name,
-				type: materialFromTable.type || 'article',
-				competencyIds: materialFromTable.competencyIds || [],
-				url: materialFromTable.link || '',
-				description: materialFromTable.description || '',
-			});
+			setIsFormOpen(true);
 		}
-		setIsFormOpen(true);
 	};
 
 	const handleSubmitMaterial = async (material: MaterialData) => {
@@ -343,31 +231,19 @@ const MaterialsAdminPage: React.FC = () => {
 	useEffect(() => {
 		const loadData = async () => {
 			setIsLoading(true);
-			await Promise.all([fetchMaterials(), fetchCompetencies(), fetchMaterialTypes()]);
+			await Promise.all([fetchMaterials(), fetchMaterialTypes()]);
 			setIsLoading(false);
 		};
 		loadData();
 	}, []);
 
-	const competencyBlocks = competencies.reduce((acc, comp) => {
-		let block = acc.find(b => b.id === comp.blockId);
-		if (!block) {
-			block = { id: comp.blockId, name: comp.blockName, competencies: [] };
-			acc.push(block);
-		}
-		block.competencies.push({ id: comp.id, name: comp.name });
-		return acc;
-	}, [] as { id: string; name: string; competencies: { id: string; name: string }[] }[]);
-
 	// Преобразуем материалы для таблицы
 	const materialsForTable = materials.map(m => ({
 		id: m.id,
 		name: m.name,
-		type: m.type?.name || 'article',
-		competencies: m.competencies?.map(c => c.name) || [],
+		type: m.type?.name || 'unknown',
 		link: m.link,
 		duration: m.duration,
-		status: m.status,
 		createdAt: m.createdAt,
 	}));
 
@@ -427,7 +303,6 @@ const MaterialsAdminPage: React.FC = () => {
 						filterStatus={activeTab === 'moderation' ? 'moderation' : 'all'}
 						onMaterialEdit={handleEditMaterial}
 						onMaterialDelete={deleteMaterial}
-						onMaterialApprove={approveMaterial}
 					/>
 				)}
 			</div>
@@ -438,7 +313,7 @@ const MaterialsAdminPage: React.FC = () => {
 				onSubmit={handleSubmitMaterial}
 				initialData={editingMaterial}
 				mode={editingMaterial ? 'edit' : 'create'}
-				competencyBlocks={competencyBlocks}
+				materialTypes={materialTypes}
 			/>
 		</div>
 	);

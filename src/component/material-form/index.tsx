@@ -1,3 +1,4 @@
+// material-form.module.tsx
 import React, { useState, useEffect } from 'react';
 import styles from './material-form.module.scss';
 
@@ -7,26 +8,19 @@ interface MaterialFormProps {
 	onSubmit?: (material: MaterialData) => void;
 	initialData?: MaterialData;
 	mode?: 'create' | 'edit';
-	competencyBlocks?: CompetencyBlock[];
+	materialTypes?: MaterialType[];
 }
 
 export interface MaterialData {
 	id?: string;
 	name: string;
-	type: 'video' | 'article' | 'book' | 'course';
-	competencyIds: string[];
+	typeId: string;
 	url: string;
 	description?: string;
-	status?: 'published' | 'draft' | 'moderation';
+	duration?: number;
 }
 
-interface CompetencyBlock {
-	id: string;
-	name: string;
-	competencies: CompetencyItem[];
-}
-
-interface CompetencyItem {
+interface MaterialType {
 	id: string;
 	name: string;
 }
@@ -37,80 +31,25 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
 	onSubmit,
 	initialData,
 	mode = 'create',
-	competencyBlocks = [],
+	materialTypes = [],
 }) => {
 	const [formData, setFormData] = useState<MaterialData>(
 		initialData || {
 			name: '',
-			type: 'article',
-			competencyIds: [],
+			typeId: '',
 			url: '',
 			description: '',
+			duration: 0,
 		}
 	);
 
-	const [expandedBlocks, setExpandedBlocks] = useState<string[]>([]);
-	const [searchQuery, setSearchQuery] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
 		if (initialData) {
-			console.log('Setting form data from initialData:', initialData);
 			setFormData(initialData);
-			
-			// Автоматически раскрываем блоки, в которых есть выбранные компетенции
-			if (initialData.competencyIds && initialData.competencyIds.length > 0) {
-				const blocksToExpand = competencyBlocks
-					.filter(block => 
-						block.competencies.some(comp => 
-							initialData.competencyIds?.includes(comp.id)
-						)
-					)
-					.map(block => block.id);
-				setExpandedBlocks(blocksToExpand);
-			}
 		}
-	}, [initialData, competencyBlocks]);
-
-	// Фильтрация блоков и компетенций по поиску
-	const filteredBlocks = competencyBlocks
-		.map(block => {
-			const filteredCompetencies = block.competencies.filter(comp =>
-				comp.name.toLowerCase().includes(searchQuery.toLowerCase())
-			);
-			return { ...block, competencies: filteredCompetencies };
-		})
-		.filter(block => block.competencies.length > 0 || block.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-	const toggleBlock = (blockId: string) => {
-		setExpandedBlocks((prev) =>
-			prev.includes(blockId)
-				? prev.filter((id) => id !== blockId)
-				: [...prev, blockId]
-		);
-	};
-
-	const handleCompetencyToggle = (competencyId: string) => {
-		setFormData((prev) => ({
-			...prev,
-			competencyIds: prev.competencyIds.includes(competencyId)
-				? prev.competencyIds.filter((id) => id !== competencyId)
-				: [...prev.competencyIds, competencyId],
-		}));
-	};
-
-	const handleSelectAllInBlock = (blockId: string, competencyIds: string[]) => {
-		const allSelected = competencyIds.every((id) =>
-			formData.competencyIds.includes(id)
-		);
-
-		setFormData((prev) => ({
-			...prev,
-			competencyIds: allSelected
-				? prev.competencyIds.filter((id) => !competencyIds.includes(id))
-				: [...new Set([...prev.competencyIds, ...competencyIds])],
-		}));
-	};
+	}, [initialData]);
 
 	const validateForm = (): boolean => {
 		if (!formData.name.trim()) {
@@ -118,13 +57,13 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
 			return false;
 		}
 
-		if (!formData.url.trim()) {
-			alert('Введите ссылку на материал');
+		if (!formData.typeId) {
+			alert('Выберите тип материала');
 			return false;
 		}
 
-		if (formData.competencyIds.length === 0) {
-			alert('Выберите хотя бы одну компетенцию');
+		if (!formData.url.trim()) {
+			alert('Введите ссылку на материал');
 			return false;
 		}
 
@@ -147,7 +86,6 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
 		setIsSubmitting(true);
 		
 		try {
-			console.log('Submitting material:', formData);
 			await onSubmit?.(formData);
 			handleClose();
 		} catch (error) {
@@ -162,35 +100,13 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
 		if (mode === 'create') {
 			setFormData({
 				name: '',
-				type: 'article',
-				competencyIds: [],
+				typeId: '',
 				url: '',
 				description: '',
+				duration: 0,
 			});
-			setSearchQuery('');
-			setExpandedBlocks([]);
 		}
 		onClose();
-	};
-
-	const getTypeIcon = (type: string) => {
-		const icons = {
-			video: '🎥',
-			article: '📄',
-			book: '📚',
-			course: '🎓',
-		};
-		return icons[type as keyof typeof icons] || '📁';
-	};
-
-	const getTypeLabel = (type: string) => {
-		const labels = {
-			video: 'Видеокурс',
-			article: 'Статья',
-			book: 'Книга',
-			course: 'Курс',
-		};
-		return labels[type as keyof typeof labels] || type;
 	};
 
 	if (!isOpen) return null;
@@ -228,32 +144,47 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
 							<div className={styles.formGroup}>
 								<label>Тип материала *</label>
 								<select
-									value={formData.type}
+									value={formData.typeId}
 									onChange={(e) =>
-										setFormData({ ...formData, type: e.target.value as any })
+										setFormData({ ...formData, typeId: e.target.value })
 									}
 									required
 									disabled={isSubmitting}>
-									<option value='video'>🎥 Видеокурс</option>
-									<option value='article'>📄 Статья</option>
-									<option value='book'>📚 Книга</option>
-									<option value='course'>🎓 Курс</option>
+									<option value=''>Выберите тип</option>
+									{materialTypes.map(type => (
+										<option key={type.id} value={type.id}>
+											{type.name}
+										</option>
+									))}
 								</select>
 							</div>
 
 							<div className={styles.formGroup}>
-								<label>Ссылка на материал *</label>
+								<label>Длительность (минут)</label>
 								<input
-									type='url'
-									value={formData.url}
+									type='number'
+									value={formData.duration || 0}
 									onChange={(e) =>
-										setFormData({ ...formData, url: e.target.value })
+										setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })
 									}
-									required
-									placeholder='https://...'
+									min={0}
 									disabled={isSubmitting}
 								/>
 							</div>
+						</div>
+
+						<div className={styles.formGroup}>
+							<label>Ссылка на материал *</label>
+							<input
+								type='url'
+								value={formData.url}
+								onChange={(e) =>
+									setFormData({ ...formData, url: e.target.value })
+								}
+								required
+								placeholder='https://...'
+								disabled={isSubmitting}
+							/>
 						</div>
 
 						<div className={styles.formGroup}>
@@ -263,111 +194,10 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
 								onChange={(e) =>
 									setFormData({ ...formData, description: e.target.value })
 								}
-								rows={3}
+								rows={4}
 								placeholder='Краткое описание материала'
 								disabled={isSubmitting}
 							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label>Привязка к компетенциям *</label>
-							<p className={styles.hint}>
-								Выберите компетенции, к которым относится этот материал
-							</p>
-
-							{/* Поиск компетенций */}
-							<div className={styles.searchWrapper}>
-								<input
-									type='text'
-									placeholder='Поиск по названию компетенции...'
-									value={searchQuery}
-									onChange={(e) => setSearchQuery(e.target.value)}
-									className={styles.searchInput}
-									disabled={isSubmitting}
-								/>
-								<span className={styles.searchIcon}>🔍</span>
-							</div>
-
-							<div className={styles.competenciesTree}>
-								{filteredBlocks.length > 0 ? (
-									filteredBlocks.map((block) => (
-										<div key={block.id} className={styles.blockItem}>
-											<div
-												className={styles.blockHeader}
-												onClick={() => toggleBlock(block.id)}>
-												<span className={styles.expandIcon}>
-													{expandedBlocks.includes(block.id) ? '▼' : '▶'}
-												</span>
-												<span className={styles.blockName}>{block.name}</span>
-												<span className={styles.blockCount}>
-													({block.competencies.length})
-												</span>
-												<button
-													type='button'
-													className={styles.selectAllBtn}
-													onClick={(e) => {
-														e.stopPropagation();
-														handleSelectAllInBlock(
-															block.id,
-															block.competencies.map((c) => c.id)
-														);
-													}}
-													disabled={isSubmitting}>
-													{block.competencies.every((c) =>
-														formData.competencyIds.includes(c.id)
-													)
-														? 'Снять все'
-														: 'Выбрать все'}
-												</button>
-											</div>
-
-											{(expandedBlocks.includes(block.id) || searchQuery) && (
-												<div className={styles.competenciesList}>
-													{block.competencies.map((comp) => (
-														<label
-															key={comp.id}
-															className={styles.competencyItem}>
-															<input
-																type='checkbox'
-																checked={formData.competencyIds.includes(comp.id)}
-																onChange={() => handleCompetencyToggle(comp.id)}
-																disabled={isSubmitting}
-															/>
-															<span className={styles.competencyName}>
-																{comp.name}
-															</span>
-														</label>
-													))}
-												</div>
-											)}
-										</div>
-									))
-								) : (
-									<div className={styles.emptyCompetencies}>
-										<p>Компетенции не найдены</p>
-										{searchQuery && (
-											<p className={styles.searchHint}>
-												Попробуйте изменить поисковый запрос
-											</p>
-										)}
-									</div>
-								)}
-							</div>
-
-							<div className={styles.selectedCount}>
-								Выбрано компетенций:{' '}
-								<strong>{formData.competencyIds.length}</strong>
-							</div>
-						</div>
-
-						{/* Превью выбранного типа */}
-						<div className={styles.typePreview}>
-							<span className={styles.previewIcon}>
-								{getTypeIcon(formData.type)}
-							</span>
-							<span className={styles.previewText}>
-								{getTypeLabel(formData.type)}
-							</span>
 						</div>
 					</form>
 				</div>

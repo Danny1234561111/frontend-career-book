@@ -5,13 +5,14 @@ interface Competency {
 	id: string;
 	name: string;
 	type: string;
-	hierarchyId: string;
+	hierarchyId?: string;
 	hierarchy?: { id: string; name: string };
 	description: string;
 	text?: string;
 	defenseTasks?: string;
 	admissionCriteria?: string;
 	proficiencyLevels?: Array<{ value: number; name: string; description?: string }>;
+	level?: number;
 }
 
 interface CompetenciesMatrixProps {
@@ -36,7 +37,6 @@ const CompetenciesMatrix: React.FC<CompetenciesMatrixProps> = ({
 	const [selectedBlock, setSelectedBlock] = useState<string>('all');
 	const [expandedCompetency, setExpandedCompetency] = useState<string | null>(null);
 
-	// Получаем уникальные блоки из переданных данных
 	const blocks = ['all', ...competencyBlocks.map(b => b.name)];
 
 	const getLevelLabel = (level: number): string => {
@@ -47,16 +47,6 @@ const CompetenciesMatrix: React.FC<CompetenciesMatrixProps> = ({
 	const getLevelClass = (level: number): string => {
 		const classes = ['', styles.level1, styles.level2, styles.level3];
 		return classes[level] || '';
-	};
-
-	const getCompetencyLevels = (comp: Competency) => {
-		const levels: { [key: number]: string } = {};
-		if (comp.proficiencyLevels) {
-			comp.proficiencyLevels.forEach(level => {
-				levels[level.value] = level.description || '';
-			});
-		}
-		return levels;
 	};
 
 	const filteredCompetencies = competencies.filter(
@@ -71,8 +61,6 @@ const CompetenciesMatrix: React.FC<CompetenciesMatrixProps> = ({
 		}
 		onViewDetails?.(competency);
 	};
-
-	const levels = getCompetencyLevels(filteredCompetencies[0] || {} as Competency);
 
 	return (
 		<div className={styles.matrix}>
@@ -97,13 +85,14 @@ const CompetenciesMatrix: React.FC<CompetenciesMatrixProps> = ({
 				<div className={`${styles.row} ${styles.headerRow}`}>
 					<div className={styles.cell}>Компетенция</div>
 					<div className={styles.cell}>Блок</div>
+					<div className={styles.cell}>Уровень</div>
 					<div className={styles.cell}>Описание</div>
 					{editable && <div className={styles.cell}>Действия</div>}
 				</div>
 
 				{filteredCompetencies.map((comp) => {
 					const isExpanded = expandedCompetency === comp.id;
-					const compLevels = getCompetencyLevels(comp);
+					const level = comp.level || 0;
 
 					return (
 						<React.Fragment key={comp.id}>
@@ -118,6 +107,11 @@ const CompetenciesMatrix: React.FC<CompetenciesMatrixProps> = ({
 								<div className={styles.cell}>
 									<span className={styles.blockBadge}>
 										{comp.hierarchy?.name || 'Без блока'}
+									</span>
+								</div>
+								<div className={styles.cell}>
+									<span className={`${styles.levelBadge} ${getLevelClass(level)}`}>
+										{getLevelLabel(level)}
 									</span>
 								</div>
 								<div className={styles.cell}>
@@ -159,27 +153,6 @@ const CompetenciesMatrix: React.FC<CompetenciesMatrixProps> = ({
 											<h5>Полное описание</h5>
 											<p>{comp.description || 'Нет описания'}</p>
 										</div>
-
-										{Object.keys(compLevels).length > 0 && (
-											<div className={styles.detailSection}>
-												<h5>Уровни владения</h5>
-												<div className={styles.levelsList}>
-													{[1, 2, 3].map(level => {
-														if (compLevels[level]) {
-															return (
-																<div key={level} className={styles.levelItem}>
-																	<span className={`${styles.levelTag} ${getLevelClass(level)}`}>
-																		Уровень {level} - {getLevelLabel(level)}
-																	</span>
-																	<p>{compLevels[level]}</p>
-																</div>
-															);
-														}
-														return null;
-													})}
-												</div>
-											</div>
-										)}
 
 										{comp.defenseTasks && (
 											<div className={styles.detailSection}>
