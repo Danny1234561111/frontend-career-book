@@ -1,14 +1,18 @@
-// competency-form.module.tsx
+// competency-form.module.tsx (исправленная версия)
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './competency-form.module.scss';
 
 interface CompetencyData {
 	id?: string;
 	name: string;
+	groupId: string;
+	groupName: string;
 	blockId: string;
 	blockName: string;
+	categoryId?: string;
+	categoryName?: string;
 	description: string;
-	level: 1 | 2 | 3;
+	level: number;
 	defenseTasks?: string;
 	acceptanceCriteria?: string;
 	article?: string;
@@ -27,7 +31,7 @@ interface CompetencyFormProps {
 	levels?: Array<{ id: string; name: string; value: number }>;
 }
 
-const levelLabels = {
+const levelLabels: { [key: number]: string } = {
 	1: '1 - Базовые знания',
 	2: '2 - Профессионал',
 	3: '3 - Эксперт',
@@ -46,8 +50,12 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 }) => {
 	const [formData, setFormData] = useState<CompetencyData>({
 		name: '',
+		groupId: '',
+		groupName: '',
 		blockId: '',
 		blockName: '',
+		categoryId: '',
+		categoryName: '',
 		description: '',
 		level: 1,
 		defenseTasks: '',
@@ -60,74 +68,153 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	
-	// Используем ref для отслеживания предыдущего initialData
-	const prevInitialDataRef = useRef<CompetencyData | null | undefined>(null);
-	const isFirstOpenRef = useRef(true);
+	// Состояния для каскадных селектов
+	const [selectedBlockId, setSelectedBlockId] = useState<string>('');
+	const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+	const [selectedGroupId, setSelectedGroupId] = useState<string>('');
+	
+	// Получаем выбранный блок
+	const selectedBlock = competencyBlocks.find(b => b.id === selectedBlockId);
+	// Получаем выбранную категорию
+	const selectedCategory = selectedBlock?.categories?.find(c => c.id === selectedCategoryId);
+	// Получаем доступные группы
+	const availableGroups = selectedCategory?.groups || [];
 
-	// Обновляем форму только при изменении initialData (когда открывается новая компетенция)
+	const prevInitialDataRef = useRef<CompetencyData | null | undefined>(null);
+	const prevSelectedMaterialIdsRef = useRef<string[]>([]);
+
+	// Обновляем форму при изменении initialData или selectedMaterialIds
 	useEffect(() => {
-		// Проверяем, действительно ли изменился initialData
 		const hasChanged = initialData?.id !== prevInitialDataRef.current?.id;
+		const materialsChanged = JSON.stringify(selectedMaterialIds) !== JSON.stringify(prevSelectedMaterialIdsRef.current);
 		
-		if (initialData && hasChanged) {
-			console.log('Form received new initialData:', initialData);
-			setFormData(initialData);
-			
-			if (initialData.materialIds && initialData.materialIds.length > 0) {
-				setExpandedMaterials(true);
-			}
-			prevInitialDataRef.current = initialData;
-		} else if (!initialData && mode === 'create' && isFirstOpenRef.current) {
-			// При создании новой компетенции, если переданы выбранные материалы
-			if (selectedMaterialIds.length > 0) {
+		// Если открыт режим редактирования и есть initialData
+		if (mode === 'edit' && initialData) {
+			if (hasChanged) {
+				console.log('Edit mode - new initialData:', initialData);
+				// Используем materialIds из initialData (они должны быть правильными)
+				const materialIds = initialData.materialIds || [];
+				
+				setFormData({
+					...initialData,
+					materialIds: materialIds,
+				});
+				setSelectedBlockId(initialData.blockId);
+				setSelectedCategoryId(initialData.categoryId || '');
+				setSelectedGroupId(initialData.groupId);
+				
+				if (materialIds.length > 0) {
+					setExpandedMaterials(true);
+				}
+				prevInitialDataRef.current = initialData;
+				prevSelectedMaterialIdsRef.current = materialIds;
+			} else if (materialsChanged) {
+				// Если изменились только материалы при том же initialData
+				console.log('Edit mode - materials changed:', selectedMaterialIds);
 				setFormData(prev => ({
 					...prev,
 					materialIds: selectedMaterialIds,
 				}));
-				setExpandedMaterials(true);
+				if (selectedMaterialIds.length > 0) {
+					setExpandedMaterials(true);
+				}
+				prevSelectedMaterialIdsRef.current = selectedMaterialIds;
 			}
-			isFirstOpenRef.current = false;
+		}
+		// Если режим создания
+		else if (mode === 'create') {
+			if (selectedMaterialIds.length > 0 && JSON.stringify(selectedMaterialIds) !== JSON.stringify(prevSelectedMaterialIdsRef.current)) {
+				console.log('Create mode - selected materials:', selectedMaterialIds);
+				setFormData(prev => ({
+					...prev,
+					materialIds: selectedMaterialIds,
+				}));
+				if (selectedMaterialIds.length > 0) {
+					setExpandedMaterials(true);
+				}
+				prevSelectedMaterialIdsRef.current = selectedMaterialIds;
+			}
 		}
 	}, [initialData, selectedMaterialIds, mode]);
 
 	// Сбрасываем форму при закрытии
 	useEffect(() => {
 		if (!isOpen) {
-			// Не сбрасываем сразу, чтобы избежать моргания
 			const timeout = setTimeout(() => {
-				if (mode === 'create') {
-					setFormData({
-						name: '',
-						blockId: '',
-						blockName: '',
-						description: '',
-						level: 1,
-						defenseTasks: '',
-						acceptanceCriteria: '',
-						article: '',
-						materialIds: [],
-					});
-					setSearchQuery('');
-					setExpandedMaterials(false);
-				}
-				isFirstOpenRef.current = true;
+				setFormData({
+					name: '',
+					groupId: '',
+					groupName: '',
+					blockId: '',
+					blockName: '',
+					categoryId: '',
+					categoryName: '',
+					description: '',
+					level: 1,
+					defenseTasks: '',
+					acceptanceCriteria: '',
+					article: '',
+					materialIds: [],
+				});
+				setSelectedBlockId('');
+				setSelectedCategoryId('');
+				setSelectedGroupId('');
+				setSearchQuery('');
+				setExpandedMaterials(false);
 				prevInitialDataRef.current = null;
+				prevSelectedMaterialIdsRef.current = [];
 			}, 300);
 			return () => clearTimeout(timeout);
 		}
-	}, [isOpen, mode]);
+	}, [isOpen]);
 
+	// Обработчик выбора блока
 	const handleBlockChange = (blockId: string) => {
-		const selectedBlock = competencyBlocks.find((b) => b.id === blockId);
-		setFormData((prev) => ({
+		const block = competencyBlocks.find(b => b.id === blockId);
+		setSelectedBlockId(blockId);
+		setSelectedCategoryId('');
+		setSelectedGroupId('');
+		
+		setFormData(prev => ({
 			...prev,
-			blockId,
-			blockName: selectedBlock?.name || '',
+			blockId: blockId,
+			blockName: block?.name || '',
+			categoryId: '',
+			categoryName: '',
+			groupId: '',
+			groupName: '',
+		}));
+	};
+
+	// Обработчик выбора категории
+	const handleCategoryChange = (categoryId: string) => {
+		const category = selectedBlock?.categories?.find(c => c.id === categoryId);
+		setSelectedCategoryId(categoryId);
+		setSelectedGroupId('');
+		
+		setFormData(prev => ({
+			...prev,
+			categoryId: categoryId,
+			categoryName: category?.name || '',
+			groupId: '',
+			groupName: '',
+		}));
+	};
+
+	// Обработчик выбора группы
+	const handleGroupChange = (groupId: string) => {
+		const group = availableGroups.find(g => g.id === groupId);
+		setSelectedGroupId(groupId);
+		
+		setFormData(prev => ({
+			...prev,
+			groupId: groupId,
+			groupName: group?.name || '',
 		}));
 	};
 
 	const handleMaterialToggle = (materialId: string) => {
-		setFormData((prev) => ({
+		setFormData(prev => ({
 			...prev,
 			materialIds: prev.materialIds?.includes(materialId)
 				? prev.materialIds.filter((id) => id !== materialId)
@@ -147,8 +234,8 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 			return;
 		}
 		
-		if (!formData.blockId) {
-			alert('Выберите блок компетенций');
+		if (!formData.groupId) {
+			alert('Выберите группу компетенций');
 			return;
 		}
 		
@@ -197,46 +284,83 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 									setFormData({ ...formData, name: e.target.value })
 								}
 								required
-								placeholder='Например: Работа со средой разработки 1С 8.2 и 8.3'
+								placeholder='Введите название компетенции'
 								disabled={isSubmitting}
 							/>
 						</div>
 
-						<div className={styles.formRow}>
+						{/* Каскадные селекты для выбора иерархии */}
+						<div className={styles.formGroup}>
+							<label>Блок компетенций *</label>
+							<select
+								value={selectedBlockId}
+								onChange={(e) => handleBlockChange(e.target.value)}
+								required
+								disabled={isSubmitting}>
+								<option value=''>Выберите блок</option>
+								{competencyBlocks.map((block) => (
+									<option key={block.id} value={block.id}>
+										{block.name}
+									</option>
+								))}
+							</select>
+						</div>
+
+						{selectedBlock && selectedBlock.categories && selectedBlock.categories.length > 0 && (
 							<div className={styles.formGroup}>
-								<label>Блок компетенций *</label>
+								<label>Категория *</label>
 								<select
-									value={formData.blockId}
-									onChange={(e) => handleBlockChange(e.target.value)}
+									value={selectedCategoryId}
+									onChange={(e) => handleCategoryChange(e.target.value)}
 									required
 									disabled={isSubmitting}>
-									<option value=''>Выберите блок</option>
-									{competencyBlocks.map((block) => (
-										<option key={block.id} value={block.id}>
-											{block.name}
+									<option value=''>Выберите категорию</option>
+									{selectedBlock.categories.map((category) => (
+										<option key={category.id} value={category.id}>
+											{category.name}
 										</option>
 									))}
 								</select>
 							</div>
+						)}
 
+						{availableGroups.length > 0 && (
 							<div className={styles.formGroup}>
-								<label>Уровень компетенции *</label>
+								<label>Группа *</label>
 								<select
-									value={formData.level}
-									onChange={(e) =>
-										setFormData({
-											...formData,
-											level: parseInt(e.target.value) as 1 | 2 | 3,
-										})
-									}
+									value={selectedGroupId}
+									onChange={(e) => handleGroupChange(e.target.value)}
 									required
-									className={styles.levelSelect}
 									disabled={isSubmitting}>
-									<option value='1'>{levelLabels[1]}</option>
-									<option value='2'>{levelLabels[2]}</option>
-									<option value='3'>{levelLabels[3]}</option>
+									<option value=''>Выберите группу</option>
+									{availableGroups.map((group) => (
+										<option key={group.id} value={group.id}>
+											{group.name}
+										</option>
+									))}
 								</select>
 							</div>
+						)}
+
+						<div className={styles.formGroup}>
+							<label>Уровень компетенции *</label>
+							<select
+								value={formData.level}
+								onChange={(e) =>
+									setFormData({
+										...formData,
+										level: parseInt(e.target.value),
+									})
+								}
+								required
+								className={styles.levelSelect}
+								disabled={isSubmitting}>
+								{Object.entries(levelLabels).map(([value, label]) => (
+									<option key={value} value={value}>
+										{label}
+									</option>
+								))}
+							</select>
 						</div>
 
 						<div className={styles.formGroup}>
@@ -350,9 +474,8 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 							</div>
 						)}
 						
-						{/* Подсказка о необязательности материалов */}
 						<div className={styles.hint}>
-							💡 <strong>Примечание:</strong> Привязка материалов к компетенции необязательна. Вы можете создать компетенцию без материалов и добавить их позже через управление материалами.
+							💡 <strong>Примечание:</strong> Привязка материалов к компетенции необязательна.
 						</div>
 					</form>
 				</div>

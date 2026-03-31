@@ -181,3 +181,81 @@
 		}
 	}
 }
+// Добавьте в materials.module.scss
+
+.successMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $success;
+	font-size: $font-md;
+	background: $success-light;
+	border-radius: $border-radius-md;
+}
+
+.errorMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+}
+
+.tabs {
+	display: flex;
+	gap: $spacing-md;
+	margin-bottom: $spacing-xl;
+	border-bottom: 1px solid $border-color;
+}
+
+.tab {
+	padding: $spacing-md $spacing-xl;
+	color: $text-secondary;
+	font-size: $font-md;
+	font-weight: 500;
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	cursor: pointer;
+	transition: all 0.3s;
+
+	&:hover {
+		color: $primary;
+	}
+
+	&.activeTab {
+		color: $primary;
+		border-bottom-color: $primary;
+	}
+}
+
+.cardHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: $spacing-md;
+	margin-bottom: $spacing-md;
+
+	h3 {
+		flex: 1;
+		margin: 0;
+	}
+}
+
+.addBtn {
+	padding: $spacing-xs $spacing-md;
+	color: $white;
+	font-size: $font-sm;
+	font-weight: 500;
+	background: $success;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.3s;
+	white-space: nowrap;
+
+	&:hover {
+		background: darken($success, 10%);
+		transform: translateY(-1px);
+	}
+}

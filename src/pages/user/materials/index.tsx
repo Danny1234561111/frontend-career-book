@@ -2,19 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from './materials.module.scss';
 
-interface EducationalMaterialCompetency {
+interface MaterialTask {
 	id: string;
-	createdAt: string;
-	lastModified: string;
-	deletedAt: string | null;
-	competencyId: string;
-	competency: {
+	material: {
 		id: string;
 		name: string;
-		type: string;
-		hierarchy: { id: string; name: string };
-		description: string;
-	} | null;
+		typeId: string;
+		type: { id: string; name: string } | null;
+		link: string;
+		duration: number;
+	};
+	status: number;
+	createdAt: string;
+	lastModified: string;
+}
+
+interface EducationalMaterialCompetency {
+	id: string;
 	educationalMaterialId: string;
 	educationalMaterial: {
 		id: string;
@@ -23,8 +27,8 @@ interface EducationalMaterialCompetency {
 		type: { id: string; name: string } | null;
 		link: string;
 		duration: number;
-	} | null;
-	targetLevelId: string;
+	};
+	competencyId: string;
 	targetLevel: {
 		id: string;
 		name: string;
@@ -43,25 +47,34 @@ interface MaterialForDisplay {
 	type: string;
 	duration: number;
 	link: string;
-	competencyId: string;
-	competencyName: string;
-	targetLevel: string;
+	competencies: { id: string; name: string; targetLevel: string }[];
+	targetLevel?: string;
+	status?: number;
+	materialTaskId?: string;
+	isAdded?: boolean;
 }
 
 const MaterialsPage = () => {
 	const location = useLocation();
+	const accessToken = localStorage.getItem('accessToken');
+	
+	// Получаем фильтр из location.state при переходе
+	const initialCompetencyFilter = (location.state as any)?.filterByCompetency || 'all';
 	
 	const [typeFilter, setTypeFilter] = useState<string>('all');
-	const [competencyFilter, setCompetencyFilter] = useState<string>('all');
+	const [competencyFilter, setCompetencyFilter] = useState<string>(initialCompetencyFilter);
 	
-	const [materials, setMaterials] = useState<MaterialForDisplay[]>([]);
+	const [myMaterials, setMyMaterials] = useState<MaterialForDisplay[]>([]);
+	const [availableMaterials, setAvailableMaterials] = useState<MaterialForDisplay[]>([]);
 	const [types, setTypes] = useState<string[]>(['all']);
 	const [competencies, setCompetencies] = useState<string[]>(['all']);
 	
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [showAvailable, setShowAvailable] = useState(false);
 
-	// Получение типов материалов из API и возврат мапы
+	// Получение типов материалов
 	const fetchMaterialTypes = async (): Promise<Map<string, string>> => {
 		try {
 			const token = localStorage.getItem('accessToken');
@@ -78,14 +91,11 @@ const MaterialsPage = () => {
 			if (response.ok) {
 				const data: MaterialType[] = await response.json();
 				const typeMap = new Map<string, string>();
-				console.log('📦 Raw material types from API:', data);
 				data.forEach(type => {
 					if (type && type.id && type.name) {
 						typeMap.set(type.id, type.name);
-						console.log(`  ✅ Type mapping: ${type.id} -> ${type.name}`);
 					}
 				});
-				console.log('📦 Material types map:', Array.from(typeMap.entries()));
 				return typeMap;
 			}
 			return new Map();
@@ -95,54 +105,13 @@ const MaterialsPage = () => {
 		}
 	};
 
-	// Получение всех компетенций для фильтра
-	const fetchAllCompetencies = async () => {
-		try {
-			const token = localStorage.getItem('accessToken');
-			if (!token) return;
-
-			const response = await fetch('http://localhost:5217/api/competencies', {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${token}`,
-					'accept': 'text/plain',
-				},
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				const compNames: string[] = [];
-				const compMap: Map<string, string> = new Map();
-				
-				if (data.blocks && Array.isArray(data.blocks)) {
-					data.blocks.forEach((block: any) => {
-						block.categories?.forEach((category: any) => {
-							category.groups?.forEach((group: any) => {
-								group.competencies?.forEach((comp: any) => {
-									if (comp && comp.name) {
-										compNames.push(comp.name);
-										compMap.set(comp.name, comp.id);
-									}
-								});
-							});
-						});
-					});
-				}
-				setCompetencies(['all', ...compNames]);
-				localStorage.setItem('competencyNameToId', JSON.stringify(Object.fromEntries(compMap)));
-			}
-		} catch (error) {
-			console.error('Error fetching competencies:', error);
-		}
-	};
-
-	// Получение материалов по компетенции
-	const fetchMaterialsByCompetency = async (competencyId: string, typeMap: Map<string, string>) => {
+	// Получение материалов пользователя (из /api/material-task)
+	const fetchMyMaterials = async (typeMap: Map<string, string>) => {
 		try {
 			const token = localStorage.getItem('accessToken');
 			if (!token) return [];
 
-			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}`, {
+			const response = await fetch('http://localhost:5217/api/material-task?withDeleted=false', {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
@@ -151,60 +120,49 @@ const MaterialsPage = () => {
 			});
 
 			if (response.ok) {
-				const data: EducationalMaterialCompetency[] = await response.json();
-				console.log(`📦 Materials for competency ${competencyId}:`, data);
+				const data: MaterialTask[] = await response.json();
+				console.log('📦 My materials from /api/material-task:', data);
 				
-				// Сразу преобразуем материалы с использованием переданной мапы типов
-				const transformed: MaterialForDisplay[] = [];
+				const materials: MaterialForDisplay[] = [];
 				
-				data.forEach(item => {
-					if (item && item.educationalMaterial) {
-						const material = item.educationalMaterial;
-						
+				for (const item of data) {
+					if (item.material) {
 						let materialType = 'Без типа';
-						
-						if (material.typeId && typeMap.has(material.typeId)) {
-							materialType = typeMap.get(material.typeId) || 'Без типа';
-							console.log(`  ✅ Found type by ID: ${material.typeId} -> ${materialType}`);
-						} else if (material.type && material.type.name) {
-							materialType = material.type.name;
-							console.log(`  ✅ Found type by name: ${materialType}`);
-						} else {
-							console.log(`  ❌ Type ID not found: ${material.typeId}`);
+						if (item.material.typeId && typeMap.has(item.material.typeId)) {
+							materialType = typeMap.get(item.material.typeId) || 'Без типа';
+						} else if (item.material.type?.name) {
+							materialType = item.material.type.name;
 						}
 						
-						transformed.push({
-							id: item.id,
-							name: material.name || 'Без названия',
+						materials.push({
+							id: item.material.id,
+							name: item.material.name || 'Без названия',
 							type: materialType,
-							duration: material.duration || 0,
-							link: material.link || '',
-							competencyId: competencyId,
-							competencyName: '',
-							targetLevel: item.targetLevel?.name || 'Не указан',
+							duration: item.material.duration || 0,
+							link: item.material.link || '',
+							competencies: [], // будет заполнено позже
+							status: item.status,
+							materialTaskId: item.id,
+							isAdded: true,
 						});
 					}
-				});
-				
-				return transformed;
+				}
+				return materials;
 			}
 			return [];
 		} catch (error) {
-			console.error('Error fetching materials by competency:', error);
+			console.error('Error fetching my materials:', error);
 			return [];
 		}
 	};
 
-	// Получение всех материалов по всем компетенциям
-	const fetchAllMaterials = async (typeMap: Map<string, string>) => {
+	// Получение всех материалов из компетенций пользователя
+	const fetchAvailableMaterialsFromCompetencies = async (typeMap: Map<string, string>) => {
 		try {
 			const token = localStorage.getItem('accessToken');
-			if (!token) {
-				setError('Нет токена доступа');
-				setIsLoading(false);
-				return;
-			}
+			if (!token) return { materials: [], competencyMap: new Map(), materialCompetencies: new Map() };
 
+			// Сначала получаем компетенции пользователя
 			const competenciesResponse = await fetch('http://localhost:5217/api/competencies/own', {
 				method: 'GET',
 				headers: {
@@ -213,88 +171,221 @@ const MaterialsPage = () => {
 				},
 			});
 
-			if (competenciesResponse.ok) {
-				const competenciesData = await competenciesResponse.json();
-				const userCompetencyIds: string[] = [];
-				const userCompetencyNames: Map<string, string> = new Map();
-				
-				if (competenciesData.blocks && Array.isArray(competenciesData.blocks)) {
-					competenciesData.blocks.forEach((block: any) => {
-						block.categories?.forEach((category: any) => {
-							category.groups?.forEach((group: any) => {
-								group.competencies?.forEach((comp: any) => {
-									if (comp && comp.id) {
-										userCompetencyIds.push(comp.id);
-										userCompetencyNames.set(comp.id, comp.name);
-									}
-								});
+			if (!competenciesResponse.ok) return { materials: [], competencyMap: new Map(), materialCompetencies: new Map() };
+
+			const competenciesData = await competenciesResponse.json();
+			const userCompetencyIds: string[] = [];
+			const userCompetencyNames: Map<string, string> = new Map();
+			
+			if (competenciesData.blocks && Array.isArray(competenciesData.blocks)) {
+				competenciesData.blocks.forEach((block: any) => {
+					block.categories?.forEach((category: any) => {
+						category.groups?.forEach((group: any) => {
+							group.competencies?.forEach((comp: any) => {
+								if (comp && comp.id) {
+									userCompetencyIds.push(comp.id);
+									userCompetencyNames.set(comp.id, comp.name);
+								}
 							});
 						});
 					});
-				}
+				});
+			}
 
-				console.log('📦 User competency IDs:', userCompetencyIds);
-				console.log('📦 Material types map for lookup:', Array.from(typeMap.entries()));
+			console.log('📦 User competencies:', userCompetencyIds);
 
-				const allMaterials: MaterialForDisplay[] = [];
-				const typeSet = new Set<string>();
-				const competencySet = new Set<string>();
+			// Получаем материалы по каждой компетенции
+			const materialsMap = new Map<string, MaterialForDisplay>();
+			
+			for (const competencyId of userCompetencyIds) {
+				const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}`, {
+					method: 'GET',
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'accept': 'text/plain',
+					},
+				});
 
-				for (const competencyId of userCompetencyIds) {
-					const materialsData = await fetchMaterialsByCompetency(competencyId, typeMap);
+				if (response.ok) {
+					const data: EducationalMaterialCompetency[] = await response.json();
 					const competencyName = userCompetencyNames.get(competencyId) || 'Неизвестная компетенция';
-					competencySet.add(competencyName);
 					
-					materialsData.forEach(material => {
-						material.competencyName = competencyName;
-						typeSet.add(material.type);
-						allMaterials.push(material);
+					data.forEach(item => {
+						if (item && item.educationalMaterial) {
+							const materialId = item.educationalMaterial.id;
+							
+							// Если материала еще нет в мапе, создаем его
+							if (!materialsMap.has(materialId)) {
+								let materialType = 'Без типа';
+								if (item.educationalMaterial.typeId && typeMap.has(item.educationalMaterial.typeId)) {
+									materialType = typeMap.get(item.educationalMaterial.typeId) || 'Без типа';
+								} else if (item.educationalMaterial.type?.name) {
+									materialType = item.educationalMaterial.type.name;
+								}
+								
+								materialsMap.set(materialId, {
+									id: materialId,
+									name: item.educationalMaterial.name || 'Без названия',
+									type: materialType,
+									duration: item.educationalMaterial.duration || 0,
+									link: item.educationalMaterial.link || '',
+									competencies: [],
+								});
+							}
+							
+							// Добавляем компетенцию к материалу
+							const material = materialsMap.get(materialId)!;
+							const targetLevelName = item.targetLevel?.name || 'Не указан';
+							
+							// Проверяем, нет ли уже такой компетенции
+							const hasCompetency = material.competencies.some(c => c.id === competencyId);
+							if (!hasCompetency) {
+								material.competencies.push({
+									id: competencyId,
+									name: competencyName,
+									targetLevel: targetLevelName,
+								});
+							}
+						}
 					});
 				}
-
-				setMaterials(allMaterials);
-				setTypes(['all', ...Array.from(typeSet)]);
-				setCompetencies(['all', ...Array.from(competencySet)]);
-				console.log('📦 All materials with types:', allMaterials);
 			}
+			
+			const allMaterials = Array.from(materialsMap.values());
+			console.log('📦 All materials with competencies:', allMaterials);
+			
+			return { 
+				materials: allMaterials, 
+				competencyMap: userCompetencyNames,
+			};
 		} catch (error) {
-			console.error('Error fetching materials:', error);
-			setError('Не удалось загрузить материалы');
-		} finally {
-			setIsLoading(false);
+			console.error('Error fetching available materials:', error);
+			return { materials: [], competencyMap: new Map() };
 		}
 	};
 
-	useEffect(() => {
-		const loadData = async () => {
-			setIsLoading(true);
-			
-			// Сначала загружаем типы материалов и получаем мапу
-			const typeMap = await fetchMaterialTypes();
-			
-			// Загружаем компетенции для фильтра
-			await fetchAllCompetencies();
-			
-			// Загружаем материалы, передавая мапу типов
-			await fetchAllMaterials(typeMap);
-			
-			setIsLoading(false);
-		};
-		loadData();
-	}, []);
+	// Добавление материала
+	const addMaterial = async (materialId: string, materialName: string) => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) {
+				setError('Нет токена доступа');
+				return;
+			}
 
-	useEffect(() => {
-		if (location.state?.filterByCompetency) {
-			console.log('Filter by competency:', location.state.filterByCompetency);
-			setCompetencyFilter(location.state.filterByCompetency);
+			const response = await fetch('http://localhost:5217/api/material-task', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					materialId: materialId,
+				}),
+			});
+
+			if (response.ok || response.status === 201) {
+				setSuccessMessage(`Материал "${materialName}" добавлен к вашим материалам`);
+				setTimeout(() => setSuccessMessage(null), 3000);
+				await loadData();
+			} else {
+				const errorText = await response.text();
+				setError(`Ошибка добавления: ${errorText}`);
+				setTimeout(() => setError(null), 3000);
+			}
+		} catch (error) {
+			console.error('Error adding material:', error);
+			setError('Ошибка сети при добавлении материала');
+			setTimeout(() => setError(null), 3000);
 		}
-	}, [location.state]);
+	};
 
-	const filteredMaterials = materials.filter((material) => {
-		if (typeFilter !== 'all' && material.type !== typeFilter) return false;
-		if (competencyFilter !== 'all' && material.competencyName !== competencyFilter) return false;
-		return true;
-	});
+	// Загрузка всех данных
+	const loadData = async () => {
+		setIsLoading(true);
+		
+		const typeMap = await fetchMaterialTypes();
+		
+		// Получаем мои материалы
+		const myMaterialsData = await fetchMyMaterials(typeMap);
+		
+		// Получаем все материалы из компетенций
+		const { materials: allAvailableMaterials } = await fetchAvailableMaterialsFromCompetencies(typeMap);
+		
+		// Находим ID материалов, которые уже есть у пользователя
+		const myMaterialIds = new Set(myMaterialsData.map(m => m.id));
+		
+		// Разделяем на доступные и уже добавленные
+		const availableFiltered = allAvailableMaterials.filter(m => !myMaterialIds.has(m.id));
+		
+		// Добавляем информацию о статусе в мои материалы
+		const myMaterialsWithComp = myMaterialsData.map(m => {
+			const fullMaterial = allAvailableMaterials.find(am => am.id === m.id);
+			return {
+				...m,
+				competencies: fullMaterial?.competencies || [],
+			};
+		});
+		
+		setMyMaterials(myMaterialsWithComp);
+		setAvailableMaterials(availableFiltered);
+		
+		// Формируем списки для фильтров
+		const typeSet = new Set<string>();
+		const competencySet = new Set<string>();
+		
+		[...myMaterialsWithComp, ...availableFiltered].forEach(m => {
+			typeSet.add(m.type);
+			m.competencies.forEach(comp => {
+				competencySet.add(comp.name);
+			});
+		});
+		
+		setTypes(['all', ...Array.from(typeSet)]);
+		setCompetencies(['all', ...Array.from(competencySet)]);
+		
+		setIsLoading(false);
+	};
+
+	useEffect(() => {
+		if (accessToken) {
+			loadData();
+		}
+	}, [accessToken]);
+
+	// Фильтрация материалов (учитываем, что материал может относиться к нескольким компетенциям)
+	const filterMaterials = (materials: MaterialForDisplay[]) => {
+		return materials.filter((material) => {
+			if (typeFilter !== 'all' && material.type !== typeFilter) return false;
+			if (competencyFilter !== 'all') {
+				// Проверяем, есть ли у материала выбранная компетенция
+				const hasCompetency = material.competencies.some(comp => comp.name === competencyFilter);
+				if (!hasCompetency) return false;
+			}
+			return true;
+		});
+	};
+
+	const filteredMyMaterials = filterMaterials(myMaterials);
+	const filteredAvailableMaterials = filterMaterials(availableMaterials);
+
+	const getStatusLabel = (status: number) => {
+		const labels: Record<number, string> = {
+			0: 'Запланировано',
+			1: 'В работе',
+			2: 'Готово к проверке',
+		};
+		return labels[status] || 'Неизвестно';
+	};
+
+	const getStatusClass = (status: number) => {
+		const classes: Record<number, string> = {
+			0: styles.statusToStudy,
+			1: styles.statusInProgress,
+			2: styles.statusCompleted,
+		};
+		return classes[status] || '';
+	};
 
 	const getLevelLabel = (level: string) => {
 		const labels: Record<string, string> = {
@@ -332,19 +423,6 @@ const MaterialsPage = () => {
 		);
 	}
 
-	if (error) {
-		return (
-			<div className={styles.page}>
-				<div className={styles.error}>
-					<p>{error}</p>
-					<button onClick={() => { setIsLoading(true); window.location.reload(); }} className={styles.retryBtn}>
-						Повторить
-					</button>
-				</div>
-			</div>
-		);
-	}
-
 	return (
 		<div className={styles.page}>
 			<div className={styles.header}>
@@ -352,8 +430,31 @@ const MaterialsPage = () => {
 			</div>
 
 			<div className={styles.content}>
+				{successMessage && (
+					<div className={styles.successMessage}>{successMessage}</div>
+				)}
+				{error && (
+					<div className={styles.errorMessage}>{error}</div>
+				)}
+
+				<div className={styles.tabs}>
+					<button
+						className={`${styles.tab} ${!showAvailable ? styles.activeTab : ''}`}
+						onClick={() => setShowAvailable(false)}>
+						Мои материалы ({myMaterials.length})
+					</button>
+					<button
+						className={`${styles.tab} ${showAvailable ? styles.activeTab : ''}`}
+						onClick={() => setShowAvailable(true)}>
+						Доступные материалы ({availableMaterials.length})
+					</button>
+				</div>
+
 				<div className={styles.filters}>
-					<select className={styles.filterSelect} value={competencyFilter} onChange={(e) => setCompetencyFilter(e.target.value)}>
+					<select
+						className={styles.filterSelect}
+						value={competencyFilter}
+						onChange={(e) => setCompetencyFilter(e.target.value)}>
 						{competencies.map((comp) => (
 							<option key={comp} value={comp}>
 								{comp === 'all' ? 'Все компетенции' : comp}
@@ -361,7 +462,10 @@ const MaterialsPage = () => {
 						))}
 					</select>
 
-					<select className={styles.filterSelect} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+					<select
+						className={styles.filterSelect}
+						value={typeFilter}
+						onChange={(e) => setTypeFilter(e.target.value)}>
 						{types.map((type) => (
 							<option key={type} value={type}>
 								{type === 'all' ? 'Все типы' : type}
@@ -370,34 +474,75 @@ const MaterialsPage = () => {
 					</select>
 				</div>
 
-				{filteredMaterials.length > 0 ? (
-					<div className={styles.grid}>
-						{filteredMaterials.map((material) => (
-							<div key={material.id} className={styles.card}>
-								<div className={styles.cardHeader}>
-									<h3>{material.name}</h3>
-								</div>
-								<p>Тип: {material.type}</p>
-								<p>Длительность: {formatDuration(material.duration)}</p>
-								<p>Компетенция: {material.competencyName}</p>
-								<p>Целевой уровень: {getLevelLabel(material.targetLevel)}</p>
-								{material.link && (
-									<button onClick={() => handleOpenMaterial(material.link)} className={styles.link}>
-										Перейти к материалу
-									</button>
-								)}
+				{!showAvailable && (
+					<>
+						{filteredMyMaterials.length > 0 ? (
+							<div className={styles.grid}>
+								{filteredMyMaterials.map((material) => (
+									<div key={material.id} className={styles.card}>
+										<div className={styles.cardHeader}>
+											<h3>{material.name}</h3>
+											<span className={`${styles.statusBadge} ${getStatusClass(material.status || 0)}`}>
+												{getStatusLabel(material.status || 0)}
+											</span>
+										</div>
+										<p>Тип: {material.type}</p>
+										<p>Длительность: {formatDuration(material.duration)}</p>
+										<p>Компетенции: {material.competencies.map(c => c.name).join(', ')}</p>
+										<p>Целевые уровни: {material.competencies.map(c => getLevelLabel(c.targetLevel)).join(', ')}</p>
+										{material.link && (
+											<button
+												onClick={() => handleOpenMaterial(material.link)}
+												className={styles.link}>
+												Перейти к материалу
+											</button>
+										)}
+									</div>
+								))}
 							</div>
-						))}
-					</div>
-				) : (
-					<div className={styles.emptyState}>
-						<p>Материалы не найдены</p>
-						{filteredMaterials.length === 0 && !isLoading && (
-							<p className={styles.emptyHint}>
-								Для выбранных компетенций нет учебных материалов
-							</p>
+						) : (
+							<div className={styles.emptyState}>
+								<p>У вас нет добавленных материалов</p>
+								<p className={styles.emptyHint}>Перейдите на вкладку "Доступные материалы" чтобы добавить</p>
+							</div>
 						)}
-					</div>
+					</>
+				)}
+
+				{showAvailable && (
+					<>
+						{filteredAvailableMaterials.length > 0 ? (
+							<div className={styles.grid}>
+								{filteredAvailableMaterials.map((material) => (
+									<div key={material.id} className={styles.card}>
+										<div className={styles.cardHeader}>
+											<h3>{material.name}</h3>
+											<button
+												onClick={() => addMaterial(material.id, material.name)}
+												className={styles.addBtn}>
+												+ Добавить
+											</button>
+										</div>
+										<p>Тип: {material.type}</p>
+										<p>Длительность: {formatDuration(material.duration)}</p>
+										<p>Компетенции: {material.competencies.map(c => c.name).join(', ')}</p>
+										<p>Целевые уровни: {material.competencies.map(c => getLevelLabel(c.targetLevel)).join(', ')}</p>
+										{material.link && (
+											<button
+												onClick={() => handleOpenMaterial(material.link)}
+												className={styles.link}>
+												Перейти к материалу
+											</button>
+										)}
+									</div>
+								))}
+							</div>
+						) : (
+							<div className={styles.emptyState}>
+								<p>Нет доступных материалов для добавления</p>
+							</div>
+						)}
+					</>
 				)}
 			</div>
 		</div>

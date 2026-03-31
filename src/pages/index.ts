@@ -2,6 +2,7 @@ import Auth from './general/auth';
 import ProfilePage from './general/profile';
 import MyCompetenciesPage from './user/my-competencies';
 import IprPage from './user/ipr';
+import ImportPage from './admin/import-page';
 import MaterialsPage from './user/materials';
 import SettingsPage from './admin/settings';
 import MaterialsAdminPage from './admin/materials';
@@ -20,6 +21,7 @@ export {
 	MyCompetenciesPage,
 	IprPage,
 	MaterialsPage,
+	ImportPage,
 	SettingsPage,
 	MaterialsAdminPage,
 	CompetenciesPage,

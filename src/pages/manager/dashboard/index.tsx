@@ -1,4 +1,4 @@
-// manager-dashboard.module.tsx
+// manager-dashboard.module.tsx (исправленная версия с правильным расчетом прогресса)
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './manager-dashboard.module.scss';
@@ -81,7 +81,7 @@ const ManagerDashboard: React.FC = () => {
 		return null;
 	};
 
-	// Получение информации о департаменте (статистика)
+	// Получение информации о департаменте
 	const fetchDepartmentInfo = async (departmentId: string) => {
 		try {
 			const response = await fetch(`http://localhost:5217/api/departments/${departmentId}/info`, {
@@ -139,7 +139,7 @@ const ManagerDashboard: React.FC = () => {
 			if (response.ok) {
 				const data: AppLog[] = await response.json();
 				console.log('Department logs:', data);
-				return data.slice(0, 10); // Последние 10 событий
+				return data.slice(0, 10);
 			}
 		} catch (error) {
 			console.error('Error fetching department logs:', error);
@@ -147,23 +147,31 @@ const ManagerDashboard: React.FC = () => {
 		return [];
 	};
 
-	// Расчет среднего прогресса по сотрудникам
-	const calculateAvgProgressFromEmployees = (employees: DepartmentEmployee[]) => {
+	// Расчет общего прогресса отдела:
+	// Сумма всех изученных материалов у всех сотрудников / Сумма всех выданных материалов у всех сотрудников
+	const calculateTotalProgress = (employees: DepartmentEmployee[]) => {
 		if (employees.length === 0) return 0;
 		
-		let totalProgress = 0;
-		let validCount = 0;
+		let totalStudied = 0;  // Сумма всех изученных материалов
+		let totalCount = 0;     // Сумма всех выданных материалов
 		
 		employees.forEach(emp => {
-			if (emp.progress && emp.progress.count > 0) {
-				const progressPercent = (emp.progress.studied / emp.progress.count) * 100;
-				totalProgress += progressPercent;
-				validCount++;
+			if (emp.progress) {
+				totalStudied += emp.progress.studied || 0;
+				totalCount += emp.progress.count || 0;
 			}
 		});
 		
-		if (validCount === 0) return 0;
-		return Math.round(totalProgress / validCount);
+		console.log('📊 Расчет общего прогресса:');
+		console.log(`  Сумма изученных материалов: ${totalStudied}`);
+		console.log(`  Сумма выданных материалов: ${totalCount}`);
+		
+		if (totalCount === 0) return 0;
+		
+		const progressPercent = Math.round((totalStudied / totalCount) * 100);
+		console.log(`  Общий прогресс отдела: ${progressPercent}%`);
+		
+		return progressPercent;
 	};
 
 	useEffect(() => {
@@ -172,13 +180,12 @@ const ManagerDashboard: React.FC = () => {
 			setError(null);
 			
 			try {
-				// Получаем профиль пользователя
 				const profile = await fetchUserProfile();
 				
 				if (profile && profile.department?.id) {
 					console.log(`Loading data for department: ${profile.department.id}`);
 					
-					// Получаем данные департамента (статистика)
+					// Получаем данные департамента
 					const department = await fetchDepartmentInfo(profile.department.id);
 					
 					// Получаем сотрудников с прогрессом
@@ -187,51 +194,32 @@ const ManagerDashboard: React.FC = () => {
 					// Получаем события департамента
 					const logs = await fetchDepartmentLogs(profile.department.id);
 					
-					// Рассчитываем средний прогресс двумя способами
-					let avgProgressFromDept = 0;
-					let avgProgressFromEmployees = 0;
+					// Количество сотрудников из списка
+					const employeeCount = employees.length;
 					
-					// Способ 1: из общей статистики департамента
-					if (department?.progress && department.progress.count > 0) {
-						avgProgressFromDept = Math.round((department.progress.studied / department.progress.count) * 100);
-					}
+					// Общий прогресс отдела (сумма изученных / сумма выданных)
+					const totalProgress = calculateTotalProgress(employees);
 					
-					// Способ 2: из данных каждого сотрудника
-					avgProgressFromEmployees = calculateAvgProgressFromEmployees(employees);
-					
-					console.log('📊 Расчет среднего прогресса:');
-					console.log(`  Из статистики отдела: ${avgProgressFromDept}%`);
-					console.log(`  Из данных сотрудников: ${avgProgressFromEmployees}%`);
-					console.log(`  Количество сотрудников: ${employees.length}`);
-					
-					// Выводим прогресс каждого сотрудника
-					console.log('\n🎯 Прогресс сотрудников:');
-					const progressMap: { [key: string]: number } = {};
+					console.log('\n📊 Детальная статистика по сотрудникам:');
 					employees.forEach(emp => {
 						const fullName = `${emp.lastName} ${emp.firstName} ${emp.middleName || ''}`.trim();
-						let progress = 0;
-						if (emp.progress && emp.progress.count > 0) {
-							progress = Math.round((emp.progress.studied / emp.progress.count) * 100);
-						}
-						progressMap[fullName] = progress;
-						console.log(`  ${fullName}: ${progress}% (studied: ${emp.progress?.studied || 0}/${emp.progress?.count || 0})`);
+						console.log(`  ${fullName}:`);
+						console.log(`    Изучено: ${emp.progress?.studied || 0}`);
+						console.log(`    Выдано: ${emp.progress?.count || 0}`);
+						console.log(`    Прогресс: ${emp.progress && emp.progress.count > 0 ? Math.round((emp.progress.studied / emp.progress.count) * 100) : 0}%`);
 					});
-					console.table(progressMap);
-					
-					// Используем прогресс из статистики отдела (более точный)
-					const finalAvgProgress = avgProgressFromDept > 0 ? avgProgressFromDept : avgProgressFromEmployees;
 					
 					setDepartmentData({
 						name: department?.name || profile.department.name,
-						employeeCount: department?.progress?.count || employees.length,
-						avgProgress: finalAvgProgress,
+						employeeCount: employeeCount,
+						avgProgress: totalProgress,
 						recentEvents: logs,
 					});
 					
 					console.log('\n✅ Итоговые данные дашборда:');
 					console.log(`  Отдел: ${department?.name || profile.department.name}`);
-					console.log(`  Сотрудников: ${department?.progress?.count || employees.length}`);
-					console.log(`  Средний прогресс: ${finalAvgProgress}%`);
+					console.log(`  Сотрудников: ${employeeCount}`);
+					console.log(`  Общий прогресс отдела: ${totalProgress}%`);
 					console.log(`  Событий: ${logs.length}`);
 					console.log('=' .repeat(80));
 					
@@ -274,7 +262,6 @@ const ManagerDashboard: React.FC = () => {
 			</div>
 
 			<div className={styles.content}>
-				{/* Сводная панель с метриками */}
 				<div className={styles.statsGrid}>
 					<div className={styles.statCard}>
 						<span className={styles.statValue}>
@@ -286,11 +273,10 @@ const ManagerDashboard: React.FC = () => {
 						<span className={styles.statValue}>
 							{departmentData.avgProgress}%
 						</span>
-						<span className={styles.statLabel}>Средний прогресс</span>
+						<span className={styles.statLabel}>Общий прогресс</span>
 					</div>
 				</div>
 
-				{/* Блок последних событий */}
 				<div className={styles.eventsSection}>
 					<h2>Последние события</h2>
 					<div className={styles.eventsList}>

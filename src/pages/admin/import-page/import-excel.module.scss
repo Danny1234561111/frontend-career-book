@@ -1,0 +1,308 @@
+// import-excel.module.scss
+@import '../../../variables.module';
+
+.page {
+	min-height: calc(100vh - 80px);
+	background: $background-light;
+}
+
+.header {
+	padding: $spacing-xl $spacing-xxl;
+	background: $white;
+	border-bottom: 1px solid $border-color;
+}
+
+.title {
+	margin: 0;
+	color: $text-primary;
+	font-weight: 600;
+	font-size: $font-xxxxl;
+}
+
+.content {
+	padding: $spacing-xxl;
+	background: $white;
+	min-height: calc(100vh - 80px - 80px);
+}
+
+.tabs {
+	display: flex;
+	gap: $spacing-sm;
+	margin-bottom: $spacing-xxxl;
+	border-bottom: 2px solid $border-color;
+	
+	.tab {
+		padding: $spacing-md $spacing-xl;
+		font-size: $font-lg;
+		font-weight: 500;
+		color: $text-secondary;
+		background: none;
+		border: none;
+		border-bottom: 2px solid transparent;
+		cursor: pointer;
+		transition: all 0.3s;
+		
+		&:hover {
+			color: $primary;
+		}
+		
+		&.active {
+			color: $primary;
+			border-bottom-color: $primary;
+		}
+	}
+}
+
+.uploadSection {
+	margin-bottom: $spacing-xxxl;
+	padding: $spacing-xxxl;
+	background: $background-light;
+	border: 2px dashed $border-color;
+	border-radius: $border-radius-lg;
+	text-align: center;
+}
+
+.fileInputWrapper {
+	margin-bottom: $spacing-xl;
+}
+
+.fileInput {
+	display: none;
+}
+
+.fileLabel {
+	display: inline-block;
+	padding: $spacing-lg $spacing-xxxl;
+	font-size: $font-lg;
+	font-weight: 500;
+	color: $primary;
+	background: $white;
+	border: 1px solid $primary;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.3s;
+	
+	&:hover {
+		color: $white;
+		background: $primary;
+	}
+}
+
+.fileInfo {
+	margin-top: $spacing-lg;
+	padding: $spacing-md;
+	background: $white;
+	border-radius: $border-radius-md;
+	display: inline-flex;
+	align-items: center;
+	gap: $spacing-sm;
+	
+	.fileSize {
+		color: $text-secondary;
+		font-size: $font-sm;
+	}
+}
+
+.buttonsGroup {
+	display: flex;
+	justify-content: center;
+	gap: $spacing-lg;
+}
+
+.previewBtn, .importBtn {
+	padding: $spacing-md $spacing-xxxl;
+	font-size: $font-md;
+	font-weight: 500;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.3s;
+	
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
+
+.previewBtn {
+	color: $primary;
+	background: $white;
+	border: 1px solid $primary;
+	
+	&:hover:not(:disabled) {
+		color: $white;
+		background: $primary;
+	}
+}
+
+.importBtn {
+	color: $white;
+	background: $success;
+	
+	&:hover:not(:disabled) {
+		background: darken($success, 10%);
+	}
+}
+
+.errorMessage {
+	margin-bottom: $spacing-xl;
+	padding: $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+}
+
+.successMessage {
+	margin-bottom: $spacing-xl;
+	padding: $spacing-lg;
+	color: $success;
+	font-size: $font-md;
+	background: $success-light;
+	border-radius: $border-radius-md;
+}
+
+.previewSection {
+	margin-bottom: $spacing-xxxl;
+}
+
+.previewTitle {
+	margin-bottom: $spacing-xl;
+	font-size: $font-xl;
+	font-weight: 600;
+	color: $text-primary;
+}
+
+.tableWrapper {
+	margin-bottom: $spacing-xxxl;
+	overflow-x: auto;
+	
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.tableTitle {
+	margin-bottom: $spacing-lg;
+	font-size: $font-lg;
+	font-weight: 500;
+	color: $text-primary;
+}
+
+.previewTable {
+	width: 100%;
+	border-collapse: collapse;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	overflow: hidden;
+	
+	tr {
+		border-bottom: 1px solid $border-color;
+		
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+	
+	.tableCell {
+		padding: $spacing-md;
+		font-size: $font-sm;
+		color: $text-primary;
+		border-right: 1px solid $border-color;
+		
+		&:last-child {
+			border-right: none;
+		}
+	}
+	
+	tr:first-child .tableCell {
+		font-weight: 600;
+		background: $background-hover;
+	}
+}
+
+.tableStats {
+	margin-top: $spacing-lg;
+	padding: $spacing-md;
+	display: flex;
+	gap: $spacing-xl;
+	flex-wrap: wrap;
+	background: $background-light;
+	border-radius: $border-radius-md;
+	
+	span {
+		color: $text-secondary;
+		font-size: $font-sm;
+		
+		strong {
+			color: $text-primary;
+		}
+	}
+}
+
+.infoSection {
+	margin-top: $spacing-xxxl;
+	padding: $spacing-xl;
+	background: $background-light;
+	border-radius: $border-radius-md;
+	
+	h3 {
+		margin-bottom: $spacing-md;
+		color: $text-primary;
+		font-size: $font-lg;
+		font-weight: 600;
+	}
+	
+	.infoContent {
+		p {
+			margin-bottom: $spacing-sm;
+			color: $text-secondary;
+			font-size: $font-md;
+			line-height: 1.6;
+			
+			code {
+				padding: 2px 6px;
+				background: $white;
+				border-radius: $border-radius-sm;
+				font-family: monospace;
+			}
+		}
+	}
+}
+
+@include mobile {
+	.header {
+		padding: $spacing-lg $spacing-xl;
+	}
+	
+	.title {
+		font-size: $font-xxl;
+	}
+	
+	.content {
+		padding: $spacing-lg;
+	}
+	
+	.tabs .tab {
+		padding: $spacing-sm $spacing-lg;
+		font-size: $font-md;
+	}
+	
+	.uploadSection {
+		padding: $spacing-xl;
+	}
+	
+	.buttonsGroup {
+		flex-direction: column;
+	}
+	
+	.previewBtn, .importBtn {
+		width: 100%;
+	}
+	
+	.tableStats {
+		flex-direction: column;
+		gap: $spacing-sm;
+	}
+}

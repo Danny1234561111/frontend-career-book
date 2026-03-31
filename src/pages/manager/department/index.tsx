@@ -1,4 +1,4 @@
-// department.module.tsx (исправленная версия с правильным API)
+// department.module.tsx (исправленная версия с правильной логикой подсчета)
 import React, { useState, useEffect } from 'react';
 import { ManagerUserTable } from '../../../component';
 import styles from './department.module.scss';
@@ -138,37 +138,6 @@ const DepartmentPage: React.FC = () => {
 		return [];
 	};
 
-	// Получение должностей сотрудников (если нужно)
-	const fetchEmployeeJobTitles = async (employees: DepartmentEmployee[]) => {
-		const employeesWithJobs = await Promise.all(
-			employees.map(async (emp) => {
-				try {
-					const response = await fetch(`http://localhost:5217/api/users/${emp.id}`, {
-						method: 'GET',
-						headers: {
-							'Authorization': `Bearer ${accessToken}`,
-							'accept': 'text/plain',
-						},
-					});
-					
-					if (response.ok) {
-						const userData = await response.json();
-						return {
-							...emp,
-							jobTitle: userData.jobTitle || userData.currentPosition,
-							targetJobTitle: userData.targetJobTitle || userData.targetPosition,
-						};
-					}
-				} catch (error) {
-					console.error(`Error fetching user ${emp.id}:`, error);
-				}
-				return emp;
-			})
-		);
-		
-		return employeesWithJobs;
-	};
-
 	// Форматирование ФИО
 	const formatFullName = (firstName: string, lastName: string, middleName: string) => {
 		const parts = [];
@@ -184,17 +153,21 @@ const DepartmentPage: React.FC = () => {
 		return Math.round((empProgress.studied / empProgress.count) * 100);
 	};
 
-	// Расчет среднего прогресса по департаменту
-	const calculateAvgProgress = (employees: Employee[]) => {
+	// Расчет общего прогресса отдела (сумма изученных / сумма выданных)
+	const calculateTotalProgress = (employees: Employee[]) => {
 		if (employees.length === 0) return 0;
-		const totalProgress = employees.reduce((sum, emp) => sum + emp.progress, 0);
-		return Math.round(totalProgress / employees.length);
+		
+		// Считаем сумму изученных материалов и сумму выданных материалов
+		// ВНИМАНИЕ: progress - это уже процент, но нам нужны исходные данные!
+		// Для правильного расчета нужно использовать исходные данные из API
+		return 0; // Временное значение, будет пересчитано из исходных данных
 	};
 
-	// Расчет среднего уровня компетенций
+	// Расчет среднего уровня компетенций (на основе прогресса сотрудников)
 	const calculateAvgCompetencyLevel = (employees: Employee[]) => {
 		if (employees.length === 0) return 0;
-		const avgProgress = calculateAvgProgress(employees);
+		const totalProgress = employees.reduce((sum, emp) => sum + emp.progress, 0);
+		const avgProgress = totalProgress / employees.length;
 		// Переводим процент в уровень (0-100% -> 0-5)
 		const avgLevel = avgProgress / 20;
 		return Math.round(avgLevel * 10) / 10;
@@ -215,13 +188,13 @@ const DepartmentPage: React.FC = () => {
 					// Получаем список сотрудников с прогрессом (основной источник данных)
 					const employeesData = await fetchDepartmentEmployees(profile.department.id);
 					
+					// Количество сотрудников - из реального списка
+					const totalEmployees = employeesData.length;
+					
 					if (employeesData.length > 0) {
-						// Получаем должности сотрудников
-						const employeesWithJobs = await fetchEmployeeJobTitles(employeesData);
-						
 						// Формируем список сотрудников
-						const formattedEmployees: Employee[] = employeesWithJobs.map(emp => {
-							// Прогресс берем из API напрямую
+						const formattedEmployees: Employee[] = employeesData.map(emp => {
+							// Прогресс сотрудника в процентах
 							const progressPercent = calculateEmployeeProgress(emp.progress);
 							
 							return {
@@ -229,8 +202,8 @@ const DepartmentPage: React.FC = () => {
 								fullName: formatFullName(emp.firstName, emp.lastName, emp.middleName),
 								email: emp.email,
 								department: emp.department?.name || profile.department.name,
-								currentPosition: (emp as any).jobTitle?.name || 'Не указана',
-								targetPosition: (emp as any).targetJobTitle?.name || 'Не указана',
+								currentPosition: emp.jobTitle?.name || 'Не указана',
+								targetPosition: emp.targetJobTitle?.name || 'Не указана',
 								progress: progressPercent,
 								createdAt: new Date().toISOString().split('T')[0],
 							};
@@ -238,77 +211,67 @@ const DepartmentPage: React.FC = () => {
 						
 						setEmployees(formattedEmployees);
 						
-						// Статистика отдела из department.progress
-						const totalEmployees = department?.progress?.count || formattedEmployees.length;
-						const inProgressIpr = department?.progress?.inProgress || 0;
-						const completedIpr = department?.progress?.studied || 0;
+						// Расчет ИПР в работе и выполнено из данных сотрудников
+						// inProgress - количество материалов в процессе у всех сотрудников
+						// completedIpr - количество изученных материалов у всех сотрудников
+						let totalInProgress = 0;
+						let totalStudied = 0;
+						let totalMaterials = 0;
 						
-						// Средний прогресс считаем из данных сотрудников
-						const avgProgress = calculateAvgProgress(formattedEmployees);
+						employeesData.forEach(emp => {
+							if (emp.progress) {
+								totalInProgress += emp.progress.inProgress || 0;
+								totalStudied += emp.progress.studied || 0;
+								totalMaterials += emp.progress.count || 0;
+							}
+						});
+						
+						// Средний уровень компетенций на основе прогресса
 						const avgLevel = calculateAvgCompetencyLevel(formattedEmployees);
 						
-						// Выводим данные каждого сотрудника в виде словаря
-						console.log('📊 Данные сотрудников отдела (из /api/departments/{id}/employees):');
+						// Общий прогресс отдела (сумма изученных / сумма выданных * 100)
+						const totalProgressPercent = totalMaterials > 0 
+							? Math.round((totalStudied / totalMaterials) * 100) 
+							: 0;
+						
+						console.log('📊 Детальная статистика отдела:');
+						console.log(`  Всего сотрудников: ${totalEmployees}`);
+						console.log(`  Сумма материалов в процессе: ${totalInProgress}`);
+						console.log(`  Сумма изученных материалов: ${totalStudied}`);
+						console.log(`  Сумма выданных материалов: ${totalMaterials}`);
+						console.log(`  Общий прогресс отдела: ${totalProgressPercent}%`);
+						console.log(`  Средний уровень компетенций: ${avgLevel}`);
+						
+						// Выводим данные каждого сотрудника
+						console.log('\n📊 Данные сотрудников отдела:');
 						console.log('=' .repeat(80));
 						
 						formattedEmployees.forEach((employee, index) => {
 							console.log(`\n👤 Сотрудник ${index + 1}:`);
-							console.log(`  ID: ${employee.id}`);
 							console.log(`  ФИО: ${employee.fullName}`);
-							console.log(`  Email: ${employee.email}`);
-							console.log(`  Отдел: ${employee.department}`);
-							console.log(`  Текущая должность: ${employee.currentPosition}`);
-							console.log(`  Целевая должность: ${employee.targetPosition}`);
 							console.log(`  Прогресс: ${employee.progress}%`);
-							console.log(`  ${'-'.repeat(60)}`);
+							const empData = employeesData[index];
+							if (empData?.progress) {
+								console.log(`    Изучено: ${empData.progress.studied}/${empData.progress.count}`);
+								console.log(`    В процессе: ${empData.progress.inProgress}`);
+								console.log(`    К изучению: ${empData.progress.toStudy}`);
+							}
 						});
-						
-						// Выводим сырые данные из API для отладки
-						console.log('\n🔍 Сырые данные сотрудников из API:');
-						employeesData.forEach((emp, index) => {
-							console.log(`\nСотрудник ${index + 1}:`, {
-								id: emp.id,
-								fullName: formatFullName(emp.firstName, emp.lastName, emp.middleName),
-								email: emp.email,
-								progressRaw: emp.progress,
-								progressPercent: calculateEmployeeProgress(emp.progress)
-							});
-						});
-						
-						// Выводим сводную статистику
-						console.log('\n📈 Сводная статистика отдела:');
-						console.log(`  Всего сотрудников: ${totalEmployees}`);
-						console.log(`  ИПР в работе: ${inProgressIpr}`);
-						console.log(`  ИПР выполнено: ${completedIpr}`);
-						console.log(`  Средний прогресс: ${avgProgress}%`);
-						console.log(`  Средний уровень: ${avgLevel}`);
-						console.log(`  ${'='.repeat(80)}`);
-						
-						// Выводим прогресс каждого сотрудника в виде таблицы
-						console.log('\n🎯 Прогресс сотрудников:');
-						const progressMap: { [key: string]: number } = {};
-						formattedEmployees.forEach(emp => {
-							progressMap[emp.fullName] = emp.progress;
-						});
-						console.table(progressMap);
 						
 						setDepartmentStats({
 							totalEmployees: totalEmployees,
 							avgCompetencyLevel: avgLevel,
-							inProgressIpr: inProgressIpr,
-							completedIpr: completedIpr,
+							inProgressIpr: totalInProgress,
+							completedIpr: totalStudied,
 						});
-					} else if (department) {
-						// Если нет сотрудников, но есть статистика отдела
-						const totalEmployees = department.progress?.count || 0;
-						const inProgressIpr = department.progress?.inProgress || 0;
-						const completedIpr = department.progress?.studied || 0;
 						
+					} else {
+						// Если нет сотрудников
 						setDepartmentStats({
-							totalEmployees: totalEmployees,
+							totalEmployees: 0,
 							avgCompetencyLevel: 0,
-							inProgressIpr: inProgressIpr,
-							completedIpr: completedIpr,
+							inProgressIpr: 0,
+							completedIpr: 0,
 						});
 						
 						console.log('Нет сотрудников в отделе');

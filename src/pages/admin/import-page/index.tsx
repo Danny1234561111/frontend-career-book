@@ -1,167 +1,383 @@
-import React, { useState, useRef } from 'react';
-import styles from './import-page.module.scss';
+// import-excel.module.tsx
+import React, { useState, useEffect } from 'react';
+import styles from './import-excel.module.scss';
+
+interface PreviewData {
+	table: string[][];
+	numberDataRows: number;
+	numberIgnoreRows: number;
+	numberCompetencies: number;
+}
+
+interface EmployeePreviewData {
+	profiles: PreviewData;
+	model: PreviewData;
+}
 
 const ImportPage: React.FC = () => {
-	const [file, setFile] = useState<File | null>(null);
-	const [previewData, setPreviewData] = useState<any>(null);
-	const [validationStatus, setValidationStatus] = useState<
-		'idle' | 'success' | 'error'
-	>('idle');
-	const [validationErrors, setValidationErrors] = useState<string[]>([]);
-	const fileInputRef = useRef<HTMLInputElement>(null);
+	const accessToken = localStorage.getItem('accessToken');
+	
+	const [activeTab, setActiveTab] = useState<'bosses' | 'employees'>('bosses');
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [preview, setPreview] = useState<PreviewData | EmployeePreviewData | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(null);
 
-	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedFile = e.target.files?.[0];
-		if (selectedFile) {
-			setFile(selectedFile);
-			setValidationStatus('idle');
-			// Здесь будет загрузка и предпросмотр файла
-			loadPreviewData(selectedFile);
+	// Получение превью для руководителей
+	const fetchBossesPreview = async (file: File) => {
+		const formData = new FormData();
+		formData.append('File', file);
+
+		console.log('Sending request to: http://localhost:5217/api/import-excel/bosses/preview');
+		
+		const response = await fetch('http://localhost:5217/api/import-excel/bosses/preview', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			body: formData,
+		});
+
+		console.log('Response status:', response.status);
+		
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Ошибка ${response.status}: ${errorText || 'Неизвестная ошибка'}`);
+		}
+
+		const data = await response.json();
+		console.log('Bosses preview data:', data);
+		return data;
+	};
+
+	// Подтверждение импорта руководителей
+	const confirmBossesImport = async (file: File) => {
+		const formData = new FormData();
+		formData.append('File', file);
+
+		const response = await fetch('http://localhost:5217/api/import-excel/bosses/confirm', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			body: formData,
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Ошибка ${response.status}: ${errorText}`);
+		}
+
+		return response;
+	};
+
+	// Получение превью для сотрудников
+	const fetchEmployeesPreview = async (file: File) => {
+		const formData = new FormData();
+		formData.append('File', file);
+
+		console.log('Sending request to: http://localhost:5217/api/import-excel/employees/preview');
+		
+		const response = await fetch('http://localhost:5217/api/import-excel/employees/preview', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			body: formData,
+		});
+
+		console.log('Response status:', response.status);
+		
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Ошибка ${response.status}: ${errorText || 'Неизвестная ошибка'}`);
+		}
+
+		const data = await response.json();
+		console.log('Employees preview data:', data);
+		return data;
+	};
+
+	// Подтверждение импорта сотрудников
+	const confirmEmployeesImport = async (file: File) => {
+		const formData = new FormData();
+		formData.append('File', file);
+
+		const response = await fetch('http://localhost:5217/api/import-excel/employees/confirm', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			body: formData,
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`Ошибка ${response.status}: ${errorText}`);
+		}
+
+		return response;
+	};
+
+	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			console.log('File selected:', file.name, file.type, file.size);
+			setSelectedFile(file);
+			setPreview(null);
+			setError(null);
+			setSuccess(null);
 		}
 	};
 
-	const loadPreviewData = (file: File) => {
-		// Имитация загрузки данных для предпросмотра
-		setPreviewData({
-			sheetName: 'Профили',
-			rowCount: 45,
-			competencyCount: 42,
-			ignoredRows: 3,
-			previewRows: [
-				['Разработка 1С', 'Работа с отчетами', '1', '1', '2', '2', '3'],
-				['Разработка 1С', 'Работа с формами', '1', '1', '2', '2', '3'],
-				['Soft-skills', 'Коммуникация', '1', '1', '2', '2', '3'],
-				['Soft-skills', 'Управление проектами', '1', '1', '2', '2', '3'],
-				['Базы данных', 'SQL', '1', '1', '2', '2', '3'],
-			],
-		});
+	const handlePreview = async () => {
+		if (!selectedFile) {
+			setError('Пожалуйста, выберите файл');
+			return;
+		}
+
+		setIsLoading(true);
+		setError(null);
+		setPreview(null);
+
+		try {
+			if (activeTab === 'bosses') {
+				const data = await fetchBossesPreview(selectedFile);
+				// Для руководителей данные в поле data
+				if (data && data.data) {
+					setPreview(data.data);
+				} else {
+					setPreview(data);
+				}
+			} else {
+				const data = await fetchEmployeesPreview(selectedFile);
+				// Для сотрудников данные уже в правильной структуре
+				setPreview(data);
+			}
+		} catch (err) {
+			console.error('Preview error:', err);
+			setError(err instanceof Error ? err.message : 'Ошибка при загрузке превью');
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
-	const handleValidate = () => {
-		// Имитация валидации
-		setValidationStatus('success');
+	const handleImport = async () => {
+		if (!selectedFile) {
+			setError('Пожалуйста, выберите файл');
+			return;
+		}
+
+		setIsLoading(true);
+		setError(null);
+		setSuccess(null);
+
+		try {
+			if (activeTab === 'bosses') {
+				await confirmBossesImport(selectedFile);
+			} else {
+				await confirmEmployeesImport(selectedFile);
+			}
+			setSuccess('Импорт успешно выполнен');
+			setSelectedFile(null);
+			setPreview(null);
+			// Очищаем input
+			const fileInput = document.getElementById('file-input') as HTMLInputElement;
+			if (fileInput) fileInput.value = '';
+		} catch (err) {
+			console.error('Import error:', err);
+			setError(err instanceof Error ? err.message : 'Ошибка при импорте');
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
-	const handleImport = () => {
-		// Имитация импорта
-		alert(
-			'Импорт успешно завершен!\nСоздано моделей: 1\nСоздано компетенций: 42\nСоздано требований к должностям: 186'
+	const renderTable = (data: PreviewData, title?: string) => {
+		if (!data || !data.table || data.table.length === 0) {
+			return (
+				<div className={styles.emptyPreview}>
+					<p>Нет данных для отображения</p>
+				</div>
+			);
+		}
+
+		return (
+			<div className={styles.tableWrapper}>
+				{title && <h3 className={styles.tableTitle}>{title}</h3>}
+				<div className={styles.tableContainer}>
+					<table className={styles.previewTable}>
+						<tbody>
+							{data.table.map((row, rowIndex) => (
+								<tr key={rowIndex}>
+									{row.map((cell, cellIndex) => (
+										<td key={cellIndex} className={styles.tableCell}>
+											{cell || '—'}
+											</td>
+									))}
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+				<div className={styles.tableStats}>
+					<span>📊 Строк с данными: <strong>{data.numberDataRows}</strong></span>
+					<span>⏭️ Пропущено строк: <strong>{data.numberIgnoreRows}</strong></span>
+					<span>🎯 Компетенций: <strong>{data.numberCompetencies}</strong></span>
+				</div>
+			</div>
 		);
 	};
 
-	return (
-		<div className={styles.container}>
-			<h1 className={styles.title}>Импорт матрицы компетенций из Excel</h1>
+	// Проверка доступности эндпоинтов
+	useEffect(() => {
+		const checkEndpoints = async () => {
+			try {
+				const bossesUrl = 'http://localhost:5217/api/import-excel/bosses/preview';
+				const employeesUrl = 'http://localhost:5217/api/import-excel/employees/preview';
+				
+				const bossesResponse = await fetch(bossesUrl, {
+					method: 'OPTIONS',
+					headers: { 'Authorization': `Bearer ${accessToken}` },
+				});
+				const employeesResponse = await fetch(employeesUrl, {
+					method: 'OPTIONS',
+					headers: { 'Authorization': `Bearer ${accessToken}` },
+				});
+				
+				console.log('Bosses endpoint available:', bossesResponse.status !== 404);
+				console.log('Employees endpoint available:', employeesResponse.status !== 404);
+			} catch (error) {
+				console.error('Error checking endpoints:', error);
+			}
+		};
+		
+		checkEndpoints();
+	}, []);
 
-			<div className={styles.uploadSection}>
-				<button
-					className={styles.selectFileBtn}
-					onClick={() => fileInputRef.current?.click()}>
-					Выбрать файл
-				</button>
-				<input
-					ref={fileInputRef}
-					type='file'
-					accept='.xlsx'
-					onChange={handleFileSelect}
-					className={styles.fileInput}
-				/>
-				{file && (
-					<span className={styles.fileName}>Выбран файл: {file.name}</span>
-				)}
+	return (
+		<div className={styles.page}>
+			<div className={styles.header}>
+				<h1 className={styles.title}>Импорт Excel</h1>
+				<p className={styles.subtitle}>Загрузка данных из Excel файлов</p>
 			</div>
 
-			{previewData && (
-				<div className={styles.previewSection}>
-					<h2 className={styles.sectionTitle}>Предпросмотр</h2>
+			<div className={styles.content}>
+				<div className={styles.tabs}>
+					<button
+						className={`${styles.tab} ${activeTab === 'bosses' ? styles.active : ''}`}
+						onClick={() => {
+							setActiveTab('bosses');
+							setSelectedFile(null);
+							setPreview(null);
+							setError(null);
+							setSuccess(null);
+						}}>
+						👔 Руководители
+					</button>
+					<button
+						className={`${styles.tab} ${activeTab === 'employees' ? styles.active : ''}`}
+						onClick={() => {
+							setActiveTab('employees');
+							setSelectedFile(null);
+							setPreview(null);
+							setError(null);
+							setSuccess(null);
+						}}>
+						👥 Сотрудники
+					</button>
+				</div>
 
-					<div className={styles.previewInfo}>
-						<div className={styles.infoGrid}>
-							<div className={styles.infoItem}>
-								<span className={styles.infoLabel}>Лист:</span>
-								<span className={styles.infoValue}>
-									{previewData.sheetName}
+				<div className={styles.uploadSection}>
+					<div className={styles.fileInputWrapper}>
+						<input
+							id="file-input"
+							type="file"
+							accept=".xlsx, .xls, .csv"
+							onChange={handleFileSelect}
+							className={styles.fileInput}
+							disabled={isLoading}
+						/>
+						<label htmlFor="file-input" className={styles.fileLabel}>
+							📁 Выберите файл Excel
+						</label>
+						{selectedFile && (
+							<div className={styles.fileInfo}>
+								<span>📄 {selectedFile.name}</span>
+								<span className={styles.fileSize}>
+									({(selectedFile.size / 1024).toFixed(2)} KB)
 								</span>
-							</div>
-							<div className={styles.infoItem}>
-								<span className={styles.infoLabel}>Строк данных:</span>
-								<span className={styles.infoValue}>{previewData.rowCount}</span>
-							</div>
-							<div className={styles.infoItem}>
-								<span className={styles.infoLabel}>
-									Обнаружено компетенций:
-								</span>
-								<span className={styles.infoValue}>
-									{previewData.competencyCount}
-								</span>
-							</div>
-							<div className={styles.infoItem}>
-								<span className={styles.infoLabel}>Игнорируемые строки:</span>
-								<span className={styles.infoValue}>
-									{previewData.ignoredRows}
-								</span>
-							</div>
-						</div>
-					</div>
-
-					<div className={styles.previewTable}>
-						<h3>Первые 5 строк файла:</h3>
-						<table>
-							<thead>
-								<tr>
-									<th>Блок компетенций</th>
-									<th>Компетенция</th>
-									<th>Специалист</th>
-									<th>Спец. 2 кат.</th>
-									<th>Спец. 1 кат.</th>
-									<th>Ведущий</th>
-									<th>Главный</th>
-								</tr>
-							</thead>
-							<tbody>
-								{previewData.previewRows.map((row: string[], index: number) => (
-									<tr key={index}>
-										{row.map((cell, i) => (
-											<td key={i}>{cell}</td>
-										))}
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-
-					<div className={styles.actions}>
-						<button className={styles.validateBtn} onClick={handleValidate}>
-							Проверить данные
-						</button>
-
-						{validationStatus === 'success' && (
-							<div className={styles.successMessage}>
-								<span className={styles.successIcon}>✓</span>
-								Файл соответствует шаблону
 							</div>
 						)}
+					</div>
 
-						{validationStatus === 'error' && (
-							<div className={styles.errorMessage}>
-								<span className={styles.errorIcon}>✗</span>
-								Ошибки валидации
-								<ul className={styles.errorList}>
-									{validationErrors.map((error, i) => (
-										<li key={i}>{error}</li>
-									))}
+					<div className={styles.buttonsGroup}>
+						<button
+							className={styles.previewBtn}
+							onClick={handlePreview}
+							disabled={!selectedFile || isLoading}>
+							{isLoading ? '⏳ Загрузка...' : '🔍 Предпросмотр'}
+						</button>
+						<button
+							className={styles.importBtn}
+							onClick={handleImport}
+							disabled={!selectedFile || isLoading || !preview}>
+							{isLoading ? '⏳ Импорт...' : '📥 Импортировать'}
+						</button>
+					</div>
+				</div>
+
+				{error && (
+					<div className={styles.errorMessage}>
+						⚠️ {error}
+					</div>
+				)}
+
+				{success && (
+					<div className={styles.successMessage}>
+						✅ {success}
+					</div>
+				)}
+
+				{preview && (
+					<div className={styles.previewSection}>
+						<h2 className={styles.previewTitle}>📋 Предпросмотр данных</h2>
+						{activeTab === 'bosses' && (
+							renderTable(preview as PreviewData, 'Структура руководителей')
+						)}
+						{activeTab === 'employees' && (
+							<>
+								{(preview as EmployeePreviewData).profiles && 
+									renderTable((preview as EmployeePreviewData).profiles, '📝 Профили сотрудников')
+								}
+								{(preview as EmployeePreviewData).model && 
+									renderTable((preview as EmployeePreviewData).model, '🎓 Модель компетенций')
+								}
+							</>
+						)}
+					</div>
+				)}
+
+				<div className={styles.infoSection}>
+					<h3>📌 Инструкция</h3>
+					<div className={styles.infoContent}>
+						<p><strong>👔 Для руководителей:</strong> Excel файл должен содержать информацию о структуре подчинения (кто кому подчиняется).</p>
+						<p><strong>👥 Для сотрудников:</strong> Excel файл должен содержать профили сотрудников и матрицу компетенций.</p>
+						<p><strong>📎 Поддерживаемые форматы:</strong> <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code></p>
+						<p><strong>📋 Порядок действий:</strong> Выберите файл → Нажмите "Предпросмотр" → Проверьте данные → Нажмите "Импортировать"</p>
+						{error && error.includes('404') && (
+							<div className={styles.hint}>
+								💡 <strong>Совет:</strong> Если вы видите ошибку 404, убедитесь, что:
+								<ul>
+									<li>Бэкенд сервер запущен на порту 5217</li>
+									<li>Эндпоинты импорта доступны (проверьте в Swagger)</li>
+									<li>У вас есть права администратора для импорта данных</li>
 								</ul>
 							</div>
 						)}
-
-						{validationStatus === 'success' && (
-							<button className={styles.importBtn} onClick={handleImport}>
-								Импортировать
-							</button>
-						)}
 					</div>
 				</div>
-			)}
+			</div>
 		</div>
 	);
 };

@@ -519,3 +519,279 @@
 		background: darken($primary-light, 5%);
 	}
 }
+/* Стили для Категорий */
+.category {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+}
+
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  background: $background-hover;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: darken($background-hover, 2%);
+  }
+}
+
+.categoryTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  h5 {
+    margin: 0;
+    color: $text-primary;
+    font-weight: 600;
+    font-size: $font-lg; // Обычно категории чуть меньше блоков (h4)
+  }
+}
+
+.expandIcon {
+  width: 20px;
+  color: $text-secondary;
+  font-size: $font-sm;
+}
+
+.categoryActions {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.categoryContent {
+  padding: $spacing-lg;
+  background: $white; // Чтобы контент категории был на белом фоне
+}
+/* Стили для Групп */
+.group {
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  margin-bottom: $spacing-md;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm $spacing-lg;
+  background: $background-light;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid transparent;
+
+  &:hover {
+    background: darken($background-light, 3%);
+  }
+}
+
+.groupTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+
+  h6 {
+    margin: 0;
+    color: $text-primary;
+    font-weight: 500;
+    font-size: $font-md;
+  }
+}
+
+.competencyCount {
+  margin-left: $spacing-sm;
+  padding: $spacing-xs $spacing-sm;
+  color: $text-secondary;
+  font-size: $font-xs;
+  background: $white;
+  border-radius: $border-radius-xl;
+}
+
+.groupContent {
+  padding: $spacing-md;
+  background: $white;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.emptyGroup {
+  padding: $spacing-lg;
+  text-align: center;
+  color: $text-secondary;
+  font-size: $font-sm;
+  background: $background-light;
+  border-radius: $border-radius-md;
+  
+  p {
+    margin: 0;
+  }
+}
+
+// Обновленные стили для компетенций внутри группы
+.competencyContainer {
+  overflow: hidden;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: $primary-light;
+    box-shadow: $shadow-sm;
+  }
+}
+
+.competencyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  background: $white;
+  border-bottom: 1px solid $border-color;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: $background-light;
+  }
+}
+
+.competencyTitle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: $spacing-sm;
+  cursor: pointer;
+  user-select: none;
+
+  .competencyName {
+    color: $text-primary;
+    font-weight: 500;
+    font-size: $font-md;
+    flex: 1;
+  }
+}
+
+// Адаптация для мобильных устройств
+@include mobile {
+  .groupHeader {
+    padding: $spacing-sm $spacing-md;
+  }
+  
+  .groupTitle h6 {
+    font-size: $font-sm;
+  }
+  
+  .competencyCount {
+    font-size: $font-xs;
+    padding: $spacing-xs $spacing-sm;
+  }
+  
+  .groupContent {
+    padding: $spacing-sm;
+    gap: $spacing-sm;
+  }
+  
+  .competencyHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+  }
+  
+  .competencyTitle {
+    width: 100%;
+  }
+  
+  .competencyActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .emptyGroup {
+    padding: $spacing-md;
+    font-size: $font-xs;
+  }
+}
+
+// Дополнительные стили для улучшения отображения
+.headerButtons {
+  display: flex;
+  gap: $spacing-md;
+  align-items: center;
+}
+
+.addBlockBtn {
+  @include button-reset;
+  padding: $spacing-sm $spacing-xl;
+  color: $white;
+  font-weight: 500;
+  font-size: $font-md;
+  background: $primary;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+// Стили для успешных и ошибочных сообщений
+.successMessage {
+  position: fixed;
+  top: $spacing-xl;
+  right: $spacing-xl;
+  z-index: 1001;
+  padding: $spacing-md $spacing-xl;
+  color: $success;
+  font-weight: 500;
+  background: $success-light;
+  border: 1px solid $success;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+  animation: slideIn 0.3s ease-out;
+}
+
+.errorMessage {
+  position: fixed;
+  top: $spacing-xl;
+  right: $spacing-xl;
+  z-index: 1001;
+  padding: $spacing-md $spacing-xl;
+  color: $danger;
+  font-weight: 500;
+  background: $danger-light;
+  border: 1px solid $danger;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+  animation: slideIn 0.3s ease-out;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: $text-secondary;
+  font-size: $font-lg;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
