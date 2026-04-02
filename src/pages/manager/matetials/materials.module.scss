@@ -1,3 +1,4 @@
+// materials.module.scss
 @import '../../../variables.module';
 
 .page {
@@ -18,14 +19,50 @@
 	font-size: $font-xxxxl;
 }
 
+.departmentName {
+	margin-top: $spacing-sm;
+	color: $text-secondary;
+	font-size: $font-md;
+}
+
 .content {
 	min-height: calc(100vh - 80px - 80px);
 	padding: $spacing-xxl;
 	background: $white;
 }
 
-.filters {
+.loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 400px;
+	color: $text-secondary;
+	font-size: $font-lg;
+}
+
+.error {
 	margin-bottom: $spacing-xl;
+	padding: $spacing-md $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+}
+
+.successMessage {
+	margin-bottom: $spacing-xl;
+	padding: $spacing-md $spacing-lg;
+	color: $success;
+	font-size: $font-md;
+	background: $success-light;
+	border-radius: $border-radius-md;
+}
+
+.filters {
+	display: flex;
+	gap: $spacing-xl;
+	margin-bottom: $spacing-xl;
+	flex-wrap: wrap;
 
 	.filterGroup {
 		display: flex;
@@ -35,8 +72,14 @@
 		label {
 			color: $text-secondary;
 			font-size: $font-md;
+			font-weight: 500;
 			white-space: nowrap;
 		}
+	}
+
+	@include mobile {
+		flex-direction: column;
+		gap: $spacing-lg;
 	}
 }
 
@@ -49,10 +92,21 @@
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 	cursor: pointer;
+	transition: all 0.3s;
+
+	&:hover {
+		border-color: $primary;
+	}
 
 	&:focus {
 		border-color: $primary;
 		outline: none;
+	}
+
+	&:disabled {
+		background: $background-light;
+		cursor: not-allowed;
+		opacity: 0.7;
 	}
 
 	@include mobile {
@@ -60,153 +114,246 @@
 	}
 }
 
-.tableWrapper {
-	margin-bottom: $spacing-xxxl;
-}
-
-.assignmentResult {
-	margin-bottom: $spacing-xl;
+.materialsInfo {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 	padding: $spacing-md $spacing-lg;
-	text-align: center;
+	margin-bottom: $spacing-xl;
+	background: $background-light;
 	border-radius: $border-radius-md;
-	animation: fadeIn 0.3s ease;
+	font-size: $font-sm;
+	color: $text-secondary;
 
-	&.success {
-		color: $success;
-		background: $success-light;
-		border: 1px solid $success;
+	span:first-child {
+		font-weight: 500;
+		color: $text-primary;
 	}
 
-	&.error {
-		color: $danger;
-		background: $danger-light;
-		border: 1px solid $danger;
+	@include mobile {
+		flex-direction: column;
+		gap: $spacing-sm;
+		align-items: flex-start;
 	}
 }
 
-.quickAssign {
+.warning {
+	color: $warning;
+	font-weight: 500;
+}
+
+.employeeProgressCard {
 	padding: $spacing-xl;
-	background: $background-light;
+	margin-bottom: $spacing-xl;
+	background: linear-gradient(135deg, $white 0%, $background-light 100%);
+	border-radius: $border-radius-lg;
+	box-shadow: $shadow-sm;
 	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
 
 	h3 {
 		margin: 0 0 $spacing-lg 0;
 		color: $text-primary;
 		font-weight: 600;
-		font-size: $font-xl;
+		font-size: $font-lg;
 	}
 }
 
-.assignForm {
+.progressStats {
 	display: flex;
-	flex-direction: column;
-	gap: $spacing-lg;
-}
-
-.assignFields {
-	display: flex;
+	gap: $spacing-xxl;
+	margin-bottom: $spacing-xl;
 	flex-wrap: wrap;
-	align-items: flex-end;
-	gap: $spacing-xl;
 
 	@include mobile {
-		flex-direction: column;
-		align-items: stretch;
-		gap: $spacing-md;
+		gap: $spacing-lg;
 	}
 }
 
-.formGroup {
-	flex: 1;
+.progressStat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
 
-	label {
-		display: block;
-		margin-bottom: $spacing-xs;
+	.statValue {
+		color: $primary;
+		font-weight: 700;
+		font-size: $font-xxxxl;
+		line-height: 1;
+	}
+
+	.statLabel {
+		margin-top: $spacing-xs;
 		color: $text-secondary;
 		font-size: $font-sm;
 	}
 }
 
-.employeeSelect {
-	width: 100%;
-	padding: $spacing-sm $spacing-lg;
-	color: $text-primary;
-	font-size: $font-md;
-	background: $white;
+.progressBarWrapper {
+	height: 8px;
+	background: $border-color;
+	border-radius: $border-radius-md;
+	overflow: hidden;
+}
+
+.progressBarFill {
+	height: 100%;
+	background: linear-gradient(90deg, $success, lighten($success, 15%));
+	border-radius: $border-radius-md;
+	transition: width 0.3s ease;
+}
+
+.tableWrapper {
+	overflow-x: auto;
+	margin-top: $spacing-xl;
 	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
+	border-radius: $border-radius-lg;
+	background: $white;
+}
 
-	&:focus {
-		border-color: $primary;
-		outline: none;
+.materialsTable {
+	width: 100%;
+	min-width: 800px;
+	border-collapse: collapse;
+
+	th {
+		padding: $spacing-lg $spacing-md;
+		color: $text-secondary;
+		font-weight: 600;
+		font-size: $font-sm;
+		text-align: left;
+		background: $background-hover;
+		border-bottom: 2px solid $border-color;
+	}
+
+	td {
+		padding: $spacing-lg $spacing-md;
+		color: $text-primary;
+		font-size: $font-md;
+		vertical-align: middle;
+		border-bottom: 1px solid $border-color;
+	}
+
+	tbody tr {
+		transition: background 0.3s;
+
+		&:hover {
+			background: $background-hover;
+		}
+
+		&:last-child td {
+			border-bottom: none;
+		}
 	}
 }
 
-.selectedCount {
-	padding: $spacing-sm $spacing-lg;
-	color: $primary;
+.materialName {
 	font-weight: 500;
-	font-size: $font-md;
+	min-width: 200px;
+
+	a {
+		color: $primary;
+		text-decoration: none;
+		transition: color 0.3s;
+
+		&:hover {
+			color: $primary-dark;
+			text-decoration: underline;
+		}
+	}
+}
+
+.materialType {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	color: $text-secondary;
+	font-size: $font-sm;
+	background: $background-light;
+	border-radius: $border-radius-sm;
 	white-space: nowrap;
-	background: $primary-light;
-	border-radius: $border-radius-md;
-
-	strong {
-		margin: 0 $spacing-xs;
-		font-size: $font-xl;
-	}
-
-	@include mobile {
-		white-space: normal;
-		text-align: center;
-	}
 }
 
-.assignBtn {
-	@include button-reset;
-	padding: $spacing-md $spacing-xl;
+.competencyBadge {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
 	color: $white;
+	font-size: $font-sm;
 	font-weight: 500;
-	font-size: $font-md;
-	text-align: center;
-	background: $primary;
+	background: linear-gradient(135deg, $primary, darken($primary, 10%));
 	border-radius: $border-radius-md;
+	white-space: nowrap;
+}
 
-	&:hover {
-		background: $primary-hover;
-		box-shadow: $shadow-sm;
-		transform: translateY(-2px);
+.statusBadge {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	font-size: $font-sm;
+	font-weight: 500;
+	border-radius: $border-radius-md;
+	white-space: nowrap;
+}
+
+.statusToStudy {
+	color: $warning;
+	background: lighten($warning, 35%);
+}
+
+.statusInProgress {
+	color: $primary;
+	background: $primary-light;
+}
+
+.statusCompleted {
+	color: $success;
+	background: $success-light;
+}
+
+.progressCell {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	min-width: 100px;
+}
+
+.progressBarSmall {
+	flex: 1;
+	height: 6px;
+	background: $border-color;
+	border-radius: $border-radius-sm;
+	overflow: hidden;
+}
+
+.progressBarSmallFill {
+	height: 100%;
+	background: $success;
+	border-radius: $border-radius-sm;
+	transition: width 0.3s ease;
+}
+
+.progressPercent {
+	min-width: 40px;
+	color: $text-secondary;
+	font-size: $font-sm;
+}
+
+.emptyState {
+	padding: $spacing-xxl;
+	text-align: center;
+	color: $text-secondary;
+	font-size: $font-md;
+
+	p {
+		margin: 0;
 	}
 
-	&:active {
-		transform: translateY(0);
-	}
-
-	&:disabled {
-		background: $text-disabled;
-		box-shadow: none;
-		cursor: not-allowed;
-		transform: none;
-	}
-
-	@include mobile {
-		width: 100%;
+	.searchHint {
+		margin-top: $spacing-sm;
+		color: $text-disabled;
+		font-size: $font-sm;
 	}
 }
 
-@keyframes fadeIn {
-	from {
-		transform: translateY(-10px);
-		opacity: 0;
-	}
-
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
-}
-
+// Адаптивность для мобильных устройств
 @include mobile {
 	.header {
 		padding: $spacing-lg $spacing-xl;
@@ -223,6 +370,7 @@
 	.filterGroup {
 		flex-direction: column;
 		align-items: flex-start;
+		width: 100%;
 
 		label {
 			margin-bottom: $spacing-xs;
@@ -233,7 +381,50 @@
 		width: 100%;
 	}
 
-	.quickAssign {
+	.employeeProgressCard {
 		padding: $spacing-lg;
+
+		h3 {
+			font-size: $font-md;
+		}
+	}
+
+	.progressStat {
+		.statValue {
+			font-size: $font-xxxl;
+		}
+	}
+
+	.materialsTable {
+		min-width: 600px;
+
+		th, td {
+			padding: $spacing-md;
+		}
+	}
+
+	.materialName {
+		min-width: 150px;
+	}
+
+	.competencyBadge,
+	.statusBadge {
+		font-size: $font-xs;
+		padding: $spacing-xs $spacing-sm;
+	}
+}
+
+// Планшеты
+@media (min-width: 768px) and (max-width: 1024px) {
+	.content {
+		padding: $spacing-xl;
+	}
+
+	.filters {
+		gap: $spacing-lg;
+	}
+
+	.progressStats {
+		gap: $spacing-xl;
 	}
 }
