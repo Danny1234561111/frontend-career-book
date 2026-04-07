@@ -1,6 +1,17 @@
-// competency-form.module.tsx (исправленная версия)
-import React, { useState, useEffect, useRef } from 'react';
+// competency-form.module.tsx (ИСПРАВЛЕННАЯ ВЕРСИЯ - фильтрация материалов по уровням)
+
+import React, { useState, useEffect } from 'react';
 import styles from './competency-form.module.scss';
+
+interface CompetencyLevel {
+	id?: string;
+	levelId: string;
+	levelName: string;
+	levelValue: number;
+	description: string;
+	example: string;
+	materialIds: string[];
+}
 
 interface CompetencyData {
 	id?: string;
@@ -12,30 +23,22 @@ interface CompetencyData {
 	categoryId?: string;
 	categoryName?: string;
 	description: string;
-	level: number;
 	defenseTasks?: string;
 	acceptanceCriteria?: string;
 	article?: string;
-	materialIds?: string[];
+	levels: CompetencyLevel[];
 }
 
 interface CompetencyFormProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSubmit?: (competency: CompetencyData) => void;
+	onSubmit?: (competency: CompetencyData) => Promise<boolean> | void;
 	initialData?: CompetencyData | null;
 	mode?: 'create' | 'edit';
 	competencyBlocks?: { id: string; name: string; categories?: Array<{ id: string; name: string; groups?: Array<{ id: string; name: string }> }> }[];
 	materials?: { id: string; name: string; type: string }[];
-	selectedMaterialIds?: string[];
-	levels?: Array<{ id: string; name: string; value: number }>;
+	availableLevels?: Array<{ id: string; name: string; value: number }>;
 }
-
-const levelLabels: { [key: number]: string } = {
-	1: '1 - Базовые знания',
-	2: '2 - Профессионал',
-	3: '3 - Эксперт',
-};
 
 const CompetencyForm: React.FC<CompetencyFormProps> = ({
 	isOpen,
@@ -45,8 +48,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 	mode = 'create',
 	competencyBlocks = [],
 	materials = [],
-	selectedMaterialIds = [],
-	levels = [],
+	availableLevels = [],
 }) => {
 	const [formData, setFormData] = useState<CompetencyData>({
 		name: '',
@@ -57,87 +59,108 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		categoryId: '',
 		categoryName: '',
 		description: '',
-		level: 1,
 		defenseTasks: '',
 		acceptanceCriteria: '',
 		article: '',
-		materialIds: [],
+		levels: [],
 	});
 
-	const [expandedMaterials, setExpandedMaterials] = useState(false);
+	const [expandedLevels, setExpandedLevels] = useState<Set<number>>(new Set());
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	
-	// Состояния для каскадных селектов
 	const [selectedBlockId, setSelectedBlockId] = useState<string>('');
 	const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 	const [selectedGroupId, setSelectedGroupId] = useState<string>('');
 	
-	// Получаем выбранный блок
+	const [showAddLevelModal, setShowAddLevelModal] = useState(false);
+	const [editingLevelIndex, setEditingLevelIndex] = useState<number | null>(null);
+	const [newLevelData, setNewLevelData] = useState<CompetencyLevel>({
+		levelId: '',
+		levelName: '',
+		levelValue: 1,
+		description: '',
+		example: '',
+		materialIds: [],
+	});
+	
 	const selectedBlock = competencyBlocks.find(b => b.id === selectedBlockId);
-	// Получаем выбранную категорию
 	const selectedCategory = selectedBlock?.categories?.find(c => c.id === selectedCategoryId);
-	// Получаем доступные группы
 	const availableGroups = selectedCategory?.groups || [];
 
-	const prevInitialDataRef = useRef<CompetencyData | null | undefined>(null);
-	const prevSelectedMaterialIdsRef = useRef<string[]>([]);
+	const getLevelById = (levelId: string) => {
+		return availableLevels.find(l => l.id === levelId);
+	};
 
-	// Обновляем форму при изменении initialData или selectedMaterialIds
-	useEffect(() => {
-		const hasChanged = initialData?.id !== prevInitialDataRef.current?.id;
-		const materialsChanged = JSON.stringify(selectedMaterialIds) !== JSON.stringify(prevSelectedMaterialIdsRef.current);
+	const getLevelColor = (value: number): string => {
+		const colors = ['', '#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#f44336'];
+		return colors[value] || '#9e9e9e';
+	};
+
+	const getLevelIcon = (value: number): string => {
+		const icons = ['', '🌱', '⭐', '🏆', '🚀', '👑'];
+		return icons[value] || '📚';
+	};
+
+	// Получаем ID материалов, уже привязанных к ДРУГИМ уровням (не к редактируемому)
+	const getMaterialsUsedByOtherLevels = (currentLevelId?: string): Set<string> => {
+		const usedMaterialIds = new Set<string>();
 		
-		// Если открыт режим редактирования и есть initialData
-		if (mode === 'edit' && initialData) {
-			if (hasChanged) {
-				console.log('Edit mode - new initialData:', initialData);
-				// Используем materialIds из initialData (они должны быть правильными)
-				const materialIds = initialData.materialIds || [];
-				
-				setFormData({
-					...initialData,
-					materialIds: materialIds,
-				});
-				setSelectedBlockId(initialData.blockId);
-				setSelectedCategoryId(initialData.categoryId || '');
-				setSelectedGroupId(initialData.groupId);
-				
-				if (materialIds.length > 0) {
-					setExpandedMaterials(true);
-				}
-				prevInitialDataRef.current = initialData;
-				prevSelectedMaterialIdsRef.current = materialIds;
-			} else if (materialsChanged) {
-				// Если изменились только материалы при том же initialData
-				console.log('Edit mode - materials changed:', selectedMaterialIds);
-				setFormData(prev => ({
-					...prev,
-					materialIds: selectedMaterialIds,
-				}));
-				if (selectedMaterialIds.length > 0) {
-					setExpandedMaterials(true);
-				}
-				prevSelectedMaterialIdsRef.current = selectedMaterialIds;
+		formData.levels.forEach(level => {
+			// Если это редактируемый уровень - пропускаем его
+			if (currentLevelId && level.levelId === currentLevelId) {
+				return;
 			}
-		}
-		// Если режим создания
-		else if (mode === 'create') {
-			if (selectedMaterialIds.length > 0 && JSON.stringify(selectedMaterialIds) !== JSON.stringify(prevSelectedMaterialIdsRef.current)) {
-				console.log('Create mode - selected materials:', selectedMaterialIds);
-				setFormData(prev => ({
-					...prev,
-					materialIds: selectedMaterialIds,
-				}));
-				if (selectedMaterialIds.length > 0) {
-					setExpandedMaterials(true);
-				}
-				prevSelectedMaterialIdsRef.current = selectedMaterialIds;
-			}
-		}
-	}, [initialData, selectedMaterialIds, mode]);
+			level.materialIds.forEach(mid => usedMaterialIds.add(mid));
+		});
+		
+		return usedMaterialIds;
+	};
 
-	// Сбрасываем форму при закрытии
+	// Фильтруем материалы для модального окна
+	const getFilteredMaterialsForModal = () => {
+		const currentLevelId = editingLevelIndex !== null 
+			? formData.levels[editingLevelIndex]?.levelId 
+			: undefined;
+		
+		const usedByOtherLevels = getMaterialsUsedByOtherLevels(currentLevelId);
+		
+		return materials.filter(material => {
+			// Поиск по названию
+			const matchesSearch = material.name.toLowerCase().includes(searchQuery.toLowerCase());
+			if (!matchesSearch) return false;
+			
+			// Если материал уже используется на другом уровне - не показываем его
+			if (usedByOtherLevels.has(material.id)) return false;
+			
+			return true;
+		});
+	};
+
+	useEffect(() => {
+		if (isOpen && mode === 'edit' && initialData) {
+			setFormData({
+				id: initialData.id,
+				name: initialData.name || '',
+				groupId: initialData.groupId || '',
+				groupName: initialData.groupName || '',
+				blockId: initialData.blockId || '',
+				blockName: initialData.blockName || '',
+				categoryId: initialData.categoryId || '',
+				categoryName: initialData.categoryName || '',
+				description: initialData.description || '',
+				defenseTasks: initialData.defenseTasks || '',
+				acceptanceCriteria: initialData.acceptanceCriteria || '',
+				article: initialData.article || '',
+				levels: initialData.levels || [],
+			});
+			
+			setSelectedBlockId(initialData.blockId || '');
+			setSelectedCategoryId(initialData.categoryId || '');
+			setSelectedGroupId(initialData.groupId || '');
+		}
+	}, [isOpen, mode, initialData]);
+
 	useEffect(() => {
 		if (!isOpen) {
 			const timeout = setTimeout(() => {
@@ -150,25 +173,21 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 					categoryId: '',
 					categoryName: '',
 					description: '',
-					level: 1,
 					defenseTasks: '',
 					acceptanceCriteria: '',
 					article: '',
-					materialIds: [],
+					levels: [],
 				});
 				setSelectedBlockId('');
 				setSelectedCategoryId('');
 				setSelectedGroupId('');
 				setSearchQuery('');
-				setExpandedMaterials(false);
-				prevInitialDataRef.current = null;
-				prevSelectedMaterialIdsRef.current = [];
+				setExpandedLevels(new Set());
 			}, 300);
 			return () => clearTimeout(timeout);
 		}
 	}, [isOpen]);
 
-	// Обработчик выбора блока
 	const handleBlockChange = (blockId: string) => {
 		const block = competencyBlocks.find(b => b.id === blockId);
 		setSelectedBlockId(blockId);
@@ -186,7 +205,6 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		}));
 	};
 
-	// Обработчик выбора категории
 	const handleCategoryChange = (categoryId: string) => {
 		const category = selectedBlock?.categories?.find(c => c.id === categoryId);
 		setSelectedCategoryId(categoryId);
@@ -201,7 +219,6 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		}));
 	};
 
-	// Обработчик выбора группы
 	const handleGroupChange = (groupId: string) => {
 		const group = availableGroups.find(g => g.id === groupId);
 		setSelectedGroupId(groupId);
@@ -213,18 +230,131 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		}));
 	};
 
-	const handleMaterialToggle = (materialId: string) => {
-		setFormData(prev => ({
-			...prev,
-			materialIds: prev.materialIds?.includes(materialId)
-				? prev.materialIds.filter((id) => id !== materialId)
-				: [...(prev.materialIds || []), materialId],
-		}));
+	const handleMaterialToggleForLevel = (levelIndex: number, materialId: string) => {
+		setFormData(prev => {
+			const updatedLevels = [...prev.levels];
+			const level = updatedLevels[levelIndex];
+			const materialIds = level.materialIds.includes(materialId)
+				? level.materialIds.filter(id => id !== materialId)
+				: [...level.materialIds, materialId];
+			updatedLevels[levelIndex] = { ...level, materialIds };
+			return { ...prev, levels: updatedLevels };
+		});
 	};
 
-	const filteredMaterials = materials.filter(material =>
-		material.name.toLowerCase().includes(searchQuery.toLowerCase())
-	);
+	const handleAddLevel = () => {
+		if (!newLevelData.levelId) {
+			alert('Выберите уровень владения');
+			return;
+		}
+		
+		const selectedLevel = getLevelById(newLevelData.levelId);
+		if (!selectedLevel) return;
+		
+		const levelExists = formData.levels.some(l => l.levelId === newLevelData.levelId);
+		if (levelExists) {
+			alert('Этот уровень уже добавлен');
+			return;
+		}
+		
+		const newLevel: CompetencyLevel = {
+			levelId: newLevelData.levelId,
+			levelName: selectedLevel.name,
+			levelValue: selectedLevel.value,
+			description: newLevelData.description,
+			example: newLevelData.example,
+			materialIds: newLevelData.materialIds,
+		};
+		
+		const updatedLevels = [...formData.levels, newLevel].sort((a, b) => a.levelValue - b.levelValue);
+		
+		setFormData(prev => ({
+			...prev,
+			levels: updatedLevels,
+		}));
+		
+		setShowAddLevelModal(false);
+		setNewLevelData({
+			levelId: '',
+			levelName: '',
+			levelValue: 1,
+			description: '',
+			example: '',
+			materialIds: [],
+		});
+	};
+
+	const handleEditLevel = () => {
+		if (editingLevelIndex === null) return;
+		
+		const updatedLevels = [...formData.levels];
+		updatedLevels[editingLevelIndex] = {
+			...updatedLevels[editingLevelIndex],
+			description: newLevelData.description,
+			example: newLevelData.example,
+			materialIds: newLevelData.materialIds,
+		};
+		
+		setFormData(prev => ({
+			...prev,
+			levels: updatedLevels,
+		}));
+		
+		setShowAddLevelModal(false);
+		setEditingLevelIndex(null);
+		setNewLevelData({
+			levelId: '',
+			levelName: '',
+			levelValue: 1,
+			description: '',
+			example: '',
+			materialIds: [],
+		});
+	};
+
+	const handleRemoveLevel = (index: number) => {
+		const updatedLevels = formData.levels.filter((_, i) => i !== index);
+		setFormData(prev => ({ ...prev, levels: updatedLevels }));
+	};
+
+	const openAddLevelModal = () => {
+		setEditingLevelIndex(null);
+		setNewLevelData({
+			levelId: '',
+			levelName: '',
+			levelValue: 1,
+			description: '',
+			example: '',
+			materialIds: [],
+		});
+		setShowAddLevelModal(true);
+	};
+
+	const openEditLevelModal = (index: number) => {
+		const level = formData.levels[index];
+		setEditingLevelIndex(index);
+		setNewLevelData({
+			levelId: level.levelId,
+			levelName: level.levelName,
+			levelValue: level.levelValue,
+			description: level.description,
+			example: level.example,
+			materialIds: level.materialIds,
+		});
+		setShowAddLevelModal(true);
+	};
+
+	const toggleLevelExpand = (index: number) => {
+		const newExpanded = new Set(expandedLevels);
+		if (newExpanded.has(index)) {
+			newExpanded.delete(index);
+		} else {
+			newExpanded.add(index);
+		}
+		setExpandedLevels(newExpanded);
+	};
+
+	const filteredMaterialsForModal = getFilteredMaterialsForModal();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -239,11 +369,18 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 			return;
 		}
 		
+		if (formData.levels.length === 0) {
+			alert('Добавьте хотя бы один уровень владения компетенцией');
+			return;
+		}
+		
 		setIsSubmitting(true);
 		
 		try {
-			await onSubmit?.(formData);
-			handleClose();
+			if (onSubmit) {
+				await onSubmit(formData);
+				onClose();
+			}
 		} catch (error) {
 			console.error('Error submitting form:', error);
 			alert('Ошибка при сохранении компетенции');
@@ -252,15 +389,11 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		}
 	};
 
-	const handleClose = () => {
-		onClose();
-	};
-
 	if (!isOpen) return null;
 
 	return (
 		<>
-			<div className={styles.overlay} onClick={handleClose} />
+			<div className={styles.overlay} onClick={onClose} />
 			<div className={`${styles.drawer} ${isOpen ? styles.open : ''}`}>
 				<div className={styles.drawerHeader}>
 					<h3>
@@ -268,214 +401,247 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 							? 'Добавить компетенцию'
 							: 'Редактировать компетенцию'}
 					</h3>
-					<button className={styles.closeBtn} onClick={handleClose}>
+					<button className={styles.closeBtn} onClick={onClose}>
 						×
 					</button>
 				</div>
 
 				<div className={styles.drawerContent}>
 					<form onSubmit={handleSubmit}>
-						<div className={styles.formGroup}>
-							<label>Название компетенции *</label>
-							<input
-								type='text'
-								value={formData.name}
-								onChange={(e) =>
-									setFormData({ ...formData, name: e.target.value })
-								}
-								required
-								placeholder='Введите название компетенции'
-								disabled={isSubmitting}
-							/>
-						</div>
-
-						{/* Каскадные селекты для выбора иерархии */}
-						<div className={styles.formGroup}>
-							<label>Блок компетенций *</label>
-							<select
-								value={selectedBlockId}
-								onChange={(e) => handleBlockChange(e.target.value)}
-								required
-								disabled={isSubmitting}>
-								<option value=''>Выберите блок</option>
-								{competencyBlocks.map((block) => (
-									<option key={block.id} value={block.id}>
-										{block.name}
-									</option>
-								))}
-							</select>
-						</div>
-
-						{selectedBlock && selectedBlock.categories && selectedBlock.categories.length > 0 && (
+						<div className={styles.section}>
+							<h4 className={styles.sectionTitle}>Основная информация</h4>
+							
 							<div className={styles.formGroup}>
-								<label>Категория *</label>
+								<label>Название компетенции *</label>
+								<input
+									type='text'
+									value={formData.name}
+									onChange={(e) =>
+										setFormData({ ...formData, name: e.target.value })
+									}
+									required
+									placeholder='Введите название компетенции'
+									disabled={isSubmitting}
+								/>
+							</div>
+
+							<div className={styles.formGroup}>
+								<label>Блок компетенций *</label>
 								<select
-									value={selectedCategoryId}
-									onChange={(e) => handleCategoryChange(e.target.value)}
+									value={selectedBlockId}
+									onChange={(e) => handleBlockChange(e.target.value)}
 									required
 									disabled={isSubmitting}>
-									<option value=''>Выберите категорию</option>
-									{selectedBlock.categories.map((category) => (
-										<option key={category.id} value={category.id}>
-											{category.name}
+									<option value=''>Выберите блок</option>
+									{competencyBlocks.map((block) => (
+										<option key={block.id} value={block.id}>
+											{block.name}
 										</option>
 									))}
 								</select>
 							</div>
-						)}
 
-						{availableGroups.length > 0 && (
-							<div className={styles.formGroup}>
-								<label>Группа *</label>
-								<select
-									value={selectedGroupId}
-									onChange={(e) => handleGroupChange(e.target.value)}
-									required
-									disabled={isSubmitting}>
-									<option value=''>Выберите группу</option>
-									{availableGroups.map((group) => (
-										<option key={group.id} value={group.id}>
-											{group.name}
-										</option>
-									))}
-								</select>
-							</div>
-						)}
-
-						<div className={styles.formGroup}>
-							<label>Уровень компетенции *</label>
-							<select
-								value={formData.level}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										level: parseInt(e.target.value),
-									})
-								}
-								required
-								className={styles.levelSelect}
-								disabled={isSubmitting}>
-								{Object.entries(levelLabels).map(([value, label]) => (
-									<option key={value} value={value}>
-										{label}
-									</option>
-								))}
-							</select>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label>Описание компетенции</label>
-							<textarea
-								value={formData.description}
-								onChange={(e) =>
-									setFormData({ ...formData, description: e.target.value })
-								}
-								rows={4}
-								placeholder='Общее описание компетенции...'
-								disabled={isSubmitting}
-							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label>Теоретическая статья</label>
-							<textarea
-								value={formData.article}
-								onChange={(e) =>
-									setFormData({ ...formData, article: e.target.value })
-								}
-								rows={4}
-								placeholder='Ссылка на статью или текст статьи...'
-								disabled={isSubmitting}
-							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label>Задания для защиты</label>
-							<textarea
-								value={formData.defenseTasks}
-								onChange={(e) =>
-									setFormData({ ...formData, defenseTasks: e.target.value })
-								}
-								rows={4}
-								placeholder='Практические задания для подтверждения владения компетенцией...'
-								disabled={isSubmitting}
-							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label>Критерии приема</label>
-							<textarea
-								value={formData.acceptanceCriteria}
-								onChange={(e) =>
-									setFormData({
-										...formData,
-										acceptanceCriteria: e.target.value,
-									})
-								}
-								rows={4}
-								placeholder='Критерии оценки выполнения заданий...'
-								disabled={isSubmitting}
-							/>
-						</div>
-
-						{materials.length > 0 && (
-							<div className={styles.formGroup}>
-								<div 
-									className={styles.materialsHeader}
-									onClick={() => setExpandedMaterials(!expandedMaterials)}>
-									<span className={styles.expandIcon}>
-										{expandedMaterials ? '▼' : '▶'}
-									</span>
-									<label>Привязанные материалы (опционально)</label>
-									<span className={styles.materialsCount}>
-										({formData.materialIds?.length || 0} выбрано)
-									</span>
+							{selectedBlock && selectedBlock.categories && selectedBlock.categories.length > 0 && (
+								<div className={styles.formGroup}>
+									<label>Категория</label>
+									<select
+										value={selectedCategoryId}
+										onChange={(e) => handleCategoryChange(e.target.value)}
+										disabled={isSubmitting}>
+										<option value=''>Выберите категорию</option>
+										{selectedBlock.categories.map((category) => (
+											<option key={category.id} value={category.id}>
+												{category.name}
+											</option>
+										))}
+									</select>
 								</div>
+							)}
 
-								{expandedMaterials && (
-									<div className={styles.materialsSection}>
-										<div className={styles.searchWrapper}>
-											<input
-												type='text'
-												placeholder='Поиск материалов...'
-												value={searchQuery}
-												onChange={(e) => setSearchQuery(e.target.value)}
-												className={styles.searchInput}
-												disabled={isSubmitting}
-											/>
-											<span className={styles.searchIcon}>🔍</span>
-										</div>
+							{availableGroups.length > 0 && (
+								<div className={styles.formGroup}>
+									<label>Группа *</label>
+									<select
+										value={selectedGroupId}
+										onChange={(e) => handleGroupChange(e.target.value)}
+										required
+										disabled={isSubmitting}>
+										<option value=''>Выберите группу</option>
+										{availableGroups.map((group) => (
+											<option key={group.id} value={group.id}>
+												{group.name}
+											</option>
+										))}
+									</select>
+								</div>
+							)}
 
-										<div className={styles.materialsList}>
-											{filteredMaterials.map((material) => (
-												<label key={material.id} className={styles.materialItem}>
-													<input
-														type='checkbox'
-														checked={formData.materialIds?.includes(material.id) || false}
-														onChange={() => handleMaterialToggle(material.id)}
-														disabled={isSubmitting}
-													/>
-													<span className={styles.materialName}>
-														{material.name}
-													</span>
-													<span className={styles.materialType}>
-														{material.type}
-													</span>
-												</label>
-											))}
-										</div>
-										{filteredMaterials.length === 0 && (
-											<div className={styles.emptyMaterials}>
-												<p>Материалы не найдены</p>
-											</div>
-										)}
+							<div className={styles.formGroup}>
+								<label>Описание компетенции</label>
+								<textarea
+									value={formData.description}
+									onChange={(e) =>
+										setFormData({ ...formData, description: e.target.value })
+									}
+									rows={4}
+									placeholder='Общее описание компетенции...'
+									disabled={isSubmitting}
+								/>
+							</div>
+
+							<div className={styles.formGroup}>
+								<label>Теоретическая статья</label>
+								<textarea
+									value={formData.article}
+									onChange={(e) =>
+										setFormData({ ...formData, article: e.target.value })
+									}
+									rows={4}
+									placeholder='Ссылка на статью или текст статьи...'
+									disabled={isSubmitting}
+								/>
+							</div>
+
+							<div className={styles.formGroup}>
+								<label>Задания для защиты</label>
+								<textarea
+									value={formData.defenseTasks}
+									onChange={(e) =>
+										setFormData({ ...formData, defenseTasks: e.target.value })
+									}
+									rows={4}
+									placeholder='Практические задания для подтверждения владения компетенцией...'
+									disabled={isSubmitting}
+								/>
+							</div>
+
+							<div className={styles.formGroup}>
+								<label>Критерии приема</label>
+								<textarea
+									value={formData.acceptanceCriteria}
+									onChange={(e) =>
+										setFormData({
+											...formData,
+											acceptanceCriteria: e.target.value,
+										})
+									}
+									rows={4}
+									placeholder='Критерии оценки выполнения заданий...'
+									disabled={isSubmitting}
+								/>
+							</div>
+						</div>
+
+						<div className={styles.section}>
+							<div className={styles.sectionHeader}>
+								<h4 className={styles.sectionTitle}>Уровни владения компетенцией *</h4>
+								<button
+									type="button"
+									className={styles.addLevelBtn}
+									onClick={openAddLevelModal}
+									disabled={isSubmitting}>
+									+ Добавить уровень
+								</button>
+							</div>
+
+							<div className={styles.levelsList}>
+								{formData.levels.length === 0 && (
+									<div className={styles.emptyLevels}>
+										<p>Нет добавленных уровней</p>
+										<small>Нажмите "Добавить уровень", чтобы описать уровни владения этой компетенцией</small>
 									</div>
 								)}
+								
+								{formData.levels.map((level, index) => {
+									const isExpanded = expandedLevels.has(index);
+									const levelColor = getLevelColor(level.levelValue);
+									
+									return (
+										<div key={index} className={styles.levelCard}>
+											<div 
+												className={styles.levelHeader}
+												style={{ borderLeftColor: levelColor }}
+												onClick={() => toggleLevelExpand(index)}>
+												<div className={styles.levelTitle}>
+													<span className={styles.levelIcon}>{getLevelIcon(level.levelValue)}</span>
+													<span className={styles.levelName}>{level.levelName}</span>
+													<span className={styles.levelValue}>Уровень {level.levelValue}</span>
+													{level.materialIds.length > 0 && (
+														<span className={styles.materialsBadge}>
+															📚 {level.materialIds.length} материалов
+														</span>
+													)}
+												</div>
+												<div className={styles.levelActions} onClick={(e) => e.stopPropagation()}>
+													<button
+														type="button"
+														className={styles.editLevelBtn}
+														onClick={() => openEditLevelModal(index)}
+														title="Редактировать уровень">
+														✏️
+													</button>
+													<button
+														type="button"
+														className={styles.removeLevelBtn}
+														onClick={() => handleRemoveLevel(index)}
+														title="Удалить уровень">
+														🗑️
+													</button>
+													<span className={styles.expandIcon}>
+														{isExpanded ? '▲' : '▼'}
+													</span>
+												</div>
+											</div>
+											
+											{isExpanded && (
+												<div className={styles.levelContent}>
+													{level.description && (
+														<div className={styles.levelDescription}>
+															<strong>Описание уровня:</strong>
+															<p>{level.description}</p>
+														</div>
+													)}
+													
+													{level.example && (
+														<div className={styles.levelExample}>
+															<strong>Пример:</strong>
+															<p>{level.example}</p>
+														</div>
+													)}
+													
+													{materials.length > 0 && (
+														<div className={styles.levelMaterialsSection}>
+															<strong>Учебные материалы для этого уровня:</strong>
+															<div className={styles.materialsList}>
+																{materials.map(material => {
+																	const isSelected = level.materialIds.includes(material.id);
+																	return (
+																		<label key={material.id} className={styles.materialItem}>
+																			<input
+																				type="checkbox"
+																				checked={isSelected}
+																				onChange={() => handleMaterialToggleForLevel(index, material.id)}
+																				disabled={isSubmitting}
+																			/>
+																			<span className={styles.materialName}>{material.name}</span>
+																			<span className={styles.materialType}>{material.type}</span>
+																		</label>
+																	);
+																})}
+															</div>
+														</div>
+													)}
+												</div>
+											)}
+										</div>
+									);
+								})}
 							</div>
-						)}
+						</div>
 						
 						<div className={styles.hint}>
-							💡 <strong>Примечание:</strong> Привязка материалов к компетенции необязательна.
+							💡 <strong>Примечание:</strong> Для каждой компетенции необходимо добавить хотя бы один уровень владения. 
+							Каждому уровню можно привязать учебные материалы.
 						</div>
 					</form>
 				</div>
@@ -483,7 +649,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 				<div className={styles.drawerFooter}>
 					<button
 						type='button'
-						onClick={handleClose}
+						onClick={onClose}
 						className={styles.cancelBtn}
 						disabled={isSubmitting}>
 						Отмена
@@ -499,6 +665,109 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 					</button>
 				</div>
 			</div>
+
+			{showAddLevelModal && (
+				<div className={styles.modal} onClick={() => setShowAddLevelModal(false)}>
+					<div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+						<h3>{editingLevelIndex !== null ? 'Редактировать уровень' : 'Добавить уровень владения'}</h3>
+						
+						<div className={styles.formGroup}>
+							<label>Уровень владения *</label>
+							<select
+								value={newLevelData.levelId}
+								onChange={(e) => {
+									const level = getLevelById(e.target.value);
+									setNewLevelData({
+										...newLevelData,
+										levelId: e.target.value,
+										levelName: level?.name || '',
+										levelValue: level?.value || 1,
+									});
+								}}
+								disabled={editingLevelIndex !== null}>
+								<option value=''>Выберите уровень</option>
+								{availableLevels
+									.filter(level => 
+										editingLevelIndex !== null || 
+										!formData.levels.some(l => l.levelId === level.id)
+									)
+									.map(level => (
+										<option key={level.id} value={level.id}>
+											{level.name} (Уровень {level.value})
+										</option>
+									))}
+							</select>
+						</div>
+						
+						<div className={styles.formGroup}>
+							<label>Описание уровня</label>
+							<textarea
+								value={newLevelData.description}
+								onChange={(e) => setNewLevelData({ ...newLevelData, description: e.target.value })}
+								rows={3}
+								placeholder="Опишите, что должен уметь сотрудник на этом уровне..."
+							/>
+						</div>
+						
+						<div className={styles.formGroup}>
+							<label>Пример</label>
+							<textarea
+								value={newLevelData.example}
+								onChange={(e) => setNewLevelData({ ...newLevelData, example: e.target.value })}
+								rows={3}
+								placeholder="Приведите пример задач или ситуаций..."
+							/>
+						</div>
+						
+						{materials.length > 0 && (
+							<div className={styles.formGroup}>
+								<label>Учебные материалы для этого уровня</label>
+								<div className={styles.modalMaterialsList}>
+									<div className={styles.searchWrapper}>
+										<input
+											type='text'
+											placeholder='Поиск материалов...'
+											value={searchQuery}
+											onChange={(e) => setSearchQuery(e.target.value)}
+											className={styles.searchInput}
+										/>
+									</div>
+									<div className={styles.materialsCheckList}>
+										{filteredMaterialsForModal.length === 0 && (
+											<div className={styles.noMaterials}>
+												{searchQuery ? 'Материалы не найдены' : 'Нет доступных материалов (все уже привязаны к другим уровням)'}
+											</div>
+										)}
+										{filteredMaterialsForModal.map(material => (
+											<label key={material.id} className={styles.materialItem}>
+												<input
+													type='checkbox'
+													checked={newLevelData.materialIds.includes(material.id)}
+													onChange={() => {
+														const newIds = newLevelData.materialIds.includes(material.id)
+															? newLevelData.materialIds.filter(id => id !== material.id)
+															: [...newLevelData.materialIds, material.id];
+														setNewLevelData({ ...newLevelData, materialIds: newIds });
+													}}
+												/>
+												<span className={styles.materialName}>{material.name}</span>
+												<span className={styles.materialType}>{material.type}</span>
+											</label>
+										))}
+									</div>
+								</div>
+							</div>
+						)}
+						
+						<div className={styles.modalActions}>
+							<button type="button" onClick={() => setShowAddLevelModal(false)}>Отмена</button>
+							<button type="button" onClick={editingLevelIndex !== null ? handleEditLevel : handleAddLevel}>
+								{editingLevelIndex !== null ? 'Сохранить' : 'Добавить'}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</>
 	);
 };

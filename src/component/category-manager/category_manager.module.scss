@@ -30,41 +30,46 @@
 	}
 }
 
-.addBlock {
+.headerButtons {
 	display: flex;
-	gap: $spacing-sm;
+	gap: $spacing-md;
+	align-items: center;
+}
 
-	input {
-		width: 300px;
-		padding: $spacing-sm $spacing-lg;
-		font-size: $font-md;
-		border: 1px solid $border-color;
-		border-radius: $border-radius-md;
+.addBlockBtn {
+	@include button-reset;
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $primary;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: background 0.2s;
 
-		&:focus {
-			border-color: $primary;
-			outline: none;
-		}
+	&:hover {
+		background: $primary-hover;
+	}
+}
+
+.saveBtn {
+	@include button-reset;
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $success;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: background 0.2s;
+
+	&:hover {
+		background: darken($success, 10%);
 	}
 
-	.addBtn {
-		@include button-reset;
-		padding: $spacing-sm $spacing-xl;
-		color: $white;
-		font-weight: 500;
-		font-size: $font-md;
-		background: $primary;
-		border-radius: $border-radius-md;
-
-		&:hover {
-			background: $primary-hover;
-		}
-	}
-
-	@include mobile {
-		input {
-			width: 100%;
-		}
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 }
 
@@ -107,42 +112,9 @@
 	}
 }
 
-.expandIcon {
-	width: 20px;
-	color: $text-secondary;
-	font-size: $font-sm;
-	text-align: center;
-}
-
-.itemCount {
-	margin-left: $spacing-sm;
-	padding: $spacing-xs $spacing-sm;
-	color: $text-secondary;
-	font-size: $font-sm;
-	background: $white;
-	border-radius: $border-radius-xl;
-}
-
 .blockActions {
 	display: flex;
 	gap: $spacing-xs;
-}
-
-.iconBtn {
-	@include button-reset;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 32px;
-	height: 32px;
-	font-size: $font-lg;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-sm;
-
-	&:hover {
-		background: $white;
-		border-color: $primary;
-	}
 }
 
 .blockContent {
@@ -153,10 +125,130 @@
 	background: $white;
 }
 
+// Стили для Категорий
+.category {
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+}
+
+.categoryHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: $spacing-md $spacing-lg;
+	background: $background-hover;
+	cursor: pointer;
+	transition: background 0.2s;
+
+	&:hover {
+		background: darken($background-hover, 2%);
+	}
+}
+
+.categoryTitle {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+
+	h5 {
+		margin: 0;
+		color: $text-primary;
+		font-weight: 600;
+		font-size: $font-lg;
+	}
+}
+
+.categoryActions {
+	display: flex;
+	gap: $spacing-xs;
+}
+
+.categoryContent {
+	padding: $spacing-lg;
+	background: $white;
+}
+
+// Стили для Групп
+.group {
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	margin-bottom: $spacing-md;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.groupHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: $spacing-sm $spacing-lg;
+	background: $background-light;
+	cursor: pointer;
+	transition: background 0.2s;
+	border-bottom: 1px solid transparent;
+
+	&:hover {
+		background: darken($background-light, 3%);
+	}
+}
+
+.groupTitle {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	flex: 1;
+
+	h6 {
+		margin: 0;
+		color: $text-primary;
+		font-weight: 500;
+		font-size: $font-md;
+	}
+}
+
+.competencyCount {
+	margin-left: $spacing-sm;
+	padding: $spacing-xs $spacing-sm;
+	color: $text-secondary;
+	font-size: $font-xs;
+	background: $white;
+	border-radius: $border-radius-xl;
+}
+
+.groupContent {
+	padding: $spacing-md;
+	background: $white;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-md;
+}
+
+.emptyGroup {
+	padding: $spacing-lg;
+	text-align: center;
+	color: $text-secondary;
+	font-size: $font-sm;
+	background: $background-light;
+	border-radius: $border-radius-md;
+
+	p {
+		margin: 0;
+	}
+}
+
+// Стили для компетенций
 .competencyContainer {
 	overflow: hidden;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	transition: all 0.2s;
+
+	&:hover {
+		border-color: $primary-light;
+		box-shadow: $shadow-sm;
+	}
 }
 
 .competencyHeader {
@@ -164,8 +256,13 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: $spacing-sm $spacing-md;
-	background: $background-light;
+	background: $white;
 	border-bottom: 1px solid $border-color;
+	transition: background 0.2s;
+
+	&:hover {
+		background: $background-light;
+	}
 }
 
 .competencyTitle {
@@ -174,42 +271,75 @@
 	align-items: center;
 	gap: $spacing-sm;
 	cursor: pointer;
+	user-select: none;
 
 	.competencyName {
 		color: $text-primary;
 		font-weight: 500;
 		font-size: $font-md;
+		flex: 1;
 	}
 }
 
-.levelBadge {
-	display: inline-block;
-	margin-left: $spacing-sm;
-	padding: $spacing-xs $spacing-sm;
-	font-weight: 500;
-	font-size: $font-xs;
-	border-radius: $border-radius-xl;
+.addLevelBtn {
+	@include button-reset;
+	padding: $spacing-xs $spacing-md;
+	color: $success;
+	font-size: $font-sm;
+	background: $success-light;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
 
-	&.level1 {
-		color: $warning;
-		background: $warning-light;
-	}
-
-	&.level2 {
-		color: $primary;
-		background: $primary-light;
-	}
-
-	&.level3 {
-		color: $success;
-		background: $success-light;
+	&:hover {
+		background: darken($success-light, 5%);
 	}
 }
 
-.competencyActions {
+// Стили для уровней и материалов
+.materialsByLevel {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-md;
+	padding: $spacing-md;
+}
+
+.levelSection {
+	overflow: hidden;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	background: $white;
+}
+
+.levelHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: $spacing-sm $spacing-md;
+	background: $background-light;
+	cursor: pointer;
+	border-left: 4px solid;
+	transition: all 0.2s;
+
+	&:hover {
+		background: darken($background-light, 2%);
+	}
+}
+
+.levelTitle {
 	display: flex;
 	align-items: center;
 	gap: $spacing-sm;
+}
+
+.levelIcon {
+	font-size: $font-md;
+}
+
+.levelName {
+	font-weight: 600;
+	font-size: $font-md;
+	color: $text-primary;
 }
 
 .materialCount {
@@ -220,21 +350,32 @@
 	border-radius: $border-radius-xl;
 }
 
-.smallIconBtn {
-	@include button-reset;
+.levelActions {
 	display: flex;
-	justify-content: center;
 	align-items: center;
-	width: 24px;
-	height: 24px;
+	gap: $spacing-sm;
+}
+
+.addMaterialBtn {
+	@include button-reset;
+	padding: $spacing-xs $spacing-md;
+	color: $primary;
 	font-size: $font-sm;
-	border: 1px solid $border-color;
+	background: $primary-light;
 	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
 
 	&:hover {
-		background: $primary-light;
-		border-color: $primary;
+		background: darken($primary-light, 5%);
 	}
+}
+
+.expandIcon {
+	width: 20px;
+	color: $text-secondary;
+	font-size: $font-sm;
+	text-align: center;
 }
 
 .materialsList {
@@ -242,6 +383,13 @@
 	flex-direction: column;
 	gap: $spacing-sm;
 	padding: $spacing-md;
+	min-height: 100px;
+	background: $white;
+	transition: background 0.2s;
+
+	&[data-drag-over="true"] {
+		background: $primary-light;
+	}
 }
 
 .materialCard {
@@ -251,10 +399,12 @@
 	border-radius: $border-radius-md;
 	cursor: move;
 	transition: all 0.2s;
+	position: relative;
 
 	&:hover {
 		border-color: $primary;
 		box-shadow: $shadow-sm;
+		transform: translateX(2px);
 	}
 
 	&:active {
@@ -276,21 +426,75 @@
 	font-size: $font-sm;
 }
 
+.materialActions {
+	display: flex;
+	gap: $spacing-xs;
+}
+
+.removeMaterialBtn {
+	@include button-reset;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 24px;
+	height: 24px;
+	font-size: $font-sm;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+		border-color: $danger;
+	}
+}
+
 .materialMeta {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	gap: $spacing-md;
 	font-size: $font-xs;
 }
 
-.materialUrl a {
-	color: $primary;
-	font-size: $font-xs;
-	text-decoration: none;
+.materialUrl {
+	flex: 1;
+	overflow: hidden;
 
-	&:hover {
-		text-decoration: underline;
+	a {
+		color: $primary;
+		font-size: $font-xs;
+		text-decoration: none;
+		word-break: break-all;
+
+		&:hover {
+			text-decoration: underline;
+		}
 	}
+}
+
+.duration {
+	display: flex;
+	align-items: center;
+	gap: $spacing-xs;
+	color: $text-secondary;
+	font-size: $font-xs;
+	white-space: nowrap;
+}
+
+.newMaterialBadge {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	padding: 2px 8px;
+	color: $white;
+	font-size: $font-xs;
+	font-weight: 600;
+	background: $success;
+	border-radius: $border-radius-xl;
+	box-shadow: $shadow-sm;
 }
 
 .emptyMaterials {
@@ -311,86 +515,7 @@
 	}
 }
 
-.footer {
-	margin-top: $spacing-xl;
-	padding-top: $spacing-lg;
-	border-top: 1px solid $border-color;
-}
-
-.hint {
-	margin: 0;
-	color: $text-secondary;
-	font-size: $font-sm;
-	line-height: 1.5;
-	text-align: center;
-}
-
-@include mobile {
-	.header {
-		flex-direction: column;
-		gap: $spacing-md;
-	}
-
-	.addBlock {
-		width: 100%;
-
-		input {
-			width: 100%;
-		}
-	}
-
-	.blockHeader {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: $spacing-sm;
-	}
-
-	.blockActions {
-		justify-content: flex-end;
-		width: 100%;
-	}
-
-	.competencyHeader {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: $spacing-sm;
-	}
-
-	.competencyActions {
-		justify-content: flex-end;
-		width: 100%;
-	}
-
-	.materialMeta {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: $spacing-xs;
-	}
-}
-// category_manager.module.scss - добавить в секцию .header
-
-.saveBtn {
-	@include button-reset;
-	padding: $spacing-sm $spacing-xl;
-	color: $white;
-	font-weight: 500;
-	font-size: $font-md;
-	background: $success;
-	border-radius: $border-radius-md;
-	cursor: pointer;
-	transition: background 0.2s;
-
-	&:hover {
-		background: darken($success, 10%);
-	}
-
-	&:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-}
-
-// Добавить стили для модального окна
+// Стили для модальных окон
 .modal {
 	position: fixed;
 	top: 0;
@@ -402,6 +527,7 @@
 	width: 100%;
 	height: 100%;
 	background: rgba(0, 0, 0, 0.5);
+	animation: fadeIn 0.2s ease-out;
 }
 
 .modalContent {
@@ -411,6 +537,7 @@
 	background: $white;
 	border-radius: $border-radius-lg;
 	box-shadow: $shadow-lg;
+	animation: slideUp 0.3s ease-out;
 
 	h3 {
 		margin: 0 0 $spacing-lg 0;
@@ -430,17 +557,24 @@
 		font-weight: 500;
 	}
 
-	select {
+	input, select {
 		width: 100%;
 		padding: $spacing-sm $spacing-md;
 		font-size: $font-md;
 		border: 1px solid $border-color;
 		border-radius: $border-radius-md;
+		transition: all 0.2s;
 
 		&:focus {
 			border-color: $primary;
 			outline: none;
+			box-shadow: 0 0 0 2px rgba($primary, 0.1);
 		}
+	}
+
+	.disabledInput {
+		background: $background-light;
+		cursor: not-allowed;
 	}
 }
 
@@ -456,6 +590,7 @@
 		border: none;
 		border-radius: $border-radius-md;
 		cursor: pointer;
+		transition: all 0.2s;
 
 		&:first-child {
 			color: $text-secondary;
@@ -482,316 +617,217 @@
 	}
 }
 
-.materialActions {
-	display: flex;
-	gap: $spacing-xs;
+// Сообщения
+.successMessage {
+	position: fixed;
+	top: $spacing-xl;
+	right: $spacing-xl;
+	z-index: 1001;
+	padding: $spacing-md $spacing-xl;
+	color: $success;
+	font-weight: 500;
+	background: $success-light;
+	border: 1px solid $success;
+	border-radius: $border-radius-md;
+	box-shadow: $shadow-md;
+	animation: slideIn 0.3s ease-out;
 }
 
-.removeMaterialBtn {
-	@include button-reset;
+.errorMessage {
+	position: fixed;
+	top: $spacing-xl;
+	right: $spacing-xl;
+	z-index: 1001;
+	padding: $spacing-md $spacing-xl;
+	color: $danger;
+	font-weight: 500;
+	background: $danger-light;
+	border: 1px solid $danger;
+	border-radius: $border-radius-md;
+	box-shadow: $shadow-md;
+	animation: slideIn 0.3s ease-out;
+}
+
+.loading {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 24px;
-	height: 24px;
-	font-size: $font-sm;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-sm;
-	cursor: pointer;
+	min-height: 400px;
+	color: $text-secondary;
+	font-size: $font-lg;
+}
 
-	&:hover {
-		color: $danger;
-		background: $danger-light;
-		border-color: $danger;
+// Анимации
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
 	}
 }
 
-.addMaterialBtn {
-	@include button-reset;
-	padding: $spacing-xs $spacing-md;
-	color: $primary;
-	font-size: $font-sm;
-	background: $primary-light;
-	border-radius: $border-radius-sm;
-	cursor: pointer;
-
-	&:hover {
-		background: darken($primary-light, 5%);
+@keyframes slideUp {
+	from {
+		transform: translateY(50px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
 	}
 }
-/* Стили для Категорий */
-.category {
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-}
 
-.categoryHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-md $spacing-lg;
-  background: $background-hover;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: darken($background-hover, 2%);
-  }
-}
-
-.categoryTitle {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-
-  h5 {
-    margin: 0;
-    color: $text-primary;
-    font-weight: 600;
-    font-size: $font-lg; // Обычно категории чуть меньше блоков (h4)
-  }
-}
-
-.expandIcon {
-  width: 20px;
-  color: $text-secondary;
-  font-size: $font-sm;
-}
-
-.categoryActions {
-  display: flex;
-  gap: $spacing-xs;
-}
-
-.categoryContent {
-  padding: $spacing-lg;
-  background: $white; // Чтобы контент категории был на белом фоне
-}
-/* Стили для Групп */
-.group {
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  margin-bottom: $spacing-md;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.groupHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-sm $spacing-lg;
-  background: $background-light;
-  cursor: pointer;
-  transition: background 0.2s;
-  border-bottom: 1px solid transparent;
-
-  &:hover {
-    background: darken($background-light, 3%);
-  }
-}
-
-.groupTitle {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  flex: 1;
-
-  h6 {
-    margin: 0;
-    color: $text-primary;
-    font-weight: 500;
-    font-size: $font-md;
-  }
-}
-
-.competencyCount {
-  margin-left: $spacing-sm;
-  padding: $spacing-xs $spacing-sm;
-  color: $text-secondary;
-  font-size: $font-xs;
-  background: $white;
-  border-radius: $border-radius-xl;
-}
-
-.groupContent {
-  padding: $spacing-md;
-  background: $white;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-}
-
-.emptyGroup {
-  padding: $spacing-lg;
-  text-align: center;
-  color: $text-secondary;
-  font-size: $font-sm;
-  background: $background-light;
-  border-radius: $border-radius-md;
-  
-  p {
-    margin: 0;
-  }
-}
-
-// Обновленные стили для компетенций внутри группы
-.competencyContainer {
-  overflow: hidden;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-md;
-  transition: all 0.2s;
-  
-  &:hover {
-    border-color: $primary-light;
-    box-shadow: $shadow-sm;
-  }
-}
-
-.competencyHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-sm $spacing-md;
-  background: $white;
-  border-bottom: 1px solid $border-color;
-  transition: background 0.2s;
-  
-  &:hover {
-    background: $background-light;
-  }
-}
-
-.competencyTitle {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: $spacing-sm;
-  cursor: pointer;
-  user-select: none;
-
-  .competencyName {
-    color: $text-primary;
-    font-weight: 500;
-    font-size: $font-md;
-    flex: 1;
-  }
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 // Адаптация для мобильных устройств
 @include mobile {
-  .groupHeader {
-    padding: $spacing-sm $spacing-md;
-  }
-  
-  .groupTitle h6 {
-    font-size: $font-sm;
-  }
-  
-  .competencyCount {
-    font-size: $font-xs;
-    padding: $spacing-xs $spacing-sm;
-  }
-  
-  .groupContent {
-    padding: $spacing-sm;
-    gap: $spacing-sm;
-  }
-  
-  .competencyHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: $spacing-sm;
-    padding: $spacing-sm;
-  }
-  
-  .competencyTitle {
-    width: 100%;
-  }
-  
-  .competencyActions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-  
-  .emptyGroup {
-    padding: $spacing-md;
-    font-size: $font-xs;
-  }
-}
+	.container {
+		padding: $spacing-md;
+	}
 
-// Дополнительные стили для улучшения отображения
-.headerButtons {
-  display: flex;
-  gap: $spacing-md;
-  align-items: center;
-}
+	.header {
+		flex-direction: column;
+		gap: $spacing-md;
+	}
 
-.addBlockBtn {
-  @include button-reset;
-  padding: $spacing-sm $spacing-xl;
-  color: $white;
-  font-weight: 500;
-  font-size: $font-md;
-  background: $primary;
-  border-radius: $border-radius-md;
-  cursor: pointer;
-  transition: background 0.2s;
+	.headerButtons {
+		width: 100%;
+		flex-direction: column;
+		gap: $spacing-sm;
+	}
 
-  &:hover {
-    background: $primary-hover;
-  }
-}
+	.addBlockBtn, .saveBtn {
+		width: 100%;
+	}
 
-// Стили для успешных и ошибочных сообщений
-.successMessage {
-  position: fixed;
-  top: $spacing-xl;
-  right: $spacing-xl;
-  z-index: 1001;
-  padding: $spacing-md $spacing-xl;
-  color: $success;
-  font-weight: 500;
-  background: $success-light;
-  border: 1px solid $success;
-  border-radius: $border-radius-md;
-  box-shadow: $shadow-md;
-  animation: slideIn 0.3s ease-out;
-}
+	.blockHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-sm;
+		padding: $spacing-sm $spacing-md;
+	}
 
-.errorMessage {
-  position: fixed;
-  top: $spacing-xl;
-  right: $spacing-xl;
-  z-index: 1001;
-  padding: $spacing-md $spacing-xl;
-  color: $danger;
-  font-weight: 500;
-  background: $danger-light;
-  border: 1px solid $danger;
-  border-radius: $border-radius-md;
-  box-shadow: $shadow-md;
-  animation: slideIn 0.3s ease-out;
-}
+	.blockActions {
+		justify-content: flex-end;
+		width: 100%;
+	}
 
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  color: $text-secondary;
-  font-size: $font-lg;
-}
+	.blockContent {
+		padding: $spacing-sm;
+	}
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+	.categoryHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-sm;
+		padding: $spacing-sm $spacing-md;
+	}
+
+	.categoryActions {
+		justify-content: flex-end;
+		width: 100%;
+	}
+
+	.categoryContent {
+		padding: $spacing-sm;
+	}
+
+	.groupHeader {
+		padding: $spacing-sm $spacing-md;
+	}
+
+	.groupTitle h6 {
+		font-size: $font-sm;
+	}
+
+	.competencyCount {
+		font-size: $font-xs;
+		padding: $spacing-xs $spacing-sm;
+	}
+
+	.groupContent {
+		padding: $spacing-sm;
+		gap: $spacing-sm;
+	}
+
+	.competencyHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-sm;
+		padding: $spacing-sm;
+	}
+
+	.competencyTitle {
+		width: 100%;
+	}
+
+	.addLevelBtn {
+		width: 100%;
+		text-align: center;
+	}
+
+	.materialsByLevel {
+		padding: $spacing-sm;
+	}
+
+	.levelHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-sm;
+		padding: $spacing-sm;
+	}
+
+	.levelActions {
+		width: 100%;
+		justify-content: flex-end;
+	}
+
+	.materialsList {
+		padding: $spacing-sm;
+	}
+
+	.materialCard {
+		padding: $spacing-xs $spacing-sm;
+	}
+
+	.materialMeta {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-xs;
+	}
+
+	.duration {
+		white-space: normal;
+	}
+
+	.successMessage, .errorMessage {
+		top: $spacing-md;
+		right: $spacing-md;
+		left: $spacing-md;
+		padding: $spacing-sm $spacing-md;
+		font-size: $font-sm;
+	}
+
+	.modalContent {
+		padding: $spacing-lg;
+	}
+
+	.modalActions {
+		flex-direction: column;
+		gap: $spacing-sm;
+
+		button {
+			width: 100%;
+		}
+	}
 }

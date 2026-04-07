@@ -1,4 +1,10 @@
+// competencies-matrix.module.scss
 @import '../../variables.module';
+
+// Дополнительные переменные, которых нет в основном файле
+$info: #0288d1;
+$info-light: #e1f5fe;
+$text-muted: #999999;
 
 .matrix {
 	width: 100%;
@@ -31,35 +37,91 @@
 	}
 }
 
-.filter {
+.resetBtn {
+	padding: $spacing-sm $spacing-lg;
+	color: $primary;
+	font-size: $font-sm;
+	background: $primary-light;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: rgba($primary, 0.2);
+	}
+}
+
+.filtersBar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $spacing-lg;
+	padding: $spacing-lg $spacing-xl;
+	background: $background-hover;
+	border-bottom: 1px solid $border-color;
+
+	@include mobile {
+		flex-direction: column;
+		gap: $spacing-md;
+		padding: $spacing-md;
+	}
+}
+
+.filterGroup {
 	display: flex;
 	align-items: center;
-	gap: $spacing-md;
+	gap: $spacing-sm;
+	flex: 1;
+	min-width: 180px;
 
 	label {
 		color: $text-secondary;
-		font-size: $font-md;
+		font-size: $font-sm;
+		font-weight: 500;
 		white-space: nowrap;
 	}
 }
 
-.blockSelect {
-	min-width: 250px;
-	padding: $spacing-sm $spacing-lg;
+.filterSelect {
+	flex: 1;
+	padding: $spacing-sm $spacing-md;
 	color: $text-primary;
 	font-size: $font-md;
 	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 	cursor: pointer;
+	transition: all 0.2s;
 
 	&:focus {
 		border-color: $primary;
 		outline: none;
 	}
 
-	@include mobile {
-		width: 100%;
+	&:disabled {
+		background: $background-light;
+		cursor: not-allowed;
+		opacity: 0.6;
+	}
+}
+
+.searchInput {
+	flex: 1;
+	padding: $spacing-sm $spacing-md;
+	color: $text-primary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	transition: all 0.2s;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	&::placeholder {
+		color: $text-muted;
 	}
 }
 
@@ -77,7 +139,7 @@
 
 .row {
 	display: grid;
-	grid-template-columns: 2fr 1.5fr 1fr 2fr 0.8fr;
+	grid-template-columns: 2fr 1.5fr 1fr 0.8fr;
 	border-bottom: 1px solid $border-color;
 	transition: background 0.3s;
 
@@ -138,52 +200,55 @@
 	}
 }
 
-.blockBadge {
+.hierarchyPath {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: $spacing-xs;
+}
+
+.breadcrumb {
 	display: inline-block;
-	max-width: 100%;
-	padding: $spacing-xs $spacing-md;
+	max-width: 150px;
+	padding: 2px 6px;
 	overflow: hidden;
 	color: $text-secondary;
 	font-size: $font-sm;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	background: $background-light;
-	border-radius: $border-radius-xl;
+	border-radius: $border-radius-sm;
 }
 
-.levelBadge {
-	display: inline-block;
-	min-width: 120px;
+.separator {
+	color: $text-muted;
+	font-size: $font-sm;
+}
+
+.levelsContainer {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $spacing-sm;
+}
+
+.levelIndicator {
+	display: inline-flex;
+	align-items: center;
+	gap: $spacing-xs;
 	padding: $spacing-xs $spacing-md;
-	font-weight: 500;
 	font-size: $font-sm;
-	text-align: center;
 	border-radius: $border-radius-xl;
+	transition: all 0.2s;
 
-	&.level1 {
-		color: $warning;
-		background: $warning-light;
+	&.hasLevel {
+		color: $white;
 	}
 
-	&.level2 {
-		color: $primary;
-		background: $primary-light;
+	&.noLevel {
+		color: $text-muted;
+		background: $border-color;
+		opacity: 0.5;
 	}
-
-	&.level3 {
-		color: $success;
-		background: $success-light;
-	}
-}
-
-.levelDescription {
-	display: -webkit-box;
-	overflow: hidden;
-	color: $text-secondary;
-	font-size: $font-sm;
-	line-height: 1.5;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
 }
 
 .actions {
@@ -238,6 +303,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: $spacing-xl;
+	margin-bottom: $spacing-xl;
 }
 
 .detailSection {
@@ -271,56 +337,280 @@
 	}
 }
 
+.levelsSection {
+	margin-top: $spacing-xl;
+	padding-top: $spacing-xl;
+	border-top: 1px solid $border-color;
+}
+
+.levelsHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: $spacing-lg;
+
+	h4 {
+		margin: 0;
+		color: $text-primary;
+		font-size: $font-lg;
+	}
+}
+
+.addLevelBtn {
+	padding: $spacing-sm $spacing-lg;
+	color: $white;
+	font-size: $font-sm;
+	background: $success;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: darken($success, 10%);
+	}
+}
+
 .levelsList {
 	display: flex;
 	flex-direction: column;
 	gap: $spacing-md;
 }
 
-.levelItem {
-	padding: $spacing-lg;
-	background: $white;
-	border-left: 4px solid transparent;
+.emptyLevels {
+	padding: $spacing-xxl;
+	text-align: center;
+	background: $background-light;
+	border: 1px dashed $border-color;
 	border-radius: $border-radius-md;
 
-	&:nth-child(1) {
-		border-left-color: $warning;
-	}
-
-	&:nth-child(2) {
-		border-left-color: $primary;
-	}
-
-	&:nth-child(3) {
-		border-left-color: $success;
-	}
-
 	p {
-		margin-top: $spacing-sm;
-		font-size: $font-sm;
+		margin: 0 0 $spacing-sm;
+		color: $text-secondary;
+	}
+
+	small {
+		color: $text-muted;
 	}
 }
 
-.levelTag {
-	display: inline-block;
-	padding: $spacing-xs $spacing-md;
+.levelCard {
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	overflow: hidden;
+}
+
+.levelHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: $spacing-md $spacing-lg;
+	background: $white;
+	border-left: 4px solid;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: $background-hover;
+	}
+}
+
+.levelTitle {
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
+	flex-wrap: wrap;
+}
+
+.levelIcon {
+	font-size: $font-lg;
+}
+
+.levelName {
 	font-weight: 500;
+	color: $text-primary;
+}
+
+.levelValue {
+	padding: 2px 8px;
+	color: $text-secondary;
 	font-size: $font-sm;
+	background: $background-light;
 	border-radius: $border-radius-xl;
+}
 
-	&.level1 {
-		color: $warning;
-		background: $warning-light;
+.materialsBadge {
+	display: inline-flex;
+	align-items: center;
+	gap: $spacing-xs;
+	padding: 2px 8px;
+	color: $info;
+	font-size: $font-sm;
+	background: $info-light;
+	border-radius: $border-radius-xl;
+}
+
+.levelActions {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+}
+
+.editLevelBtn,
+.deleteLevelBtn {
+	@include button-reset;
+	padding: $spacing-xs;
+	font-size: $font-md;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: $background-hover;
+	}
+}
+
+.deleteLevelBtn:hover {
+	color: $danger;
+	background: $danger-light;
+}
+
+.expandIcon {
+	color: $text-muted;
+	font-size: $font-sm;
+}
+
+.levelContent {
+	padding: $spacing-lg;
+	background: $background-light;
+	border-top: 1px solid $border-color;
+}
+
+.levelDescription,
+.levelExample {
+	margin-bottom: $spacing-md;
+
+	strong {
+		display: block;
+		margin-bottom: $spacing-sm;
+		color: $text-primary;
+		font-size: $font-sm;
 	}
 
-	&.level2 {
-		color: $primary;
-		background: $primary-light;
+	p {
+		margin: 0;
+		color: $text-secondary;
+		font-size: $font-md;
+		line-height: 1.5;
+	}
+}
+
+.levelMaterials {
+	margin-top: $spacing-md;
+	padding-top: $spacing-md;
+	border-top: 1px solid $border-color;
+
+	strong {
+		display: block;
+		margin-bottom: $spacing-sm;
+		color: $text-primary;
+		font-size: $font-sm;
 	}
 
-	&.level3 {
-		color: $success;
-		background: $success-light;
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+
+		li {
+			display: flex;
+			align-items: center;
+			gap: $spacing-md;
+			padding: $spacing-sm 0;
+			font-size: $font-md;
+			border-bottom: 1px solid $border-color;
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			a {
+				flex: 1;
+				color: $primary;
+				text-decoration: none;
+
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+		}
+	}
+}
+
+.materialType {
+	padding: 2px 6px;
+	color: $text-secondary;
+	font-size: $font-sm;
+	background: $background-light;
+	border-radius: $border-radius-sm;
+}
+
+.removeMaterialBtn {
+	@include button-reset;
+	padding: $spacing-xs;
+	font-size: $font-md;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
+	opacity: 0.6;
+
+	&:hover {
+		opacity: 1;
+		background: $danger-light;
+	}
+}
+
+.addLevelPlaceholder {
+	padding: $spacing-md;
+	text-align: center;
+	background: $background-light;
+	border-top: 1px solid $border-color;
+}
+
+.addSpecificLevelBtn {
+	padding: $spacing-sm $spacing-md;
+	color: $primary;
+	font-size: $font-sm;
+	background: $primary-light;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: rgba($primary, 0.2);
+	}
+}
+
+.noLevelData {
+	padding: $spacing-lg;
+	color: $text-muted;
+	font-style: italic;
+	text-align: center;
+}
+
+.emptyState {
+	padding: $spacing-xxl;
+	text-align: center;
+	color: $text-secondary;
+
+	p {
+		margin: 0 0 $spacing-sm;
+		font-size: $font-lg;
+	}
+
+	small {
+		color: $text-muted;
 	}
 }
 
@@ -331,6 +621,7 @@
 	gap: $spacing-xxl;
 	padding: $spacing-md $spacing-xl;
 	background: $background-hover;
+	border-top: 1px solid $border-color;
 
 	.legendTitle {
 		color: $text-secondary;
@@ -354,20 +645,116 @@
 	width: 20px;
 	height: 20px;
 	border-radius: $border-radius-round;
+}
 
-	&.level1 {
-		background: $warning-light;
-		border: 2px solid $warning;
+// Модальные окна
+.modalOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1000;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modalContent {
+	max-width: 500px;
+	width: 90%;
+	max-height: 80vh;
+	overflow-y: auto;
+	padding: $spacing-xl;
+	background: $white;
+	border-radius: $border-radius-lg;
+	box-shadow: $shadow-lg;
+
+	h3 {
+		margin: 0 0 $spacing-lg;
+		color: $text-primary;
+		font-size: $font-xl;
+	}
+}
+
+.formGroup {
+	margin-bottom: $spacing-lg;
+
+	label {
+		display: block;
+		margin-bottom: $spacing-sm;
+		color: $text-primary;
+		font-weight: 500;
+		font-size: $font-sm;
 	}
 
-	&.level2 {
-		background: $primary-light;
-		border: 2px solid $primary;
+	select,
+	textarea {
+		width: 100%;
+		padding: $spacing-sm $spacing-md;
+		color: $text-primary;
+		font-size: $font-md;
+		border: 1px solid $border-color;
+		border-radius: $border-radius-md;
+		transition: all 0.2s;
+
+		&:focus {
+			border-color: $primary;
+			outline: none;
+		}
 	}
 
-	&.level3 {
-		background: $success-light;
-		border: 2px solid $success;
+	textarea {
+		resize: vertical;
+	}
+}
+
+.disabledInput {
+	width: 100%;
+	padding: $spacing-sm $spacing-md;
+	color: $text-secondary;
+	background: $background-light;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: $spacing-md;
+	margin-top: $spacing-xl;
+
+	button {
+		padding: $spacing-sm $spacing-xl;
+		font-size: $font-md;
+		border: none;
+		border-radius: $border-radius-md;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+}
+
+.cancelBtn {
+	color: $text-secondary;
+	background: $background-hover;
+
+	&:hover {
+		background: $border-color;
+	}
+}
+
+.submitBtn {
+	color: $white;
+	background: $primary;
+
+	&:hover {
+		background: $primary-hover;
+	}
+
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 }
 
@@ -376,23 +763,26 @@
 		transform: translateY(-10px);
 		opacity: 0;
 	}
-
 	to {
 		transform: translateY(0);
 		opacity: 1;
 	}
 }
 
+// Адаптивность
 @include mobile {
-	.filter {
-		width: 100%;
+	.filterGroup {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-xs;
 
 		label {
-			display: none;
+			font-size: $font-xs;
 		}
 	}
 
-	.blockSelect {
+	.filterSelect,
+	.searchInput {
 		width: 100%;
 	}
 
@@ -400,5 +790,11 @@
 		flex-direction: column;
 		align-items: flex-start;
 		gap: $spacing-sm;
+	}
+
+	.levelTitle {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-xs;
 	}
 }

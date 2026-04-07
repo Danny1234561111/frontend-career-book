@@ -558,3 +558,350 @@
 	text-align: center;
 	color: $text-secondary;
 }
+// Добавить эти стили в competency-form.module.scss
+
+.section {
+	margin-bottom: 24px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid #e0e0e0;
+	
+	&:last-child {
+		border-bottom: none;
+	}
+}
+
+.sectionHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.sectionTitle {
+	font-size: 16px;
+	font-weight: 600;
+	color: #333;
+	margin: 0;
+}
+
+.addLevelBtn {
+	padding: 6px 12px;
+	background: #4caf50;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	
+	&:hover {
+		background: #45a049;
+	}
+	
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+}
+
+.levelsList {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.emptyLevels {
+	padding: 24px;
+	text-align: center;
+	background: #f9f9f9;
+	border-radius: 8px;
+	border: 1px dashed #ccc;
+	
+	p {
+		margin: 0 0 8px 0;
+		color: #666;
+	}
+	
+	small {
+		color: #999;
+	}
+}
+
+.levelCard {
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.levelHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 16px;
+	background: #fafafa;
+	border-left: 4px solid;
+	cursor: pointer;
+	transition: background 0.2s;
+	
+	&:hover {
+		background: #f5f5f5;
+	}
+}
+
+.levelTitle {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.levelIcon {
+	font-size: 18px;
+}
+
+.levelName {
+	font-weight: 500;
+	color: #333;
+}
+
+.levelValue {
+	font-size: 12px;
+	color: #666;
+	background: #f0f0f0;
+	padding: 2px 6px;
+	border-radius: 4px;
+}
+
+.materialsBadge {
+	font-size: 11px;
+	color: #1976d2;
+	background: #e3f2fd;
+	padding: 2px 8px;
+	border-radius: 12px;
+}
+
+.levelActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.editLevelBtn, .removeLevelBtn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 14px;
+	padding: 4px;
+	border-radius: 4px;
+	transition: background 0.2s;
+	
+	&:hover {
+		background: #e0e0e0;
+	}
+}
+
+.removeLevelBtn:hover {
+	background: #ffebee;
+}
+
+.expandIcon {
+	font-size: 12px;
+	color: #999;
+}
+
+.levelContent {
+	padding: 16px;
+	background: white;
+	border-top: 1px solid #e0e0e0;
+}
+
+.levelDescription, .levelExample {
+	margin-bottom: 16px;
+	
+	strong {
+		display: block;
+		margin-bottom: 8px;
+		font-size: 13px;
+		color: #555;
+	}
+	
+	p {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: #333;
+	}
+}
+
+.levelMaterialsSection {
+	margin-top: 16px;
+	padding-top: 16px;
+	border-top: 1px solid #eee;
+	
+	strong {
+		display: block;
+		margin-bottom: 12px;
+		font-size: 13px;
+		color: #555;
+	}
+}
+
+.materialsList {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.materialItem {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background 0.2s;
+	
+	&:hover {
+		background: #f5f5f5;
+	}
+	
+	input {
+		margin: 0;
+	}
+}
+
+.materialName {
+	flex: 1;
+	font-size: 14px;
+}
+
+.materialType {
+	font-size: 11px;
+	color: #666;
+	background: #f0f0f0;
+	padding: 2px 6px;
+	border-radius: 4px;
+}
+
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1100;
+}
+
+.modalContent {
+	background: white;
+	border-radius: 12px;
+	padding: 24px;
+	min-width: 500px;
+	max-width: 600px;
+	max-height: 80vh;
+	overflow-y: auto;
+	
+	h3 {
+		margin: 0 0 20px 0;
+	}
+}
+
+.modalMaterialsList {
+	margin-top: 8px;
+}
+
+.materialsCheckList {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-height: 200px;
+	overflow-y: auto;
+	margin-top: 8px;
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: 24px;
+	
+	button {
+		padding: 8px 16px;
+		border-radius: 4px;
+		border: none;
+		cursor: pointer;
+		
+		&:first-child {
+			background: #f0f0f0;
+			
+			&:hover {
+				background: #e0e0e0;
+			}
+		}
+		
+		&:last-child {
+			background: #4caf50;
+			color: white;
+			
+			&:hover {
+				background: #45a049;
+			}
+		}
+	}
+}
+
+.searchWrapper {
+	position: relative;
+	margin-bottom: 12px;
+}
+
+.searchInput {
+	width: 100%;
+	padding: 8px 12px;
+	padding-right: 32px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+	
+	&:focus {
+		outline: none;
+		border-color: #007bff;
+	}
+}
+
+.searchIcon {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 14px;
+	color: #999;
+}
+
+.emptyMaterials {
+	padding: 16px;
+	text-align: center;
+	color: #999;
+}
+
+.disabledInput {
+	background: #f5f5f5;
+	border: 1px solid #e0e0e0;
+	padding: 8px 12px;
+	border-radius: 4px;
+	width: 100%;
+}
+
+.hint {
+	margin-top: 16px;
+	padding: 12px;
+	background: #e3f2fd;
+	border-radius: 6px;
+	font-size: 12px;
+	color: #1976d2;
+}

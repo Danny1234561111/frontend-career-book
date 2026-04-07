@@ -5,7 +5,7 @@ import {
     IprPage,
     MaterialsPage,
     MaterialsAdminPage,
-	ImportPage,
+    ImportPage,
     SettingsPage,
     CompetenciesPage,
     UsersPage,
@@ -95,7 +95,7 @@ export const App = () => {
         
         if (data.role) {
             if (typeof data.role === 'string') {
-            roleValue = data.role;
+                roleValue = data.role;
             } else if (data.role.value) {
                 roleValue = data.role.value;
             } else if (data.role.name) {
@@ -120,7 +120,7 @@ export const App = () => {
         return 'user';
     };
 
-    // Функция для смены роли
+    // ИСПРАВЛЕННАЯ функция для смены роли
     const changeUserRole = async (roleValue: number) => {
         try {
             const token = localStorage.getItem('accessToken');
@@ -133,12 +133,15 @@ export const App = () => {
             const roleName = roleValue === 0 ? 'admin' : roleValue === 1 ? 'manager' : 'user';
             console.log(`Changing own role to: ${roleName} (value: ${roleValue})`);
             
-            const response = await fetch(`http://localhost:5217/api/users/own/role?userRole=${roleValue}`, {
+            // Отправляем просто число, а не объект
+            const response = await fetch(`http://localhost:5217/api/users/own/role`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'accept': 'text/plain',
+                    'accept': 'application/json',
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify(roleValue), // ← Просто число!
             });
 
             if (response.ok) {
@@ -149,10 +152,9 @@ export const App = () => {
                 
                 if (newTokenSuccess) {
                     await new Promise(resolve => setTimeout(resolve, 500));
-                    
-                    // Роль устанавливаем сразу после смены, без запроса к профилю
                     setCurrentRole(roleName);
                     console.log(`✅ Role updated locally: ${roleName}`);
+                    setAuthError(null);
                 } else {
                     console.warn('Could not get new test token');
                     setCurrentRole(null);
@@ -187,7 +189,7 @@ export const App = () => {
                 const success = await getTestTokens();
                 
                 if (success) {
-                    setCurrentRole('user'); // По умолчанию после получения тестового токена
+                    setCurrentRole('user');
                     console.log('Initial role set to "user" after getting test token');
                 }
                 
@@ -197,7 +199,7 @@ export const App = () => {
                 const success = await getTestTokens();
                 
                 if (success) {
-                    setCurrentRole('user'); // По умолчанию после получения тестового токена
+                    setCurrentRole('user');
                     console.log('Initial role set to "user" after getting test token');
                 }
                 
@@ -216,6 +218,20 @@ export const App = () => {
         return (
             <div style={{ padding: '40px', textAlign: 'center' }}>
                 <p>Не удалось получить токен авторизации</p>
+                <button 
+                    onClick={() => window.location.reload()}
+                    style={{
+                        marginTop: '20px',
+                        padding: '10px 20px',
+                        background: '#1976d2',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    Повторить попытку
+                </button>
             </div>
         );
     }
@@ -226,73 +242,119 @@ export const App = () => {
 
     return (
         <>
-      {/* Панель для смены ролей */}
-      <div style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        zIndex: 2000,
-        background: 'white',
-        padding: '15px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        display: 'flex',
-        gap: '10px',
-      }}>
-        <button onClick={() => changeUserRole(0)} style={{
-          padding: '8px 16px',
-          background: currentRole === 'admin' ? '#1976d2' : '#f0f0f0',
-          color: currentRole === 'admin' ? 'white' : '#333',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}>
-          Админ
-        </button>
-        <button onClick={() => changeUserRole(1)} style={{
-          padding: '8px 16px',
-          background: currentRole === 'manager' ? '#1976d2' : '#f0f0f0',
-          color: currentRole === 'manager' ? 'white' : '#333',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}>
-          Менеджер
-        </button>
-        <button onClick={() => changeUserRole(2)} style={{
-          padding: '8px 16px',
-          background: currentRole === 'user' ? '#1976d2' : '#f0f0f0',
-          color: currentRole === 'user' ? 'white' : '#333',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}>
-          Пользователь
-        </button>
-      </div>
+            {/* Панель для смены ролей */}
+            <div style={{
+                position: 'fixed',
+                top: '10px',
+                right: '10px',
+                zIndex: 2000,
+                background: 'white',
+                padding: '15px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                display: 'flex',
+                gap: '10px',
+            }}>
+                <button 
+                    onClick={() => changeUserRole(0)} 
+                    disabled={currentRole === 'admin'}
+                    style={{
+                        padding: '8px 16px',
+                        background: currentRole === 'admin' ? '#1976d2' : '#f0f0f0',
+                        color: currentRole === 'admin' ? 'white' : '#333',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: currentRole === 'admin' ? 'not-allowed' : 'pointer',
+                        opacity: currentRole === 'admin' ? 0.6 : 1,
+                    }}
+                >
+                    Админ
+                </button>
+                <button 
+                    onClick={() => changeUserRole(1)} 
+                    disabled={currentRole === 'manager'}
+                    style={{
+                        padding: '8px 16px',
+                        background: currentRole === 'manager' ? '#1976d2' : '#f0f0f0',
+                        color: currentRole === 'manager' ? 'white' : '#333',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: currentRole === 'manager' ? 'not-allowed' : 'pointer',
+                        opacity: currentRole === 'manager' ? 0.6 : 1,
+                    }}
+                >
+                    Менеджер
+                </button>
+                <button 
+                    onClick={() => changeUserRole(2)} 
+                    disabled={currentRole === 'user'}
+                    style={{
+                        padding: '8px 16px',
+                        background: currentRole === 'user' ? '#1976d2' : '#f0f0f0',
+                        color: currentRole === 'user' ? 'white' : '#333',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: currentRole === 'user' ? 'not-allowed' : 'pointer',
+                        opacity: currentRole === 'user' ? 0.6 : 1,
+                    }}
+                >
+                    Пользователь
+                </button>
+            </div>
 
-      <Navigation devRole={currentRole} />
+            {/* Отображение ошибки авторизации */}
+            {authError && (
+                <div style={{
+                    position: 'fixed',
+                    top: '80px',
+                    right: '10px',
+                    zIndex: 2000,
+                    background: '#ff4444',
+                    color: 'white',
+                    padding: '10px 15px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                }}>
+                    {authError}
+                    <button 
+                        onClick={() => setAuthError(null)}
+                        style={{
+                            marginLeft: '10px',
+                            background: 'none',
+                            border: 'none',
+                            color: 'white',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                        }}
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
 
-      <Routes location={state?.backgroundLocation || location}>
-        <Route path='/' element={
-          currentRole === 'admin' ? <AdminDashboard /> :
-            currentRole === 'manager' ? <ManagerDashboard /> :
-              <EmployeeDashboard />
-        } />
-        <Route path='/auth' element={<Auth />} />
-        <Route path='/profile' element={<ProfilePage />} />
-        <Route path='/materials' element={<MaterialsPage />} />
-        <Route path='/my-competencies' element={<MyCompetenciesPage />} />
-        <Route path='/ipr' element={<IprPage />} />
-        <Route path='/department/main' element={<DepartmentPage />} />
-        <Route path='/department/materials' element={<DepartmentMaterialsPage />} />
-        <Route path='/department/competencies' element={<DepartmentCompetenciesPage />} />
-        <Route path='/admin/materials' element={<MaterialsAdminPage />} />
-        <Route path='/settings' element={<SettingsPage />} />
-        <Route path='/admin/competencies' element={<CompetenciesPage />} />
-        <Route path='/admin/users' element={<UsersPage />} />
-		<Route path='/admin/import' element={<ImportPage />} />
-      </Routes>
-    </>
-  );
+            <Navigation devRole={currentRole} />
+
+            <Routes location={state?.backgroundLocation || location}>
+                <Route path='/' element={
+                    currentRole === 'admin' ? <AdminDashboard /> :
+                    currentRole === 'manager' ? <ManagerDashboard /> :
+                    <EmployeeDashboard />
+                } />
+                <Route path='/auth' element={<Auth />} />
+                <Route path='/profile' element={<ProfilePage />} />
+                <Route path='/materials' element={<MaterialsPage />} />
+                <Route path='/my-competencies' element={<MyCompetenciesPage />} />
+                <Route path='/ipr' element={<IprPage />} />
+                <Route path='/department/main' element={<DepartmentPage />} />
+                <Route path='/department/materials' element={<DepartmentMaterialsPage />} />
+                <Route path='/department/competencies' element={<DepartmentCompetenciesPage />} />
+                <Route path='/admin/materials' element={<MaterialsAdminPage />} />
+                <Route path='/settings' element={<SettingsPage />} />
+                <Route path='/admin/competencies' element={<CompetenciesPage />} />
+                <Route path='/admin/users' element={<UsersPage />} />
+                <Route path='/admin/import' element={<ImportPage />} />
+            </Routes>
+        </>
+    );
 };

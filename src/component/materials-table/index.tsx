@@ -153,7 +153,7 @@ const MaterialsTable: React.FC<MaterialsTableProps> = ({
 									</a>
 								</td>
 								<td className={styles.durationCell}>
-									{material.duration ? `${material.duration} мин` : '—'}
+									{material.duration ? `${material.duration} ч` : '—'}
 								</td>
 								{showCompetencyColumn && (
 									<td className={styles.competencyCell}>

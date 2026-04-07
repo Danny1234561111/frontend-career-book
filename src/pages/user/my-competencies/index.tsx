@@ -1,4 +1,5 @@
-// my-competencies.module.tsx
+// my-competencies.module.tsx (ИСПРАВЛЕННАЯ)
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../../store/strore';
@@ -35,24 +36,6 @@ interface CompetencyFull {
 	description: string;
 	proficiencyLevels?: Array<{ value: number; name: string }>;
 	materialsCount?: number;
-}
-
-interface BlockData {
-	id: string;
-	name: string;
-	categories: CategoryData[];
-}
-
-interface CategoryData {
-	id: string;
-	name: string;
-	groups: GroupData[];
-}
-
-interface GroupData {
-	id: string;
-	name: string;
-	competencies: CompetencyFromApi[];
 }
 
 interface EducationalMaterialCompetency {
@@ -265,6 +248,7 @@ const MyCompetenciesPage = () => {
 		}
 	};
 
+	// ИСПРАВЛЕННАЯ функция добавления компетенции
 	const addCompetencyToMe = async (competencyId: string) => {
 		try {
 			setAddingCompetencyId(competencyId);
@@ -274,22 +258,29 @@ const MyCompetenciesPage = () => {
 				return;
 			}
 
+			// Используем правильный эндпоинт для добавления компетенции текущему пользователю
 			const response = await fetch('http://localhost:5217/api/competency-task', {
 				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${token}`,
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ competencyId }),
+				body: JSON.stringify({ competencyId: competencyId }),
 			});
 
-			if (response.ok || response.status === 204) {
+			console.log('Add competency response:', response.status);
+
+			if (response.ok || response.status === 204 || response.status === 201) {
 				setSuccessMessage('Компетенция успешно добавлена');
+				// Обновляем списки
 				await fetchMyCompetencies();
 				await fetchNextLevelCompetencies();
+				await fetchAllCompetencies();
 				setTimeout(() => setSuccessMessage(null), 3000);
 			} else {
-				setError('Не удалось добавить компетенцию');
+				const errorText = await response.text();
+				console.error('Add competency error:', response.status, errorText);
+				setError(`Не удалось добавить компетенцию: ${response.status}`);
 				setTimeout(() => setError(null), 3000);
 			}
 		} catch (error) {
@@ -351,7 +342,9 @@ const MyCompetenciesPage = () => {
 			? competenciesList 
 			: competenciesList.filter(c => c.block === filterByBlock);
 		
-		if (filteredList.length === 0) return null;
+		if (filteredList.length === 0) {
+			return <div className={styles.emptyState}>Нет компетенций в выбранном блоке</div>;
+		}
 		
 		return (
 			<div className={styles.tableWrapper}>
