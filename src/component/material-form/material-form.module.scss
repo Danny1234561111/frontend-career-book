@@ -4,7 +4,7 @@
 	position: fixed;
 	inset: 0;
 	z-index: 999;
-	background: rgb(0 0 0 / 50%);
+	background: $derivatives-black-70;
 	animation: fadeIn 0.3s ease;
 }
 
@@ -18,7 +18,7 @@
 	width: 100%;
 	max-width: 800px;
 	height: 100vh;
-	background: $white;
+	background: $variables-containers-background;
 	box-shadow: $shadow-lg;
 	transition: right 0.3s ease;
 
@@ -32,13 +32,13 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: $spacing-xl $spacing-xxl;
-	background: $white;
+	background: $variables-containers-background;
 	border-bottom: 1px solid $border-color;
 
 	h3 {
 		margin: 0;
-		color: $text-primary;
-		font-size: $font-xxl;
+		color: $variables-textprimary;
+		font-size: $font-xl;
 	}
 }
 
@@ -48,18 +48,18 @@
 	align-items: center;
 	width: 40px;
 	height: 40px;
-	color: $text-secondary;
-	font-size: $font-xxxxl;
+	color: $variables-textsecondary;
+	font-size: $font-xxl;
 	line-height: 1;
 	background: none;
 	border: none;
 	border-radius: $border-radius-round;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all 0.2s;
 
 	&:hover {
 		color: $danger;
-		background: $background-hover;
+		background: $derivatives-gray-10;
 	}
 }
 
@@ -67,23 +67,6 @@
 	flex: 1;
 	padding: $spacing-xxl;
 	overflow-y: auto;
-
-	&::-webkit-scrollbar {
-		width: 8px;
-	}
-
-	&::-webkit-scrollbar-track {
-		background: $background-light;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: $border-color;
-		border-radius: $border-radius-md;
-
-		&:hover {
-			background: $text-disabled;
-		}
-	}
 }
 
 .drawerFooter {
@@ -91,7 +74,7 @@
 	justify-content: flex-end;
 	gap: $spacing-md;
 	padding: $spacing-xl $spacing-xxl;
-	background: $white;
+	background: $variables-containers-background;
 	border-top: 1px solid $border-color;
 }
 
@@ -101,9 +84,9 @@
 	label {
 		display: block;
 		margin-bottom: $spacing-sm;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 500;
-		font-size: $font-md;
+		font-size: $font-sm;
 	}
 
 	input,
@@ -111,21 +94,21 @@
 	textarea {
 		width: 100%;
 		padding: $spacing-sm $spacing-lg;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-size: $font-md;
 		background: $white;
 		border: 1px solid $border-color;
 		border-radius: $border-radius-md;
-		transition: all 0.2s ease;
+		transition: all 0.2s;
 
 		&:focus {
 			border-color: $primary;
 			outline: none;
-			box-shadow: 0 0 0 3px rgba($primary, 0.1);
+			box-shadow: 0 0 0 2px $derivatives-main-20;
 		}
 
 		&::placeholder {
-			color: $text-disabled;
+			color: $derivatives-gray-70;
 		}
 	}
 
@@ -136,133 +119,14 @@
 	}
 }
 
-.hint {
-	margin: $spacing-xs 0 $spacing-md 0;
-	color: $text-secondary;
-	font-size: $font-sm;
-}
-
 .formRow {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: $spacing-xl;
 
-	@media (width <= 600px) {
+	@include mobile {
 		grid-template-columns: 1fr;
 		gap: $spacing-lg;
-	}
-}
-
-.competenciesTree {
-	margin-top: $spacing-sm;
-	overflow: hidden;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
-}
-
-.blockItem {
-	border-bottom: 1px solid $border-color;
-
-	&:last-child {
-		border-bottom: none;
-	}
-}
-
-.blockHeader {
-	display: flex;
-	align-items: center;
-	gap: $spacing-sm;
-	padding: $spacing-md $spacing-lg;
-	background: $background-hover;
-	cursor: pointer;
-	transition: background 0.2s;
-
-	&:hover {
-		background: darken($background-hover, 2%);
-	}
-}
-
-.expandIcon {
-	width: 20px;
-	color: $text-secondary;
-	font-size: $font-sm;
-	text-align: center;
-}
-
-.blockName {
-	flex: 1;
-	color: $text-primary;
-	font-weight: 600;
-	font-size: $font-md;
-}
-
-.selectAllBtn {
-	padding: $spacing-xs $spacing-md;
-	color: $primary;
-	font-size: $font-xs;
-	white-space: nowrap;
-	background: none;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-sm;
-	cursor: pointer;
-	transition: all 0.2s;
-
-	&:hover {
-		background: $primary-light;
-		border-color: $primary;
-	}
-}
-
-.competenciesList {
-	display: flex;
-	flex-direction: column;
-	gap: $spacing-sm;
-	padding: $spacing-md $spacing-lg;
-	background: $white;
-}
-
-.competencyItem {
-	display: flex;
-	align-items: center;
-	gap: $spacing-sm;
-	padding: $spacing-xs 0;
-	cursor: pointer;
-
-	&:hover {
-		.competencyName {
-			color: $primary;
-		}
-	}
-
-	input[type='checkbox'] {
-		width: 18px;
-		height: 18px;
-		margin: 0;
-		cursor: pointer;
-		accent-color: $primary;
-	}
-}
-
-.competencyName {
-	color: $text-primary;
-	font-size: $font-sm;
-	line-height: 1.4;
-	transition: color 0.2s;
-}
-
-.selectedCount {
-	margin-top: $spacing-md;
-	padding: $spacing-sm $spacing-lg;
-	color: $primary;
-	font-weight: 500;
-	font-size: $font-sm;
-	text-align: center;
-	background: $primary-light;
-	border-radius: $border-radius-md;
-
-	strong {
-		margin: 0 $spacing-xs;
-		font-size: $font-lg;
 	}
 }
 
@@ -271,35 +135,29 @@
 	color: $white;
 	font-weight: 500;
 	font-size: $font-md;
-	background: none;
 	background: $primary;
 	border: none;
 	border-radius: $border-radius-md;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all 0.2s;
 
 	&:hover {
 		background: $primary-hover;
-		box-shadow: $shadow-md;
-		transform: translateY(-2px);
-	}
-
-	&:active {
-		transform: translateY(0);
+		transform: translateY(-1px);
+		box-shadow: $shadow-sm;
 	}
 }
 
 .cancelBtn {
 	padding: $spacing-md $spacing-xxxl;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-weight: 500;
 	font-size: $font-md;
-	background: none;
 	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all 0.2s;
 
 	&:hover {
 		color: $danger;
@@ -309,33 +167,16 @@
 }
 
 @keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-
-	to {
-		opacity: 1;
-	}
+	from { opacity: 0; }
+	to { opacity: 1; }
 }
 
-@keyframes slideIn {
-	from {
-		transform: translateY(10px);
-		opacity: 0;
-	}
-
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
-}
-
-@media (width <= 768px) {
+@include mobile {
 	.drawerHeader {
 		padding: $spacing-lg $spacing-xl;
 
 		h3 {
-			font-size: $font-xl;
+			font-size: $font-lg;
 		}
 	}
 
@@ -345,27 +186,11 @@
 
 	.drawerFooter {
 		padding: $spacing-lg $spacing-xl;
+		flex-direction: column;
 
 		button {
-			flex: 1;
+			width: 100%;
 			text-align: center;
-		}
-	}
-
-	.blockHeader {
-		flex-wrap: wrap;
-	}
-
-	.selectAllBtn {
-		width: 100%;
-		margin-top: $spacing-xs;
-	}
-
-	.competencyItem {
-		align-items: flex-start;
-
-		input[type='checkbox'] {
-			margin-top: 2px;
 		}
 	}
 }

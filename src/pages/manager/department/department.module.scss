@@ -1,27 +1,41 @@
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
-	min-height: calc(100vh - 80px - 80px);
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
-	background: $white;
+	box-shadow: $shadow-md;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.error {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	color: $danger;
+	font-size: $font-lg;
 }
 
 .statsGrid {
@@ -29,24 +43,20 @@
 	grid-template-columns: repeat(4, 1fr);
 	gap: $spacing-xl;
 	margin-bottom: $spacing-xxxl;
-
-	@include mobile {
-		grid-template-columns: repeat(2, 1fr);
-		gap: $spacing-md;
-	}
 }
 
 .statCard {
-	padding: $spacing-xl $spacing-md;
+	padding: $spacing-xl;
 	text-align: center;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	transition: all 0.2s ease;
 
 	&:hover {
 		border-color: $primary;
-		box-shadow: $shadow-sm;
+		box-shadow: $shadow-md;
+		transform: translateY(-2px);
 	}
 }
 
@@ -55,26 +65,28 @@
 	margin-bottom: $spacing-xs;
 	color: $primary;
 	font-weight: 700;
-	font-size: $font-xxxl;
+	font-size: $font-xxxxl;
 }
 
 .statLabel {
-	color: $text-secondary;
-	font-size: $font-sm;
+	color: $variables-textsecondary;
+	font-size: $font-md;
 }
 
 .tableSection {
+	margin-top: $spacing-xxxl;
+
 	h2 {
 		margin: 0 0 $spacing-lg 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 600;
 		font-size: $font-xl;
 	}
 }
 
 @include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
+	.page {
+		padding: $spacing-lg;
 	}
 
 	.title {
@@ -83,5 +95,14 @@
 
 	.content {
 		padding: $spacing-lg;
+	}
+
+	.statsGrid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: $spacing-md;
+	}
+
+	.statValue {
+		font-size: $font-xxxl;
 	}
 }

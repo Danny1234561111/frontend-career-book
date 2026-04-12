@@ -1,5 +1,3 @@
-// category_manager.tsx - исправленный drag & drop (перемещение, а не копирование)
-
 import React, { useState, useEffect } from 'react';
 import styles from './category_manager.module.scss';
 
@@ -16,6 +14,7 @@ interface CompetencyBlock {
 	name: string;
 	type: number;
 	parentId: string | null;
+	sortingOrder?: number;
 	categories?: CompetencyBlock[];
 	groups?: CompetencyBlock[];
 	competencies?: CompetencyItem[];
@@ -97,8 +96,8 @@ const CategoryManager: React.FC = () => {
 	const [draggedItem, setDraggedItem] = useState<{
 		type: 'material';
 		item: MaterialItem;
-		sourceCompetencyId?: string;
-		sourceLevelId?: string;
+		sourceCompetencyId: string;
+		sourceLevelId: string;
 	} | null>(null);
 
 	// Получение уровней владения
@@ -145,6 +144,7 @@ const CategoryManager: React.FC = () => {
 								name: item.name,
 								type: item.type,
 								parentId: item.parentId,
+								sortingOrder: item.sortingOrder,
 							};
 							
 							if (item.type === 0) {
@@ -303,6 +303,29 @@ const CategoryManager: React.FC = () => {
 	const getLevelById = (levelId?: string): Level | undefined => {
 		if (!levelId) return undefined;
 		return levels.find(l => l.id === levelId);
+	};
+
+	// Получение всех ID материалов в компетенции (для проверки дубликатов)
+	const getAllMaterialIdsInCompetency = (competencyId: string): Set<string> => {
+		const materialIds = new Set<string>();
+		
+		const findCompetency = (items: CompetencyBlock[]): boolean => {
+			for (const item of items) {
+				if (item.type === 2 && item.competencies) {
+					const comp = item.competencies.find(c => c.id === competencyId);
+					if (comp) {
+						comp.materials.forEach(m => materialIds.add(m.id));
+						return true;
+					}
+				}
+				if (item.categories && findCompetency(item.categories)) return true;
+				if (item.groups && findCompetency(item.groups)) return true;
+			}
+			return false;
+		};
+		
+		findCompetency(hierarchy);
+		return materialIds;
 	};
 
 	// Группировка материалов по targetLevelId
@@ -475,7 +498,7 @@ const CategoryManager: React.FC = () => {
 	};
 
 	// Drag handlers
-	const handleDragStart = (item: MaterialItem, sourceCompetencyId?: string, sourceLevelId?: string) => {
+	const handleDragStart = (item: MaterialItem, sourceCompetencyId: string, sourceLevelId: string) => {
 		if (item.id === 'temp') return; // Нельзя перетаскивать временные материалы
 		setDraggedItem({ type: 'material', item, sourceCompetencyId, sourceLevelId });
 	};
@@ -488,33 +511,48 @@ const CategoryManager: React.FC = () => {
 	const handleDrop = (targetCompetencyId: string, targetLevelId: string) => {
 		if (!draggedItem || draggedItem.item.id === 'temp') return;
 		
+		// Проверяем, не пытаемся ли мы переместить материал в ту же самую компетенцию на тот же самый уровень
+		if (draggedItem.sourceCompetencyId === targetCompetencyId && draggedItem.sourceLevelId === targetLevelId) {
+			setDraggedItem(null);
+			return;
+		}
+		
+		// Проверяем, есть ли уже такой материал в целевой компетенции на ЛЮБОМ уровне
+		const existingMaterialIds = getAllMaterialIdsInCompetency(targetCompetencyId);
+		if (existingMaterialIds.has(draggedItem.item.id)) {
+			setError(`Материал "${draggedItem.item.name}" уже существует в этой компетенции на другом уровне`);
+			setTimeout(() => setError(null), 3000);
+			setDraggedItem(null);
+			return;
+		}
+		
 		const moveMaterialToCompetency = (items: CompetencyBlock[]): boolean => {
 			for (const item of items) {
 				if (item.type === 2 && item.competencies) {
 					const targetComp = item.competencies.find(c => c.id === targetCompetencyId);
 					if (targetComp) {
-						// Проверяем, есть ли уже такой материал на целевом уровне
-						const exists = targetComp.materials.some(m => 
-							m.id === draggedItem.item.id && m.targetLevelId === targetLevelId
-						);
+						// Добавляем материал в целевую компетенцию на целевой уровень
+						targetComp.materials.push({
+							...draggedItem.item,
+							targetLevelId: targetLevelId,
+							targetLevelValue: getLevelById(targetLevelId)?.value,
+							_isNew: true,
+							_linkId: undefined,
+						});
 						
-						if (!exists) {
-							// Добавляем материал в целевую компетенцию
-							targetComp.materials.push({
-								...draggedItem.item,
-								targetLevelId: targetLevelId,
-								targetLevelValue: getLevelById(targetLevelId)?.value,
-								_isNew: true, // Помечаем как новый для сохранения
-								_linkId: undefined,
-							});
-						}
-						
-						// УДАЛЯЕМ материал из исходной компетенции (ПЕРЕМЕЩЕНИЕ, а не копирование)
-						if (draggedItem.sourceCompetencyId && draggedItem.sourceCompetencyId !== targetCompetencyId) {
+						// УДАЛЯЕМ материал из исходной компетенции (ПЕРЕМЕЩЕНИЕ)
+						if (draggedItem.sourceCompetencyId !== targetCompetencyId) {
 							const sourceComp = item.competencies.find(c => c.id === draggedItem.sourceCompetencyId);
 							if (sourceComp) {
-								// Удаляем только если это тот же самый материал и тот же уровень
 								sourceComp.materials = sourceComp.materials.filter(m => 
+									!(m.id === draggedItem.item.id && m.targetLevelId === draggedItem.sourceLevelId)
+								);
+							}
+						} else {
+							// Перемещение внутри одной компетенции - удаляем с исходного уровня
+							const sameComp = item.competencies.find(c => c.id === targetCompetencyId);
+							if (sameComp) {
+								sameComp.materials = sameComp.materials.filter(m => 
 									!(m.id === draggedItem.item.id && m.targetLevelId === draggedItem.sourceLevelId)
 								);
 							}
@@ -533,8 +571,14 @@ const CategoryManager: React.FC = () => {
 		setHierarchy(newHierarchy);
 		
 		setDraggedItem(null);
-		setSuccessMessage(`Материал перемещен на уровень ${getLevelNameById(targetLevelId)}`);
+		setSuccessMessage(`Материал "${draggedItem.item.name}" перемещен на уровень "${getLevelNameById(targetLevelId)}"`);
 		setTimeout(() => setSuccessMessage(null), 2000);
+	};
+
+	// Получение доступных материалов для добавления (исключая уже существующие в компетенции)
+	const getAvailableMaterialsForCompetency = (competencyId: string): MaterialFromApi[] => {
+		const existingMaterialIds = getAllMaterialIdsInCompetency(competencyId);
+		return materials.filter(m => !existingMaterialIds.has(m.id));
 	};
 
 	const handleAddMaterialClick = (competencyId: string, targetLevelId: string, levelValue: number) => {
@@ -545,6 +589,15 @@ const CategoryManager: React.FC = () => {
 	const handleConfirmAddMaterial = async () => {
 		if (showMaterialSelector && selectedMaterialId) {
 			const selectedMaterial = materials.find(m => m.id === selectedMaterialId);
+			
+			// Проверяем, не добавлен ли уже этот материал в компетенцию
+			const existingMaterialIds = getAllMaterialIdsInCompetency(showMaterialSelector.competencyId);
+			if (existingMaterialIds.has(selectedMaterialId)) {
+				setError(`Материал "${selectedMaterial?.name}" уже существует в этой компетенции`);
+				setTimeout(() => setError(null), 3000);
+				setShowMaterialSelector(null);
+				return;
+			}
 			
 			if (selectedMaterial) {
 				const addMaterial = (items: CompetencyBlock[]): boolean => {
@@ -580,7 +633,7 @@ const CategoryManager: React.FC = () => {
 				addMaterial(newHierarchy);
 				setHierarchy(newHierarchy);
 				
-				setSuccessMessage(`Материал добавлен для уровня ${getLevelNameById(showMaterialSelector.targetLevelId)}`);
+				setSuccessMessage(`Материал "${selectedMaterial.name}" добавлен для уровня ${getLevelNameById(showMaterialSelector.targetLevelId)}`);
 				setTimeout(() => setSuccessMessage(null), 3000);
 			}
 			
@@ -718,6 +771,7 @@ const CategoryManager: React.FC = () => {
 							name: newItem.name,
 							type: type,
 							parentId: null,
+							sortingOrder: 0,
 							categories: type === 0 ? [] : undefined,
 							groups: type === 1 ? [] : undefined,
 							competencies: type === 2 ? [] : undefined,
@@ -734,6 +788,7 @@ const CategoryManager: React.FC = () => {
 										name: newItem.name,
 										type: 1,
 										parentId: selectedParentId,
+										sortingOrder: 0,
 										groups: [],
 									}]
 								};
@@ -746,6 +801,7 @@ const CategoryManager: React.FC = () => {
 										name: newItem.name,
 										type: 2,
 										parentId: selectedParentId,
+										sortingOrder: 0,
 										competencies: [],
 									}]
 								};
@@ -873,6 +929,7 @@ const CategoryManager: React.FC = () => {
 										const groupedMaterials = groupMaterialsByLevel(comp.materials);
 										const existingLevelIds = Array.from(groupedMaterials.keys());
 										const availableLevels = levels.filter(level => !existingLevelIds.includes(level.id));
+										const availableMaterials = getAvailableMaterialsForCompetency(comp.id);
 										
 										return (
 											<div key={comp.id} className={styles.competencyContainer}>
@@ -924,11 +981,13 @@ const CategoryManager: React.FC = () => {
 																			</span>
 																		</div>
 																		<div className={styles.levelActions} onClick={(e) => e.stopPropagation()}>
-																			<button
-																				className={styles.addMaterialBtn}
-																				onClick={() => handleAddMaterialClick(comp.id, levelId, level?.value || 0)}>
-																				+ Добавить материал
-																			</button>
+																			{availableMaterials.length > 0 && (
+																				<button
+																					className={styles.addMaterialBtn}
+																					onClick={() => handleAddMaterialClick(comp.id, levelId, level?.value || 0)}>
+																					+ Добавить материал
+																				</button>
+																			)}
 																			<span className={styles.expandIcon}>
 																				{isLevelExpanded ? '▲' : '▼'}
 																			</span>
@@ -1128,12 +1187,15 @@ const CategoryManager: React.FC = () => {
 								value={selectedMaterialId}
 								onChange={(e) => setSelectedMaterialId(e.target.value)}>
 								<option value=''>Выберите материал</option>
-								{materials.map(m => (
+								{getAvailableMaterialsForCompetency(showMaterialSelector.competencyId).map(m => (
 									<option key={m.id} value={m.id}>
 										{m.name} ({m.type?.name})
 									</option>
 								))}
 							</select>
+							{getAvailableMaterialsForCompetency(showMaterialSelector.competencyId).length === 0 && (
+								<div className={styles.hint}>Нет доступных материалов для добавления (все материалы уже добавлены в эту компетенцию)</div>
+							)}
 						</div>
 						<div className={styles.modalActions}>
 							<button onClick={() => setShowMaterialSelector(null)}>Отмена</button>

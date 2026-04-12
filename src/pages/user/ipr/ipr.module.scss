@@ -1,222 +1,184 @@
+@import '../../../variables.module';
+
 .page {
-	padding: 24px;
-	max-width: 1400px;
-	margin: 0 auto;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	margin-bottom: 24px;
-	
-	.title {
-		font-size: 28px;
-		font-weight: 600;
-		margin: 0;
-		color: #1a1a1a;
-	}
+	margin-bottom: $spacing-xxl;
+}
+
+.title {
+	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
-	background: #fff;
-	border-radius: 12px;
-	padding: 24px;
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	padding: $spacing-xxl;
+	box-shadow: $shadow-md;
 }
 
-.infoBar {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 16px 20px;
-	background: #f5f5f5;
-	border-radius: 8px;
-	margin-bottom: 24px;
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.error {
+	text-align: center;
+	padding: 60px $spacing-xl;
 	
-	.positionGroup {
-		display: flex;
-		gap: 32px;
-		
-		.position {
-			.label {
-				font-size: 14px;
-				color: #666;
-				margin-right: 8px;
-			}
-			
-			.value {
-				font-size: 14px;
-				font-weight: 500;
-				color: #1a1a1a;
-			}
-		}
+	p {
+		color: $danger;
+		font-size: $font-lg;
+		margin-bottom: $spacing-lg;
 	}
+}
+
+.retryBtn {
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-size: $font-md;
+	background: $primary;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
 	
-	.progress {
-		text-align: right;
-		
-		.value {
-			font-size: 24px;
-			font-weight: 600;
-			color: #1976d2;
-		}
-		
-		.label {
-			font-size: 14px;
-			color: #666;
-			margin-left: 8px;
-		}
+	&:hover {
+		background: $primary-hover;
 	}
 }
 
 .kanban {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 20px;
+	gap: $spacing-xl;
 }
 
 .column {
-	background: #f8f9fa;
-	border-radius: 12px;
-	padding: 16px;
-	min-height: 400px;
-	
-	.columnTitle {
-		font-size: 18px;
-		font-weight: 600;
-		margin: 0 0 16px 0;
-		padding-bottom: 12px;
-		border-bottom: 2px solid #eaeaea;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		
-		.count {
-			font-size: 12px;
-			background: rgba(0, 0, 0, 0.1);
-			padding: 2px 8px;
-			border-radius: 12px;
-			font-weight: normal;
-		}
+	background: $derivatives-gray-10;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	padding: $spacing-lg;
+	min-height: 500px;
+}
+
+.columnTitle {
+	margin: 0 0 $spacing-lg 0;
+	padding-bottom: $spacing-md;
+	color: $variables-textprimary;
+	font-weight: 600;
+	font-size: $font-xl;
+	border-bottom: 2px solid $border-color;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	.count {
+		padding: 2px $spacing-sm;
+		color: $variables-textsecondary;
+		font-size: $font-xs;
+		font-weight: 500;
+		background: $derivatives-gray-20;
+		border-radius: $spacing-xl;
 	}
 }
 
 .cards {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: $spacing-md;
 }
 
 .card {
-	background: white;
-	border: 1px solid #eaeaea;
-	border-radius: 8px;
-	padding: 12px;
-	transition: all 0.2s ease;
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	
+	padding: $spacing-lg;
+	background: $variables-containers-background;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	cursor: grab;
+	transition: all 0.3s;
+
+	&:active {
+		cursor: grabbing;
+	}
+
 	&:hover {
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		border-color: $primary;
+		box-shadow: $shadow-md;
+		transform: translateY(-2px);
 	}
-	
-	.cardContent {
-		flex: 1;
-		
-		h4 {
-			margin: 0 0 8px 0;
-			font-size: 16px;
-			font-weight: 500;
-			color: #1a1a1a;
-		}
-		
-		p {
-			margin: 4px 0;
-			font-size: 13px;
-			color: #666;
-		}
-		
-		.boss {
-			font-size: 12px;
-			color: #999;
-			margin-top: 8px;
-		}
-		
-		.materialLink {
-			display: inline-block;
-			margin-top: 12px;
-			padding: 6px 12px;
-			background: #1976d2;
-			color: white;
-			border: none;
-			border-radius: 4px;
-			cursor: pointer;
-			font-size: 12px;
-			
-			&:hover {
-				background: #1565c0;
-			}
-		}
+}
+
+.cardContent {
+	h4 {
+		margin: 0 0 $spacing-sm 0;
+		color: $variables-textprimary;
+		font-weight: 600;
+		font-size: $font-lg;
 	}
-	
-	.cardActions {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		margin-left: 12px;
-		
-		.moveBtn {
-			width: 32px;
-			height: 32px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			background: #f0f0f0;
-			border: 1px solid #e0e0e0;
-			border-radius: 4px;
-			cursor: pointer;
-			font-size: 16px;
-			transition: all 0.2s ease;
-			
-			&:hover:not(:disabled) {
-				background: #1976d2;
-				color: white;
-				border-color: #1976d2;
-			}
-			
-			&:disabled {
-				opacity: 0.5;
-				cursor: not-allowed;
-			}
-		}
+
+	p {
+		margin: $spacing-xs 0;
+		color: $variables-textsecondary;
+		font-size: $font-sm;
+	}
+
+	.boss {
+		margin-top: $spacing-sm;
+		padding-top: $spacing-sm;
+		color: $derivatives-gray-70;
+		font-size: $font-xs;
+		border-top: 1px solid $border-color;
+	}
+}
+
+.materialLink {
+	display: inline-block;
+	margin-top: $spacing-md;
+	padding: $spacing-sm $spacing-lg;
+	color: $white;
+	font-size: $font-sm;
+	font-weight: 500;
+	background: $primary;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: $primary-hover;
+		transform: translateY(-1px);
 	}
 }
 
 .emptyColumn {
+	padding: $spacing-xxxl;
+	color: $variables-textsecondary;
+	font-size: $font-md;
 	text-align: center;
-	padding: 40px 20px;
-	color: #999;
-	font-size: 14px;
 }
 
-.loading, .error {
-	text-align: center;
-	padding: 40px;
-	font-size: 16px;
-}
+@include mobile {
+	.page {
+		padding: $spacing-lg;
+	}
 
-.error {
-	color: #d32f2f;
-}
+	.title {
+		font-size: $font-xxl;
+	}
 
-.retryBtn {
-	margin-top: 16px;
-	padding: 8px 16px;
-	background: #1976d2;
-	color: white;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	
-	&:hover {
-		background: #1565c0;
+	.content {
+		padding: $spacing-lg;
+	}
+
+	.kanban {
+		grid-template-columns: 1fr;
+		gap: $spacing-lg;
 	}
 }

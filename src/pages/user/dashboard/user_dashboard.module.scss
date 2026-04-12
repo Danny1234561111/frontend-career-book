@@ -1,110 +1,136 @@
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	background: $white;
-	padding: $spacing-xl $spacing-xxl;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
 	font-size: $font-xxxxl;
-	color: $text-primary;
-	margin: 0;
 	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
-	background: $white;
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
-	min-height: calc(100vh - 80px - 80px); // учитываем высоту header
+	box-shadow: $shadow-md;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.error {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	color: $danger;
+	font-size: $font-lg;
+}
+
+.card {
+	margin-bottom: $spacing-xxl;
+	
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
 
 .welcomeSection {
-	margin-bottom: $spacing-xxxl;
-}
-
-.greeting {
-	font-size: $font-xxxl;
-	color: $text-primary;
-	margin: 0 0 $spacing-sm 0;
-
-	strong {
-		color: $primary;
+	.greeting {
+		font-size: $font-xxxl;
+		color: $variables-textprimary;
+		margin: 0 0 $spacing-xl 0;
+		font-weight: 600;
 	}
 }
 
 .positionInfo {
-	display: flex;
-	gap: $spacing-xxl;
-	font-size: $font-lg;
-	color: $text-secondary;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: $spacing-md $spacing-xl;
+}
 
-	span {
-		strong {
-			color: $text-primary;
-			margin-left: $spacing-xs;
-		}
+.infoRow {
+	display: flex;
+	align-items: baseline;
+	gap: $spacing-sm;
+	font-size: $font-md;
+	
+	.infoLabel {
+		color: $variables-textsecondary;
+		min-width: 130px;
+	}
+	
+	.infoValue {
+		color: $variables-textprimary;
+		font-weight: 500;
 	}
 }
 
 .progressSection {
-	margin-bottom: $spacing-xxxl;
-	padding: $spacing-xl;
-	background: $background-light;
-	border-radius: $border-radius-md;
-	border: 1px solid $border-color;
-}
-
-.progressHeader {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: $spacing-md;
-}
-
-.progressLabel {
-	font-size: $font-lg;
-	font-weight: 500;
-	color: $text-primary;
-}
-
-.progressPercent {
-	font-size: $font-xxxl;
-	font-weight: 600;
-	color: $primary;
-}
-
-.competenciesCount {
-	margin-top: $spacing-sm;
-	font-size: $font-md;
-	color: $text-secondary;
-}
-
-.progressBar {
-	width: 100%;
-	height: 8px;
-	background: $border-color;
-	border-radius: $border-radius-sm;
-	overflow: hidden;
-	margin-bottom: $spacing-sm;
-}
-
-.progressFill {
-	height: 100%;
-	background: $primary;
-	border-radius: $border-radius-sm;
-	transition: width 0.3s;
+	.progressHeader {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: $spacing-lg;
+	}
+	
+	.progressLabel {
+		font-size: $font-lg;
+		font-weight: 500;
+		color: $variables-textprimary;
+	}
+	
+	.progressPercent {
+		font-size: $font-xxxl;
+		font-weight: 600;
+		color: $primary;
+	}
+	
+	.progressBar {
+		width: 100%;
+		height: 8px;
+		background: $derivatives-gray-20;
+		border-radius: $border-radius-sm;
+		overflow: hidden;
+		margin-bottom: $spacing-lg;
+	}
+	
+	.progressFill {
+		height: 100%;
+		background: $primary;
+		border-radius: $border-radius-sm;
+		transition: width 0.3s ease;
+	}
+	
+	.progressStats {
+		display: flex;
+		justify-content: space-between;
+		gap: $spacing-lg;
+		
+		.completedCount,
+		.totalCount {
+			font-size: $font-md;
+			color: $variables-textsecondary;
+		}
+	}
 }
 
 .updatesSection {
-	h2 {
-		font-size: $font-xxl;
-		color: $text-primary;
+	.sectionTitle {
+		font-size: $font-xl;
+		color: $variables-textprimary;
 		margin: 0 0 $spacing-lg 0;
 		font-weight: 600;
 	}
@@ -119,26 +145,41 @@
 .updateItem {
 	display: flex;
 	gap: $spacing-xl;
-	padding: $spacing-md;
-	background: $background-hover;
+	padding: $spacing-md $spacing-lg;
+	background: $derivatives-gray-10;
 	border-radius: $border-radius-md;
 	border-left: 4px solid $primary;
+	transition: all 0.2s;
+
+	&:hover {
+		background: $derivatives-gray-20;
+	}
 }
 
 .updateDate {
-	font-size: $font-md;
-	color: $text-secondary;
-	min-width: 100px;
+	font-size: $font-sm;
+	color: $variables-textsecondary;
+	min-width: 160px;
 }
 
 .updateText {
 	font-size: $font-md;
-	color: $text-primary;
+	color: $variables-textprimary;
+	flex: 1;
+}
+
+.noUpdates {
+	padding: $spacing-xxxl;
+	text-align: center;
+	color: $variables-textsecondary;
+	font-size: $font-md;
+	background: $derivatives-gray-10;
+	border-radius: $border-radius-md;
 }
 
 @include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
+	.page {
+		padding: $spacing-lg;
 	}
 
 	.title {
@@ -154,6 +195,20 @@
 	}
 
 	.positionInfo {
+		grid-template-columns: 1fr;
+		gap: $spacing-sm;
+	}
+
+	.infoRow {
+		flex-direction: column;
+		gap: $spacing-xs;
+		
+		.infoLabel {
+			min-width: auto;
+		}
+	}
+
+	.progressStats {
 		flex-direction: column;
 		gap: $spacing-sm;
 	}
@@ -165,5 +220,9 @@
 
 	.updateDate {
 		min-width: auto;
+	}
+
+	.progressPercent {
+		font-size: $font-xxl;
 	}
 }

@@ -1,64 +1,71 @@
-// import-excel.module.scss
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
+}
+
+.subtitle {
+	margin-top: $spacing-sm;
+	color: $variables-textsecondary;
+	font-size: $font-md;
 }
 
 .content {
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
-	background: $white;
-	min-height: calc(100vh - 80px - 80px);
+	box-shadow: $shadow-md;
 }
 
+// ===== ТАБЫ =====
 .tabs {
 	display: flex;
 	gap: $spacing-sm;
-	margin-bottom: $spacing-xxxl;
-	border-bottom: 2px solid $border-color;
-	
-	.tab {
-		padding: $spacing-md $spacing-xl;
-		font-size: $font-lg;
-		font-weight: 500;
-		color: $text-secondary;
-		background: none;
-		border: none;
-		border-bottom: 2px solid transparent;
-		cursor: pointer;
-		transition: all 0.3s;
-		
-		&:hover {
-			color: $primary;
-		}
-		
-		&.active {
-			color: $primary;
-			border-bottom-color: $primary;
-		}
+	margin-bottom: $spacing-xxl;
+	border-bottom: 1px solid $border-color;
+}
+
+.tab {
+	padding: $spacing-md $spacing-xl;
+	font-size: $font-md;
+	font-weight: 500;
+	color: $variables-textsecondary;
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	cursor: pointer;
+	transition: all 0.3s;
+
+	&:hover {
+		color: $primary;
+	}
+
+	&.active {
+		color: $primary;
+		border-bottom-color: $primary;
 	}
 }
 
+// ===== СЕКЦИЯ ЗАГРУЗКИ =====
 .uploadSection {
 	margin-bottom: $spacing-xxxl;
 	padding: $spacing-xxxl;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	border: 2px dashed $border-color;
-	border-radius: $border-radius-lg;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	text-align: center;
 }
 
@@ -72,8 +79,8 @@
 
 .fileLabel {
 	display: inline-block;
-	padding: $spacing-lg $spacing-xxxl;
-	font-size: $font-lg;
+	padding: $spacing-md $spacing-xxxl;
+	font-size: $font-md;
 	font-weight: 500;
 	color: $primary;
 	background: $white;
@@ -81,10 +88,11 @@
 	border-radius: $border-radius-md;
 	cursor: pointer;
 	transition: all 0.3s;
-	
+
 	&:hover {
 		color: $white;
 		background: $primary;
+		transform: translateY(-1px);
 	}
 }
 
@@ -96,20 +104,22 @@
 	display: inline-flex;
 	align-items: center;
 	gap: $spacing-sm;
-	
+
 	.fileSize {
-		color: $text-secondary;
+		color: $variables-textsecondary;
 		font-size: $font-sm;
 	}
 }
 
+// ===== КНОПКИ =====
 .buttonsGroup {
 	display: flex;
 	justify-content: center;
 	gap: $spacing-lg;
 }
 
-.previewBtn, .importBtn {
+.previewBtn,
+.importBtn {
 	padding: $spacing-md $spacing-xxxl;
 	font-size: $font-md;
 	font-weight: 500;
@@ -117,10 +127,11 @@
 	border-radius: $border-radius-md;
 	cursor: pointer;
 	transition: all 0.3s;
-	
+
 	&:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+		transform: none;
 	}
 }
 
@@ -128,40 +139,46 @@
 	color: $primary;
 	background: $white;
 	border: 1px solid $primary;
-	
+
 	&:hover:not(:disabled) {
 		color: $white;
 		background: $primary;
+		transform: translateY(-1px);
 	}
 }
 
 .importBtn {
 	color: $white;
 	background: $success;
-	
+
 	&:hover:not(:disabled) {
 		background: darken($success, 10%);
+		transform: translateY(-1px);
 	}
 }
 
+// ===== СООБЩЕНИЯ =====
 .errorMessage {
 	margin-bottom: $spacing-xl;
-	padding: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
 	color: $danger;
 	font-size: $font-md;
 	background: $danger-light;
 	border-radius: $border-radius-md;
+	border-left: 4px solid $danger;
 }
 
 .successMessage {
 	margin-bottom: $spacing-xl;
-	padding: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
 	color: $success;
 	font-size: $font-md;
 	background: $success-light;
 	border-radius: $border-radius-md;
+	border-left: 4px solid $success;
 }
 
+// ===== СЕКЦИЯ ПРЕВЬЮ =====
 .previewSection {
 	margin-bottom: $spacing-xxxl;
 }
@@ -170,13 +187,13 @@
 	margin-bottom: $spacing-xl;
 	font-size: $font-xl;
 	font-weight: 600;
-	color: $text-primary;
+	color: $variables-textprimary;
 }
 
 .tableWrapper {
 	margin-bottom: $spacing-xxxl;
 	overflow-x: auto;
-	
+
 	&:last-child {
 		margin-bottom: 0;
 	}
@@ -186,123 +203,173 @@
 	margin-bottom: $spacing-lg;
 	font-size: $font-lg;
 	font-weight: 500;
-	color: $text-primary;
+	color: $variables-textprimary;
+}
+
+.tableContainer {
+	border: 1px solid $border-color;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	overflow: hidden;
 }
 
 .previewTable {
 	width: 100%;
 	border-collapse: collapse;
 	background: $white;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
-	overflow: hidden;
-	
+
 	tr {
 		border-bottom: 1px solid $border-color;
-		
+
 		&:last-child {
 			border-bottom: none;
 		}
 	}
-	
-	.tableCell {
-		padding: $spacing-md;
-		font-size: $font-sm;
-		color: $text-primary;
-		border-right: 1px solid $border-color;
-		
-		&:last-child {
-			border-right: none;
-		}
-	}
-	
-	tr:first-child .tableCell {
-		font-weight: 600;
-		background: $background-hover;
+}
+
+.tableCell {
+	padding: $spacing-md $spacing-lg;
+	font-size: $font-sm;
+	color: $variables-textprimary;
+	border-right: 1px solid $border-color;
+
+	&:last-child {
+		border-right: none;
 	}
 }
 
+.previewTable tr:first-child .tableCell {
+	font-weight: 600;
+	background: $derivatives-gray-10;
+}
+
+// ===== СТАТИСТИКА ТАБЛИЦЫ =====
 .tableStats {
 	margin-top: $spacing-lg;
-	padding: $spacing-md;
+	padding: $spacing-md $spacing-lg;
 	display: flex;
 	gap: $spacing-xl;
 	flex-wrap: wrap;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	border-radius: $border-radius-md;
-	
+
 	span {
-		color: $text-secondary;
+		color: $variables-textsecondary;
 		font-size: $font-sm;
-		
+
 		strong {
-			color: $text-primary;
+			color: $variables-textprimary;
 		}
 	}
 }
 
+.emptyPreview {
+	padding: $spacing-xxxl;
+	text-align: center;
+	color: $variables-textsecondary;
+	font-size: $font-md;
+	background: $derivatives-gray-10;
+	border-radius: $border-radius-md;
+}
+
+// ===== ИНФОРМАЦИОННАЯ СЕКЦИЯ =====
 .infoSection {
 	margin-top: $spacing-xxxl;
 	padding: $spacing-xl;
-	background: $background-light;
-	border-radius: $border-radius-md;
-	
+	background: $derivatives-gray-10;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+
 	h3 {
 		margin-bottom: $spacing-md;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-size: $font-lg;
 		font-weight: 600;
 	}
-	
+
 	.infoContent {
 		p {
 			margin-bottom: $spacing-sm;
-			color: $text-secondary;
+			color: $variables-textsecondary;
 			font-size: $font-md;
 			line-height: 1.6;
-			
+
 			code {
 				padding: 2px 6px;
 				background: $white;
 				border-radius: $border-radius-sm;
 				font-family: monospace;
+				font-size: $font-sm;
 			}
 		}
 	}
 }
 
-@include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
+.hint {
+	margin-top: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	background: $warning-light;
+	border-left: 4px solid $warning;
+	border-radius: $border-radius-md;
+
+	strong {
+		color: $warning;
 	}
-	
+
+	ul {
+		margin: $spacing-sm 0 0 $spacing-xl;
+		color: $variables-textsecondary;
+		font-size: $font-sm;
+	}
+}
+
+// ===== АДАПТИВНОСТЬ =====
+@include mobile {
+	.page {
+		padding: $spacing-lg;
+	}
+
 	.title {
 		font-size: $font-xxl;
 	}
-	
+
 	.content {
 		padding: $spacing-lg;
 	}
-	
-	.tabs .tab {
-		padding: $spacing-sm $spacing-lg;
-		font-size: $font-md;
+
+	.tabs {
+		flex-wrap: wrap;
 	}
-	
+
+	.tab {
+		padding: $spacing-sm $spacing-lg;
+		font-size: $font-sm;
+	}
+
 	.uploadSection {
 		padding: $spacing-xl;
 	}
-	
+
 	.buttonsGroup {
 		flex-direction: column;
+		gap: $spacing-md;
 	}
-	
-	.previewBtn, .importBtn {
+
+	.previewBtn,
+	.importBtn {
 		width: 100%;
+		padding: $spacing-md;
 	}
-	
+
 	.tableStats {
 		flex-direction: column;
 		gap: $spacing-sm;
+	}
+
+	.tableCell {
+		padding: $spacing-sm $spacing-md;
+		font-size: $font-xs;
+	}
+
+	.infoSection {
+		padding: $spacing-lg;
 	}
 }

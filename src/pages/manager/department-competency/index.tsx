@@ -1,5 +1,3 @@
-// department-competencies.page.tsx (ИСПРАВЛЕННАЯ - правильный расчет прогресса)
-
 import React, { useState, useEffect } from 'react';
 import styles from './competencies.module.scss';
 
@@ -13,8 +11,16 @@ interface Employee {
 interface Material {
 	id: string;
 	name: string;
-	status: number;
-	competencyId?: string;
+	link?: string;
+	duration?: number;
+}
+
+interface EducationalMaterialLink {
+	id: string;
+	competencyId: string;
+	educationalMaterialId: string;
+	educationalMaterial: Material;
+	targetLevelId?: string;
 }
 
 interface Competency {
@@ -28,8 +34,6 @@ interface Competency {
 	hierarchy?: { id: string; name: string };
 	category?: { id: string; name: string };
 	group?: { id: string; name: string };
-	materials?: Material[];
-	progressPercent?: number;
 }
 
 interface CompetencyTask {
@@ -44,10 +48,16 @@ interface MaterialTask {
 	materialId: string;
 	status: number;
 	employeeId: string;
-	material?: {
-		id: string;
-		competencyId?: string;
-	};
+}
+
+interface Assessment {
+	id: string;
+	employeeId: string;
+	competencyId: string;
+	currentLevelId: string;
+	currentLevel?: { id: string; name: string; value: number };
+	comment?: string;
+	examiner?: Employee;
 }
 
 interface HierarchyItem {
@@ -75,6 +85,12 @@ interface Group {
 	name: string;
 }
 
+interface Level {
+	id: string;
+	name: string;
+	value: number;
+}
+
 const DepartmentCompetenciesPage: React.FC = () => {
 	const accessToken = localStorage.getItem('accessToken');
 	
@@ -90,10 +106,12 @@ const DepartmentCompetenciesPage: React.FC = () => {
 	const [departmentName, setDepartmentName] = useState<string>('');
 	const [allCompetencies, setAllCompetencies] = useState<Competency[]>([]);
 	const [assignedCompetencies, setAssignedCompetencies] = useState<CompetencyTask[]>([]);
+	const [commonCompetencies, setCommonCompetencies] = useState<Competency[]>([]);
 	const [hierarchy, setHierarchy] = useState<HierarchyItem[]>([]);
 	const [flatHierarchy, setFlatHierarchy] = useState<HierarchyItem[]>([]);
 	const [materialTasks, setMaterialTasks] = useState<MaterialTask[]>([]);
-	const [assessments, setAssessments] = useState<Map<string, { score: number; comment: string }>>(new Map());
+	const [assessments, setAssessments] = useState<Map<string, Assessment>>(new Map());
+	const [levels, setLevels] = useState<Level[]>([]);
 	
 	// UI состояния
 	const [isLoading, setIsLoading] = useState(true);
@@ -101,9 +119,30 @@ const DepartmentCompetenciesPage: React.FC = () => {
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [showCompetencyList, setShowCompetencyList] = useState(false);
 	const [expandedCompetency, setExpandedCompetency] = useState<string | null>(null);
-	const [assessmentModal, setAssessmentModal] = useState<any>(null);
-	const [assessmentScore, setAssessmentScore] = useState<number>(3);
+	const [nextLevelMaterials, setNextLevelMaterials] = useState<Map<string, Material[]>>(new Map());
+	const [assessmentModal, setAssessmentModal] = useState<{
+		competencyId: string;
+		competencyName: string;
+		employeeId: string;
+		employeeName: string;
+		existingAssessment?: Assessment;
+	} | null>(null);
+	const [selectedLevelId, setSelectedLevelId] = useState<string>('');
 	const [assessmentComment, setAssessmentComment] = useState<string>('');
+
+	// Получение уровней
+	const fetchLevels = async () => {
+		try {
+			const response = await fetch('http://localhost:5217/api/levels?withDeleted=false', {
+				method: 'GET',
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
+			});
+			if (response.ok) {
+				const data = await response.json();
+				setLevels(data.sort((a: Level, b: Level) => a.value - b.value));
+			}
+		} catch (error) { console.error(error); }
+	};
 
 	// Вспомогательные функции для иерархии
 	const flattenHierarchy = (items: HierarchyItem[], result: HierarchyItem[] = []): HierarchyItem[] => {
@@ -149,7 +188,7 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/competency-hierarchy', {
 				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
 			});
 			if (response.ok) {
 				const data: HierarchyItem[] = await response.json();
@@ -207,7 +246,7 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/users/profile', {
 				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
 			});
 			if (response.ok) {
 				const data = await response.json();
@@ -225,7 +264,7 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		try {
 			const response = await fetch(`http://localhost:5217/api/departments/${departmentId}/employees`, {
 				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
 			});
 			if (response.ok) {
 				const data: any[] = await response.json();
@@ -242,41 +281,25 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		return [];
 	};
 
-	// Получение деталей компетенции (с материалами)
-	const fetchCompetencyDetails = async (competencyId: string): Promise<Competency | null> => {
-		try {
-			const response = await fetch(`http://localhost:5217/api/competencies/${competencyId}`, {
-				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
-			});
-			if (response.ok) {
-				const data: Competency = await response.json();
-				return data;
-			}
-		} catch (error) { console.error(error); }
-		return null;
-	};
-
 	// Получение всех компетенций департамента
 	const fetchAllCompetencies = async (departmentId: string) => {
 		try {
 			const response = await fetch(`http://localhost:5217/api/competencies/department/${departmentId}`, {
 				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
 			});
 			if (response.ok) {
 				const data: Competency[] = await response.json();
-				// Обогащаем компетенции иерархией и материалами
+				
 				const enrichedData = await Promise.all(data.map(async (comp) => {
 					const hierarchyInfo = getFullHierarchy(comp.hierarchy?.id || '');
-					const details = await fetchCompetencyDetails(comp.id);
 					return {
 						...comp,
 						category: hierarchyInfo.category || undefined,
 						group: hierarchyInfo.group || undefined,
-						materials: details?.materials || [],
 					};
 				}));
+				
 				setAllCompetencies(enrichedData);
 				return enrichedData;
 			}
@@ -284,29 +307,54 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		return [];
 	};
 
-	// Получение назначенных компетенций для департамента
+	// Получение общих компетенций (которые есть у всех сотрудников)
+	const calculateCommonCompetencies = (assigned: CompetencyTask[]) => {
+		if (employees.length === 0 || assigned.length === 0) {
+			setCommonCompetencies([]);
+			return [];
+		}
+		
+		const competencyCount = new Map<string, number>();
+		
+		assigned.forEach(task => {
+			competencyCount.set(task.competencyId, (competencyCount.get(task.competencyId) || 0) + 1);
+		});
+		
+		const allEmployeeIds = employees.map(e => e.id);
+		const commonIds = new Set<string>();
+		competencyCount.forEach((count, compId) => {
+			if (count === allEmployeeIds.length) {
+				commonIds.add(compId);
+			}
+		});
+		
+		const common = allCompetencies.filter(comp => commonIds.has(comp.id));
+		setCommonCompetencies(common);
+		return common;
+	};
+
+	// Получение назначенных компетенций
 	const fetchAssignedCompetencies = async (departmentId: string) => {
 		try {
 			const response = await fetch(`http://localhost:5217/api/competency-task/department/${departmentId}`, {
 				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
 			});
 			if (response.ok) {
 				const data: CompetencyTask[] = await response.json();
-				// Обогащаем назначенные компетенции материалами и иерархией
-				const enrichedData = await Promise.all(data.map(async (task) => {
-					const details = await fetchCompetencyDetails(task.competencyId);
+				
+				const enrichedData = data.map(task => {
 					const hierarchyInfo = getFullHierarchy(task.competency.hierarchy?.id || '');
 					return {
 						...task,
 						competency: {
 							...task.competency,
-							materials: details?.materials || [],
 							category: hierarchyInfo.category,
 							group: hierarchyInfo.group,
 						}
 					};
-				}));
+				});
+				
 				setAssignedCompetencies(enrichedData);
 				return enrichedData;
 			}
@@ -314,12 +362,12 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		return [];
 	};
 
-	// Получение материалов сотрудника с их статусами
+	// Получение материалов сотрудника
 	const fetchMaterialTasks = async (departmentId: string) => {
 		try {
 			const response = await fetch(`http://localhost:5217/api/material-task/department/${departmentId}`, {
 				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
 			});
 			if (response.ok) {
 				const data: any[] = await response.json();
@@ -328,10 +376,6 @@ const DepartmentCompetenciesPage: React.FC = () => {
 					materialId: task.material?.id,
 					status: task.status,
 					employeeId: task.employee?.id,
-					material: {
-						id: task.material?.id,
-						competencyId: task.material?.competencyId,
-					}
 				}));
 				setMaterialTasks(normalizedTasks);
 				return normalizedTasks;
@@ -340,85 +384,162 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		return [];
 	};
 
-	// Расчет прогресса по компетенции для конкретного сотрудника
-	// Прогресс = (количество изученных материалов компетенции / общее количество материалов компетенции) * 100
-	const calculateCompetencyProgress = (competency: Competency, employeeId: string): number => {
-		// Получаем все материалы, привязанные к этой компетенции
-		const competencyMaterials = competency.materials || [];
+	// Получение материалов для следующего уровня через эндпоинт /next-level
+	const fetchNextLevelMaterialsForEmployee = async (competencyId: string, employeeId: string): Promise<Material[]> => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return [];
+
+			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}/next-level`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data: EducationalMaterialLink[] = await response.json();
+				return data.map(link => ({
+					id: link.educationalMaterial.id,
+					name: link.educationalMaterial.name,
+					link: link.educationalMaterial.link,
+					duration: link.educationalMaterial.duration,
+				}));
+			}
+		} catch (error) { console.error(error); }
+		return [];
+	};
+
+	// Загрузка материалов для всех компетенций выбранного сотрудника
+	const loadAllNextLevelMaterials = async (employeeId: string, competenciesList: CompetencyTask[]) => {
+		const newMaterialsMap = new Map<string, Material[]>();
 		
-		if (competencyMaterials.length === 0) {
-			return 0;
+		for (const task of competenciesList) {
+			const materials = await fetchNextLevelMaterialsForEmployee(task.competencyId, employeeId);
+			newMaterialsMap.set(`${task.competencyId}_${employeeId}`, materials);
 		}
 		
-		// Получаем задачи сотрудника по этим материалам
-		const employeeTasks = materialTasks.filter(task => 
-			task.employeeId === employeeId && 
-			competencyMaterials.some(m => m.id === task.materialId)
-		);
-		
-		// Считаем только полностью изученные материалы (status === 2)
-		const completedCount = employeeTasks.filter(task => task.status === 2).length;
-		
-		// Прогресс = (изучено / всего материалов компетенции) * 100
-		return Math.round((completedCount / competencyMaterials.length) * 100);
+		setNextLevelMaterials(newMaterialsMap);
 	};
 
 	// Получение оценок
-	const fetchAssessmentsForEmployee = async (employeeId: string) => {
+	const fetchAssessments = async () => {
 		try {
-			const response = await fetch(`http://localhost:5217/api/competency-assessment/employee/${employeeId}`, {
+			const response = await fetch('http://localhost:5217/api/assessments?withDeleted=false', {
 				method: 'GET',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
+				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'application/json' },
 			});
 			if (response.ok) {
-				const data: any[] = await response.json();
-				const assessmentMap = new Map<string, { score: number; comment: string }>();
+				const data: Assessment[] = await response.json();
+				const assessmentMap = new Map<string, Assessment>();
 				data.forEach(item => {
-					const key = `${item.competencyId}`;
-					assessmentMap.set(key, { score: item.score, comment: item.comment || '' });
+					const key = `${item.employeeId}_${item.competencyId}`;
+					assessmentMap.set(key, item);
 				});
-				setAssessments(prev => {
-					const newMap = new Map(prev);
-					assessmentMap.forEach((value, key) => newMap.set(key, value));
-					return newMap;
-				});
+				setAssessments(assessmentMap);
+				return assessmentMap;
 			}
-		} catch (error) { console.error(error); }
+		} catch (error) { console.error('Error fetching assessments:', error); }
+		return new Map();
 	};
 
-	// Отправка оценки
-	const submitAssessment = async () => {
+	// Расчет прогресса по компетенции
+	const calculateCompetencyProgress = (competencyId: string, employeeId: string): number => {
+		const materials = nextLevelMaterials.get(`${competencyId}_${employeeId}`) || [];
+		
+		if (materials.length === 0) return 0;
+		
+		const materialIds = new Set(materials.map(m => m.id));
+		
+		const employeeTasks = materialTasks.filter(task => 
+			task.employeeId === employeeId && 
+			materialIds.has(task.materialId)
+		);
+		
+		const completedCount = employeeTasks.filter(task => task.status === 2).length;
+		return Math.round((completedCount / materials.length) * 100);
+	};
+
+	// Получение уровня по проценту прогресса
+	const getLevelFromProgress = (progressPercent: number): { value: number; name: string; id: string } => {
+		if (progressPercent === 100) {
+			const level = levels.find(l => l.value === 3) || levels[levels.length - 1];
+			return { value: level?.value || 3, name: level?.name || 'Эксперт', id: level?.id || '' };
+		}
+		if (progressPercent >= 66) {
+			const level = levels.find(l => l.value === 2) || levels[1];
+			return { value: level?.value || 2, name: level?.name || 'Профессионал', id: level?.id || '' };
+		}
+		if (progressPercent >= 33) {
+			const level = levels.find(l => l.value === 1) || levels[0];
+			return { value: level?.value || 1, name: level?.name || 'Базовые знания', id: level?.id || '' };
+		}
+		return { value: 0, name: 'Не определен', id: '' };
+	};
+
+	// Сохранение оценки
+	const saveAssessment = async () => {
 		if (!assessmentModal) return;
 		
+		if (!selectedLevelId) {
+			setError('Выберите уровень для оценки');
+			setTimeout(() => setError(null), 3000);
+			return;
+		}
+		
+		const existingAssessment = assessmentModal.existingAssessment;
+		const url = existingAssessment 
+			? `http://localhost:5217/api/assessments/${existingAssessment.id}`
+			: 'http://localhost:5217/api/assessments';
+		const method = existingAssessment ? 'PATCH' : 'POST';
+		
+		let body;
+		if (existingAssessment) {
+			body = { 
+				currentLevelId: selectedLevelId,
+				comment: assessmentComment 
+			};
+		} else {
+			body = {
+				employeeId: assessmentModal.employeeId,
+				competencyId: assessmentModal.competencyId,
+				currentLevelId: selectedLevelId,
+				comment: assessmentComment,
+			};
+		}
+		
 		try {
-			const response = await fetch('http://localhost:5217/api/competency-assessment', {
-				method: 'POST',
+			const response = await fetch(url, {
+				method: method,
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({
-					employeeId: assessmentModal.employeeId,
-					competencyId: assessmentModal.competencyId,
-					levelId: assessmentModal.levelId,
-					score: assessmentScore,
-					comment: assessmentComment || undefined,
-				}),
+				body: JSON.stringify(body),
 			});
 
-			if (response.ok || response.status === 201) {
-				const key = `${assessmentModal.competencyId}`;
-				setAssessments(prev => {
-					const newMap = new Map(prev);
-					newMap.set(key, { score: assessmentScore, comment: assessmentComment });
-					return newMap;
-				});
-				
-				setSuccessMessage(`Оценка "${assessmentScore}" сохранена`);
+			if (response.ok || response.status === 201 || response.status === 204) {
+				const selectedLevel = levels.find(l => l.id === selectedLevelId);
+				const actionText = existingAssessment ? 'изменена' : 'сохранена';
+				setSuccessMessage(`Оценка "${selectedLevel?.name}" ${actionText}`);
 				setTimeout(() => setSuccessMessage(null), 3000);
 				setAssessmentModal(null);
-				setAssessmentScore(3);
+				setSelectedLevelId('');
 				setAssessmentComment('');
+				
+				const newAssessments = await fetchAssessments();
+				setAssessments(newAssessments);
+				
+				if (selectedEmployee !== 'all') {
+					const employeeCompetencies = assignedCompetencies.filter(t => t.employeeId === selectedEmployee);
+					await loadAllNextLevelMaterials(selectedEmployee, employeeCompetencies);
+				}
+			} else {
+				const errorText = await response.text();
+				console.error('Save assessment error:', response.status, errorText);
+				setError(`Ошибка при сохранении оценки: ${response.status}`);
+				setTimeout(() => setError(null), 3000);
 			}
 		} catch (error) {
 			console.error(error);
@@ -439,6 +560,34 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		} catch (error) { return false; }
 	};
 
+	// Удаление компетенции у сотрудника
+	const removeCompetencyFromEmployee = async (competencyId: string, employeeId: string) => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return false;
+
+			const task = assignedCompetencies.find(
+				t => t.employeeId === employeeId && t.competencyId === competencyId
+			);
+			
+			if (!task) return false;
+
+			const response = await fetch(`http://localhost:5217/api/competency-task/${task.id}/as-boss`, {
+				method: 'DELETE',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ employeeId: employeeId }),
+			});
+
+			return response.ok || response.status === 204;
+		} catch (error) {
+			console.error('Error removing competency:', error);
+			return false;
+		}
+	};
+
 	// Добавление компетенции
 	const handleAddCompetency = async (competencyId: string) => {
 		const competency = allCompetencies.find(c => c.id === competencyId);
@@ -448,31 +597,30 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		let assignedCount = 0;
 		
 		if (selectedEmployee === 'all') {
+			// Режим "Все сотрудники" - добавляем компетенцию ВСЕМ сотрудникам
 			for (const employee of employees) {
-				const hasCompetency = assignedCompetencies.some(
-					task => task.employeeId === employee.id && task.competencyId === competencyId
-				);
-				if (!hasCompetency) {
-					const result = await assignCompetencyToEmployee(competencyId, employee.id);
-					if (result) assignedCount++;
-				}
+				const result = await assignCompetencyToEmployee(competencyId, employee.id);
+				if (result) assignedCount++;
 			}
-			success = assignedCount > 0;
-			if (success) {
-				setSuccessMessage(`Компетенция "${competency.name}" назначена ${assignedCount} сотрудникам`);
+			
+			if (assignedCount > 0) {
+				success = true;
+				setSuccessMessage(`Компетенция "${competency.name}" назначена всем ${assignedCount} сотрудникам`);
+			} else {
+				setError('Ошибка при назначении компетенции');
+				setTimeout(() => setError(null), 3000);
+				setShowCompetencyList(false);
+				setSearchQuery('');
+				return;
 			}
 		} else {
-			const hasCompetency = assignedCompetencies.some(
-				task => task.employeeId === selectedEmployee && task.competencyId === competencyId
-			);
-			if (!hasCompetency) {
-				success = await assignCompetencyToEmployee(competencyId, selectedEmployee);
-				const employee = employees.find(e => e.id === selectedEmployee);
-				if (success) {
-					setSuccessMessage(`Компетенция "${competency.name}" назначена сотруднику ${employee?.fullName}`);
-				}
+			// Режим конкретного сотрудника - добавляем только ему
+			success = await assignCompetencyToEmployee(competencyId, selectedEmployee);
+			const employee = employees.find(e => e.id === selectedEmployee);
+			if (success) {
+				setSuccessMessage(`Компетенция "${competency.name}" назначена сотруднику ${employee?.fullName}`);
 			} else {
-				setError(`Компетенция "${competency.name}" уже назначена этому сотруднику`);
+				setError('Ошибка при назначении компетенции');
 				setTimeout(() => setError(null), 3000);
 				setShowCompetencyList(false);
 				setSearchQuery('');
@@ -484,62 +632,145 @@ const DepartmentCompetenciesPage: React.FC = () => {
 			setTimeout(() => setSuccessMessage(null), 3000);
 			const departmentId = await fetchUserProfile();
 			if (departmentId) {
-				await fetchAssignedCompetencies(departmentId);
+				const newAssigned = await fetchAssignedCompetencies(departmentId);
+				setAssignedCompetencies(newAssigned);
+				calculateCommonCompetencies(newAssigned);
+				
+				if (selectedEmployee !== 'all') {
+					const employeeCompetencies = newAssigned.filter(t => t.employeeId === selectedEmployee);
+					await loadAllNextLevelMaterials(selectedEmployee, employeeCompetencies);
+				}
 			}
-		} else {
-			setError('Ошибка при назначении компетенции');
-			setTimeout(() => setError(null), 3000);
+			setShowCompetencyList(false);
+			setSearchQuery('');
 		}
-		
-		setShowCompetencyList(false);
-		setSearchQuery('');
 	};
 
-	// Получение компетенций с прогрессом для отображения
-	const getCurrentCompetencies = (): (Competency & { progressPercent: number; materialsCount: number; completedCount: number })[] => {
-		let tasks: CompetencyTask[] = [];
+	// Обработчик удаления компетенции
+	const handleRemoveCompetency = async (competencyId: string, competencyName: string) => {
+		let removedCount = 0;
 		
 		if (selectedEmployee === 'all') {
-			const competencyMap = new Map<string, Competency>();
-			assignedCompetencies.forEach(task => {
-				if (!competencyMap.has(task.competencyId)) {
-					competencyMap.set(task.competencyId, task.competency);
+			for (const employee of employees) {
+				const hasCompetency = assignedCompetencies.some(
+					task => task.employeeId === employee.id && task.competencyId === competencyId
+				);
+				if (hasCompetency) {
+					const result = await removeCompetencyFromEmployee(competencyId, employee.id);
+					if (result) removedCount++;
 				}
-			});
-			tasks = Array.from(competencyMap.values()).map(comp => ({ 
-				id: comp.id, employeeId: '', competencyId: comp.id, competency: comp 
-			} as CompetencyTask));
+			}
+			if (removedCount > 0) {
+				setSuccessMessage(`Компетенция "${competencyName}" удалена у ${removedCount} сотрудников`);
+			} else {
+				setError(`Компетенция "${competencyName}" не назначена ни одному сотруднику`);
+				setTimeout(() => setError(null), 3000);
+				return;
+			}
 		} else {
-			tasks = assignedCompetencies.filter(task => task.employeeId === selectedEmployee);
+			const hasCompetency = assignedCompetencies.some(
+				task => task.employeeId === selectedEmployee && task.competencyId === competencyId
+			);
+			if (hasCompetency) {
+				const success = await removeCompetencyFromEmployee(competencyId, selectedEmployee);
+				if (success) {
+					const employee = employees.find(e => e.id === selectedEmployee);
+					setSuccessMessage(`Компетенция "${competencyName}" удалена у сотрудника ${employee?.fullName}`);
+					removedCount = 1;
+				}
+			} else {
+				setError(`Компетенция "${competencyName}" не назначена этому сотруднику`);
+				setTimeout(() => setError(null), 3000);
+				return;
+			}
+		}
+
+		if (removedCount > 0) {
+			setTimeout(() => setSuccessMessage(null), 3000);
+			const departmentId = await fetchUserProfile();
+			if (departmentId) {
+				const newAssigned = await fetchAssignedCompetencies(departmentId);
+				setAssignedCompetencies(newAssigned);
+				calculateCommonCompetencies(newAssigned);
+				
+				if (selectedEmployee !== 'all') {
+					const employeeCompetencies = newAssigned.filter(t => t.employeeId === selectedEmployee);
+					await loadAllNextLevelMaterials(selectedEmployee, employeeCompetencies);
+				}
+			}
+		} else {
+			setError('Ошибка при удалении компетенции');
+			setTimeout(() => setError(null), 3000);
+		}
+	};
+
+	// Обработчик раскрытия компетенции
+	const handleExpandCompetency = async (competencyId: string) => {
+		if (selectedEmployee === 'all') return;
+		
+		if (expandedCompetency === competencyId) {
+			setExpandedCompetency(null);
+		} else {
+			setExpandedCompetency(competencyId);
+			const key = `${competencyId}_${selectedEmployee}`;
+			if (!nextLevelMaterials.has(key)) {
+				const materials = await fetchNextLevelMaterialsForEmployee(competencyId, selectedEmployee);
+				setNextLevelMaterials(prev => new Map(prev).set(key, materials));
+			}
+		}
+	};
+
+	// Получение компетенций для отображения
+	const getCurrentCompetencies = (): (Competency & { 
+		progressPercent: number; 
+		materialsCount: number; 
+		completedCount: number;
+		currentLevelValue: number;
+		currentLevelName: string;
+		currentLevelId: string;
+		isCommon?: boolean;
+	})[] => {
+		let competenciesToShow: Competency[] = [];
+		
+		if (selectedEmployee === 'all') {
+			competenciesToShow = commonCompetencies;
+		} else {
+			const tasks = assignedCompetencies.filter(task => task.employeeId === selectedEmployee);
+			competenciesToShow = tasks.map(task => task.competency);
 		}
 		
-		const employeeId = selectedEmployee === 'all' ? employees[0]?.id : selectedEmployee;
-		
-		return tasks.map(task => {
-			const competency = task.competency;
-			const competencyMaterials = competency.materials || [];
-			const progressPercent = calculateCompetencyProgress(competency, employeeId);
+		return competenciesToShow.map(comp => {
+			let progressPercent = 0;
+			let currentLevelValue = 0;
+			let currentLevelName = 'Не определен';
+			let currentLevelId = '';
 			
-			// Для отладки
-			console.log(`Компетенция: ${competency.name}`);
-			console.log(`  Материалов всего: ${competencyMaterials.length}`);
-			console.log(`  Прогресс: ${progressPercent}%`);
+			if (selectedEmployee !== 'all') {
+				progressPercent = calculateCompetencyProgress(comp.id, selectedEmployee);
+				const levelInfo = getLevelFromProgress(progressPercent);
+				currentLevelValue = levelInfo.value;
+				currentLevelName = levelInfo.name;
+				currentLevelId = levelInfo.id;
+			}
 			
 			return {
-				...competency,
+				...comp,
 				progressPercent,
-				materialsCount: competencyMaterials.length,
-				completedCount: Math.round((progressPercent / 100) * competencyMaterials.length),
+				materialsCount: 0,
+				completedCount: 0,
+				currentLevelValue,
+				currentLevelName,
+				currentLevelId,
+				isCommon: selectedEmployee === 'all',
 			};
 		});
 	};
 
-	// Фильтрация компетенций по иерархии и поиску
+	// Фильтрация компетенций
 	const getFilteredCompetencies = () => {
 		const competencies = getCurrentCompetencies();
 		
 		return competencies.filter(comp => {
-			// Фильтр по блоку
 			if (selectedBlockId !== 'all') {
 				const block = blocks.find(b => b.id === selectedBlockId);
 				if (block && comp.category) {
@@ -550,18 +781,15 @@ const DepartmentCompetenciesPage: React.FC = () => {
 				}
 			}
 			
-			// Фильтр по категории
 			if (selectedCategoryId !== 'all' && comp.category?.id !== selectedCategoryId) {
 				return false;
 			}
 			
-			// Фильтр по группе
 			if (selectedGroupId !== 'all') {
 				const compGroupId = comp.group?.id || comp.hierarchy?.id;
 				if (compGroupId !== selectedGroupId) return false;
 			}
 			
-			// Фильтр по поиску
 			if (searchQuery && !comp.name.toLowerCase().includes(searchQuery.toLowerCase())) {
 				return false;
 			}
@@ -570,10 +798,21 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		});
 	};
 
-	// Получение доступных компетенций для добавления
+	// Получение доступных компетенций
 	const getAvailableCompetencies = (): Competency[] => {
-		const assignedIds = new Set(assignedCompetencies.map(c => c.competencyId));
-		return allCompetencies.filter(c => !assignedIds.has(c.id));
+		if (selectedEmployee === 'all') {
+			// Для режима "все сотрудники" - показываем компетенции, которых нет в commonCompetencies
+			const commonIds = new Set(commonCompetencies.map(c => c.id));
+			return allCompetencies.filter(c => !commonIds.has(c.id));
+		} else {
+			// Для конкретного сотрудника - показываем компетенции, которых нет у этого сотрудника
+			const assignedIds = new Set(
+				assignedCompetencies
+					.filter(t => t.employeeId === selectedEmployee)
+					.map(t => t.competencyId)
+			);
+			return allCompetencies.filter(c => !assignedIds.has(c.id));
+		}
 	};
 
 	// Фильтрация доступных компетенций
@@ -581,7 +820,6 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		const available = getAvailableCompetencies();
 		
 		return available.filter(comp => {
-			// Фильтр по блоку
 			if (selectedBlockId !== 'all') {
 				const block = blocks.find(b => b.id === selectedBlockId);
 				if (block && comp.category) {
@@ -592,18 +830,15 @@ const DepartmentCompetenciesPage: React.FC = () => {
 				}
 			}
 			
-			// Фильтр по категории
 			if (selectedCategoryId !== 'all' && comp.category?.id !== selectedCategoryId) {
 				return false;
 			}
 			
-			// Фильтр по группе
 			if (selectedGroupId !== 'all') {
 				const compGroupId = comp.group?.id || comp.hierarchy?.id;
 				if (compGroupId !== selectedGroupId) return false;
 			}
 			
-			// Фильтр по поиску
 			if (searchQuery && !comp.name.toLowerCase().includes(searchQuery.toLowerCase())) {
 				return false;
 			}
@@ -615,7 +850,6 @@ const DepartmentCompetenciesPage: React.FC = () => {
 	const currentCompetencies = getFilteredCompetencies();
 	const filteredAvailableCompetencies = getFilteredAvailableCompetencies();
 
-	// Сброс фильтров
 	const resetFilters = () => {
 		setSelectedBlockId('all');
 		setSelectedCategoryId('all');
@@ -623,22 +857,12 @@ const DepartmentCompetenciesPage: React.FC = () => {
 		setSearchQuery('');
 	};
 
-	// Получение цвета для прогресса
 	const getProgressColor = (percent: number): string => {
 		if (percent >= 80) return '#4caf50';
 		if (percent >= 50) return '#ff9800';
 		return '#f44336';
 	};
 
-	// Получение цвета для оценки
-	const getAssessmentColor = (score: number): string => {
-		if (score >= 4) return '#4caf50';
-		if (score >= 3) return '#8bc34a';
-		if (score >= 2) return '#ffc107';
-		return '#f44336';
-	};
-
-	// Получение отображаемого пути иерархии
 	const getFullHierarchyDisplay = (competency: Competency): string => {
 		const parts: string[] = [];
 		
@@ -656,21 +880,40 @@ const DepartmentCompetenciesPage: React.FC = () => {
 	};
 
 	useEffect(() => {
+		const loadMaterialsForSelectedEmployee = async () => {
+			if (selectedEmployee !== 'all' && assignedCompetencies.length > 0) {
+				const employeeCompetencies = assignedCompetencies.filter(t => t.employeeId === selectedEmployee);
+				await loadAllNextLevelMaterials(selectedEmployee, employeeCompetencies);
+			}
+			setExpandedCompetency(null);
+		};
+		
+		loadMaterialsForSelectedEmployee();
+	}, [selectedEmployee, assignedCompetencies]);
+
+	useEffect(() => {
 		const loadData = async () => {
 			setIsLoading(true);
 			setError(null);
 			
 			try {
+				await fetchLevels();
 				await fetchCompetencyHierarchy();
 				const departmentId = await fetchUserProfile();
 				if (departmentId) {
 					const employeesList = await fetchDepartmentEmployees(departmentId);
 					await fetchAllCompetencies(departmentId);
-					await fetchAssignedCompetencies(departmentId);
+					const assigned = await fetchAssignedCompetencies(departmentId);
 					await fetchMaterialTasks(departmentId);
+					await fetchAssessments();
 					
-					for (const employee of employeesList) {
-						await fetchAssessmentsForEmployee(employee.id);
+					setAssignedCompetencies(assigned);
+					calculateCommonCompetencies(assigned);
+					
+					if (employeesList.length > 0 && assigned.length > 0) {
+						const firstEmployeeId = employeesList[0].id;
+						const employeeCompetencies = assigned.filter(t => t.employeeId === firstEmployeeId);
+						await loadAllNextLevelMaterials(firstEmployeeId, employeeCompetencies);
 					}
 				} else {
 					setError('Не удалось определить ваш департамент');
@@ -698,7 +941,6 @@ const DepartmentCompetenciesPage: React.FC = () => {
 			<div className={styles.content}>
 				{successMessage && <div className={styles.successMessage}>{successMessage}</div>}
 
-				{/* Фильтры */}
 				<div className={styles.filtersBar}>
 					<div className={styles.filterGroup}>
 						<label>Сотрудник:</label>
@@ -706,7 +948,7 @@ const DepartmentCompetenciesPage: React.FC = () => {
 							value={selectedEmployee}
 							onChange={(e) => setSelectedEmployee(e.target.value)}
 							className={styles.filterSelect}>
-							<option value='all'>Все сотрудники</option>
+							<option value='all'>Все сотрудники (общие компетенции)</option>
 							{employees.map((emp) => (
 								<option key={emp.id} value={emp.id}>{emp.fullName}</option>
 							))}
@@ -777,65 +1019,96 @@ const DepartmentCompetenciesPage: React.FC = () => {
 					</button>
 				</div>
 
-				{/* Список компетенций */}
 				<div className={styles.matrixWrapper}>
-					<h2>Текущие компетенции</h2>
+					<h2>
+						{selectedEmployee === 'all' ? 'Общие компетенции отдела' : 'Компетенции сотрудника'}
+					</h2>
 					{currentCompetencies.length === 0 ? (
-						<div className={styles.emptyState}><p>Нет назначенных компетенций</p></div>
+						<div className={styles.emptyState}>
+							<p>
+								{selectedEmployee === 'all' 
+									? 'Нет общих компетенций для отдела' 
+									: 'Нет назначенных компетенций у сотрудника'}
+							</p>
+						</div>
 					) : (
 						<div className={styles.competenciesGrid}>
 							{currentCompetencies.map(comp => {
 								const isExpanded = expandedCompetency === comp.id;
-								const assessment = assessments.get(comp.id);
+								const assessmentKey = `${selectedEmployee}_${comp.id}`;
+								const assessment = assessments.get(assessmentKey);
 								const progressPercent = comp.progressPercent || 0;
+								const materials = selectedEmployee !== 'all' ? nextLevelMaterials.get(`${comp.id}_${selectedEmployee}`) || [] : [];
 								
 								return (
 									<div key={comp.id} className={styles.competencyCard}>
 										<div 
-											className={styles.competencyHeader}
-											onClick={() => setExpandedCompetency(isExpanded ? null : comp.id)}>
+											className={`${styles.competencyHeader} ${selectedEmployee === 'all' ? styles.noHover : ''}`}
+											onClick={() => handleExpandCompetency(comp.id)}
+											style={selectedEmployee === 'all' ? { cursor: 'default' } : {}}>
 											<div className={styles.competencyTitle}>
 												<h3>{comp.name}</h3>
 												<span className={styles.competencyType}>{comp.type}</span>
+												{comp.isCommon && (
+													<span className={styles.commonBadge}>Общая</span>
+												)}
 											</div>
 											<div className={styles.headerRight}>
 												<div className={styles.hierarchyPath}>
 													{getFullHierarchyDisplay(comp)}
 												</div>
-												<div className={styles.progressSection}>
-													<div className={styles.progressBar}>
-														<div 
-															className={styles.progressFill} 
-															style={{ 
-																width: `${progressPercent}%`,
-																backgroundColor: getProgressColor(progressPercent)
-															}} 
-														/>
+												{selectedEmployee !== 'all' && (
+													<div className={styles.progressSection}>
+														<div className={styles.progressBar}>
+															<div 
+																className={styles.progressFill} 
+																style={{ 
+																	width: `${progressPercent}%`,
+																	backgroundColor: getProgressColor(progressPercent)
+																}} 
+															/>
+														</div>
+														<span className={styles.progressPercent}>{progressPercent}%</span>
 													</div>
-													<span className={styles.progressPercent}>{progressPercent}%</span>
-												</div>
-												<span className={styles.expandIcon}>{isExpanded ? '▲' : '▼'}</span>
+												)}
+												{selectedEmployee !== 'all' && (
+													<span className={styles.expandIcon}>{isExpanded ? '▲' : '▼'}</span>
+												)}
+												<button
+													className={styles.removeCompetencyBtn}
+													onClick={(e) => {
+														e.stopPropagation();
+														if (confirm(`Вы уверены, что хотите удалить компетенцию "${comp.name}" у ${selectedEmployee === 'all' ? 'всех сотрудников' : 'этого сотрудника'}?`)) {
+															handleRemoveCompetency(comp.id, comp.name);
+														}
+													}}>
+													🗑️
+												</button>
 											</div>
 										</div>
 										
 										<p className={styles.competencyDescription}>{comp.description}</p>
 										
-										{isExpanded && (
+										{isExpanded && selectedEmployee !== 'all' && (
 											<div className={styles.materialsSection}>
-												<strong>Учебные материалы ({comp.materialsCount || 0}):</strong>
+												<strong>Материалы для изучения ({materials.length}):</strong>
 												<div className={styles.materialsList}>
-													{comp.materials && comp.materials.length > 0 ? (
-														comp.materials.map(material => {
-															// Находим статус материала для выбранного сотрудника
-															const employeeId = selectedEmployee === 'all' ? employees[0]?.id : selectedEmployee;
+													{materials.length > 0 ? (
+														materials.map(material => {
 															const materialTask = materialTasks.find(
-																task => task.materialId === material.id && task.employeeId === employeeId
+																task => task.materialId === material.id && task.employeeId === selectedEmployee
 															);
 															const isCompleted = materialTask?.status === 2;
 															
 															return (
 																<div key={material.id} className={`${styles.materialItem} ${isCompleted ? styles.completed : ''}`}>
-																	<span className={styles.materialName}>{material.name}</span>
+																	{material.link ? (
+																		<a href={material.link} target="_blank" rel="noopener noreferrer" className={styles.materialLink}>
+																			{material.name}
+																		</a>
+																	) : (
+																		<span className={styles.materialName}>{material.name}</span>
+																	)}
 																	<span className={styles.materialStatus}>
 																		{isCompleted ? '✅ Изучено' : '⏳ Не изучено'}
 																	</span>
@@ -843,18 +1116,16 @@ const DepartmentCompetenciesPage: React.FC = () => {
 															);
 														})
 													) : (
-														<div className={styles.noMaterials}>Нет привязанных материалов</div>
+														<div className={styles.noMaterials}>
+															Нет материалов для изучения на следующем уровне
+														</div>
 													)}
 												</div>
 												
-												{/* Отображение оценки */}
 												{assessment && (
 													<div className={styles.assessmentDisplay}>
-														<span 
-															className={styles.assessmentBadge}
-															style={{ backgroundColor: getAssessmentColor(assessment.score) }}
-														>
-															Оценка: {assessment.score}
+														<span className={styles.assessmentBadge}>
+															✅ Текущая оценка: {assessment.currentLevel?.name || comp.currentLevelName}
 														</span>
 														{assessment.comment && (
 															<span className={styles.assessmentComment}>{assessment.comment}</span>
@@ -862,27 +1133,23 @@ const DepartmentCompetenciesPage: React.FC = () => {
 													</div>
 												)}
 												
-												{/* Кнопка оценки */}
-												{selectedEmployee !== 'all' && (
-													<button
-														className={styles.assessBtn}
-														onClick={() => {
-															const employee = employees.find(e => e.id === selectedEmployee);
-															setAssessmentModal({
-																competencyId: comp.id,
-																competencyName: comp.name,
-																levelId: 'level',
-																levelName: `Компетенция "${comp.name}"`,
-																employeeId: selectedEmployee,
-																employeeName: employee?.fullName || '',
-															});
-															setAssessmentScore(assessment?.score || 3);
-															setAssessmentComment(assessment?.comment || '');
-														}}
-													>
-														{assessment ? 'Изменить оценку' : 'Оценить'}
-													</button>
-												)}
+												<button
+													className={styles.confirmLevelBtn}
+													onClick={() => {
+														const employee = employees.find(e => e.id === selectedEmployee);
+														setAssessmentModal({
+															competencyId: comp.id,
+															competencyName: comp.name,
+															employeeId: selectedEmployee,
+															employeeName: employee?.fullName || '',
+															existingAssessment: assessment,
+														});
+														setSelectedLevelId(assessment?.currentLevelId || '');
+														setAssessmentComment(assessment?.comment || '');
+													}}
+												>
+													{assessment ? '✏️ Изменить оценку' : '📝 Выставить оценку'}
+												</button>
 											</div>
 										)}
 									</div>
@@ -892,7 +1159,6 @@ const DepartmentCompetenciesPage: React.FC = () => {
 					)}
 				</div>
 
-				{/* Добавление компетенции */}
 				<div className={styles.addCompetencySection}>
 					<h2>Добавить компетенцию</h2>
 					{getAvailableCompetencies().length === 0 ? (
@@ -932,7 +1198,9 @@ const DepartmentCompetenciesPage: React.FC = () => {
 													<div className={styles.competencyItemDesc}>
 														{comp.description?.slice(0, 60) || 'Нет описания'}
 													</div>
-													<button className={styles.assignBtn}>Назначить</button>
+													<button className={styles.assignBtn}>
+														{selectedEmployee === 'all' ? '📋 Назначить всем' : '➕ Назначить'}
+													</button>
 												</div>
 											))
 										)}
@@ -949,7 +1217,7 @@ const DepartmentCompetenciesPage: React.FC = () => {
 				<div className={styles.modalOverlay} onClick={() => setAssessmentModal(null)}>
 					<div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
 						<div className={styles.modalHeader}>
-							<h3>Оценка компетенции</h3>
+							<h3>{assessmentModal.existingAssessment ? 'Изменить оценку' : 'Оценка компетенции'}</h3>
 							<button className={styles.closeBtn} onClick={() => setAssessmentModal(null)}>×</button>
 						</div>
 						
@@ -958,26 +1226,18 @@ const DepartmentCompetenciesPage: React.FC = () => {
 							<p><strong>Компетенция:</strong> {assessmentModal.competencyName}</p>
 							
 							<div className={styles.formGroup}>
-								<label>Оценка (1-5):</label>
-								<div className={styles.scoreInputGroup}>
-									{[1, 2, 3, 4, 5].map(score => (
-										<label key={score} className={styles.scoreOption}>
-											<input
-												type="radio"
-												name="score"
-												value={score}
-												checked={assessmentScore === score}
-												onChange={() => setAssessmentScore(score)}
-											/>
-											<span 
-												className={styles.scoreValue}
-												style={{ backgroundColor: getAssessmentColor(score) }}
-											>
-												{score}
-											</span>
-										</label>
+								<label>Уровень владения *</label>
+								<select
+									value={selectedLevelId}
+									onChange={(e) => setSelectedLevelId(e.target.value)}
+									className={styles.modalSelect}>
+									<option value="">Выберите уровень</option>
+									{levels.map(level => (
+										<option key={level.id} value={level.id}>
+											{level.name} (Уровень {level.value})
+										</option>
 									))}
-								</div>
+								</select>
 							</div>
 							
 							<div className={styles.formGroup}>
@@ -986,7 +1246,7 @@ const DepartmentCompetenciesPage: React.FC = () => {
 									value={assessmentComment}
 									onChange={(e) => setAssessmentComment(e.target.value)}
 									rows={3}
-									placeholder="Опишите почему поставлена такая оценка..."
+									placeholder="Добавьте комментарий к оценке..."
 									className={styles.commentInput}
 								/>
 							</div>
@@ -994,8 +1254,11 @@ const DepartmentCompetenciesPage: React.FC = () => {
 						
 						<div className={styles.modalActions}>
 							<button onClick={() => setAssessmentModal(null)}>Отмена</button>
-							<button className={styles.submitBtn} onClick={submitAssessment}>
-								Сохранить оценку
+							<button 
+								className={styles.submitBtn} 
+								onClick={saveAssessment}
+								disabled={!selectedLevelId}>
+								{assessmentModal.existingAssessment ? 'Сохранить изменения' : 'Сохранить оценку'}
 							</button>
 						</div>
 					</div>

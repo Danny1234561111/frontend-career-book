@@ -3,8 +3,9 @@
 .container {
 	width: 100%;
 	overflow: hidden;
-	background: $white;
-	border-radius: $border-radius-lg;
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	border: 1px solid $border-color;
 	box-shadow: $shadow-sm;
 }
 
@@ -14,18 +15,18 @@
 	border-collapse: collapse;
 
 	th {
-		padding: $spacing-lg $spacing-md;
-		color: $text-secondary;
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
 		font-weight: 600;
 		font-size: $font-md;
 		text-align: left;
-		background: $background-hover;
+		background: $derivatives-gray-10;
 		border-bottom: 2px solid $border-color;
 	}
 
 	td {
-		padding: $spacing-md;
-		color: $text-primary;
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
 		font-size: $font-md;
 		vertical-align: middle;
 		border-bottom: 1px solid $border-color;
@@ -35,7 +36,7 @@
 		transition: background 0.2s ease;
 
 		&:hover {
-			background: $background-hover;
+			background: $derivatives-gray-10;
 		}
 
 		&.clickableRow {
@@ -44,7 +45,7 @@
 
 		&.editedRow {
 			position: relative;
-			background: rgba($primary, 0.05);
+			background: $derivatives-main-20;
 
 			&::after {
 				position: absolute;
@@ -59,25 +60,9 @@
 	}
 }
 
-.positionSelect {
-	width: 180px;
-	padding: $spacing-xs $spacing-sm;
-	color: $text-primary;
+.dateCell {
+	color: $variables-textsecondary;
 	font-size: $font-sm;
-	background: $white;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-sm;
-	cursor: pointer;
-
-	&:focus {
-		border-color: $primary;
-		outline: none;
-	}
-
-	&.edited {
-		background: rgba($primary, 0.05);
-		border-color: $primary;
-	}
 }
 
 .progressContainer {
@@ -87,81 +72,56 @@
 }
 
 .progressBar {
-	width: 80px;
-	height: 6px;
+	flex: 1;
+	height: 8px;
 	overflow: hidden;
-	background: $border-color;
+	background: $derivatives-gray-20;
 	border-radius: $border-radius-sm;
 }
 
 .progressFill {
 	height: 100%;
-	background: $primary;
 	border-radius: $border-radius-sm;
-	transition: width 0.3s;
+	transition: width 0.3s ease;
+
+	&.highProgress {
+		background: $success;
+	}
+
+	&.mediumProgress {
+		background: $warning;
+	}
+
+	&.lowProgress {
+		background: $danger;
+	}
 }
 
 .progressText {
-	min-width: 35px;
-	color: $text-secondary;
+	min-width: 40px;
+	color: $variables-textsecondary;
 	font-size: $font-xs;
-}
-
-.tableFooter {
-	display: flex;
-	justify-content: flex-end;
-	padding: $spacing-lg $spacing-md;
-	background: $background-hover;
-	border-top: 1px solid $border-color;
-}
-
-.saveButton {
-	@include button-reset;
-	padding: $spacing-sm $spacing-xl;
-	color: $text-secondary;
-	font-size: $font-md;
-	background: $white;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
-
-	&:hover:not(:disabled) {
-		background: $background-hover;
-	}
-
-	&.active {
-		color: $white;
-		background: $primary;
-		border-color: $primary;
-
-		&:hover {
-			background: $primary-hover;
-		}
-	}
-
-	&:disabled {
-		cursor: not-allowed;
-		opacity: 0.5;
-	}
+	font-weight: 500;
 }
 
 .emptyState {
 	padding: $spacing-xxxl;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-lg;
 	text-align: center;
-	background: $white;
+	background: $variables-containers-background;
 }
 
-@media (width <= 768px) {
+@include mobile {
 	.container {
 		overflow-x: auto;
 	}
 
 	.table {
-		min-width: 800px;
+		min-width: 600px;
 	}
 
-	.saveButton {
-		width: 100%;
+	th, td {
+		padding: $spacing-sm $spacing-md;
 	}
 }

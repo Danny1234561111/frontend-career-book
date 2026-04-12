@@ -1,187 +1,35 @@
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
-	min-height: calc(100vh - 80px - 80px);
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
-	background: $white;
+	box-shadow: $shadow-md;
 }
 
-.filters {
-	display: flex;
-	flex-wrap: wrap;
-	gap: $spacing-lg;
-	margin-bottom: $spacing-xxxl;
-
-	@include mobile {
-		flex-direction: column;
-		gap: $spacing-md;
-	}
-}
-
-.filterSelect {
-	min-width: 200px;
-	padding: $spacing-sm $spacing-lg;
-	color: $text-primary;
-	font-size: $font-md;
-	background: $white;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
-	cursor: pointer;
-
-	&:focus {
-		border-color: $primary;
-		outline: none;
-	}
-
-	&:hover {
-		border-color: $primary;
-	}
-
-	@include mobile {
-		width: 100%;
-		min-width: auto;
-	}
-}
-
-.grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	gap: $spacing-xl;
-}
-
-.card {
-	padding: $spacing-xl;
-	background: $white;
-	border: 1px solid $border-color;
-	border-top: 4px solid transparent;
-	border-radius: $border-radius-md;
-	box-shadow: $shadow-sm;
-	transition: all 0.3s;
-
-	&:hover {
-		border-color: $primary;
-		box-shadow: $shadow-md;
-		transform: translateY(-4px);
-	}
-
-	h3 {
-		margin: 0 0 $spacing-md 0;
-		color: $text-primary;
-		font-weight: 600;
-		font-size: $font-xl;
-		line-height: 1.4;
-	}
-
-	p {
-		display: flex;
-		align-items: center;
-		gap: $spacing-sm;
-		margin: $spacing-xs 0;
-		color: $text-secondary;
-		font-size: $font-md;
-
-		&::before {
-			content: '•';
-			color: $primary;
-			font-weight: bold;
-		}
-	}
-}
-
-.link {
-	display: inline-block;
-	margin-top: $spacing-lg;
-	padding: $spacing-sm $spacing-xl;
-	color: $white;
-	font-weight: 500;
-	font-size: $font-md;
-	text-decoration: none;
-	background: $primary;
-	border: none;
-	border-radius: $border-radius-xl;
-	cursor: pointer;
-	transition: all 0.2s;
-
-	&:hover {
-		background: $primary-hover;
-		box-shadow: $shadow-sm;
-		transform: scale(1.05);
-	}
-}
-
-/* Типы материалов */
-
-.card[data-type='Видеокурс'] {
-	border-top-color: $warning;
-}
-
-.card[data-type='Статья'] {
-	border-top-color: $primary;
-}
-
-.card[data-type='Книга'] {
-	border-top-color: #9c27b0;
-}
-
-.card[data-type='Курс'] {
-	border-top-color: $success;
-}
-
-.emptyState {
-	grid-column: 1 / -1;
-	padding: $spacing-xxxl;
-	color: $text-secondary;
-	font-size: $font-lg;
+.loading {
 	text-align: center;
-	background: $background-hover;
-	border-radius: $border-radius-md;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
 }
-
-@include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
-	}
-
-	.title {
-		font-size: $font-xxl;
-	}
-
-	.content {
-		padding: $spacing-lg;
-	}
-
-	.grid {
-		grid-template-columns: 1fr;
-		gap: $spacing-lg;
-	}
-
-	.card {
-		padding: $spacing-lg;
-
-		h3 {
-			font-size: $font-lg;
-		}
-	}
-}
-// Добавьте в materials.module.scss
 
 .successMessage {
 	margin-bottom: $spacing-lg;
@@ -210,7 +58,7 @@
 
 .tab {
 	padding: $spacing-md $spacing-xl;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-md;
 	font-weight: 500;
 	background: none;
@@ -229,6 +77,62 @@
 	}
 }
 
+.filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: $spacing-lg;
+	margin-bottom: $spacing-xxxl;
+}
+
+.filterSelect {
+	min-width: 200px;
+	padding: $spacing-sm $spacing-lg;
+	color: $variables-textprimary;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+
+	&:focus {
+		border-color: $primary;
+		outline: none;
+	}
+
+	&:hover {
+		border-color: $primary;
+	}
+
+	@include mobile {
+		width: 100%;
+		min-width: auto;
+	}
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+	gap: $spacing-xl;
+}
+
+.card {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: $spacing-xl;
+	background: $variables-containers-background;
+	border: 1px solid $border-color;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	box-shadow: $shadow-sm;
+	transition: all 0.3s;
+
+	&:hover {
+		border-color: $primary;
+		box-shadow: $shadow-md;
+		transform: translateY(-4px);
+	}
+}
+
 .cardHeader {
 	display: flex;
 	justify-content: space-between;
@@ -239,7 +143,77 @@
 	h3 {
 		flex: 1;
 		margin: 0;
+		color: $variables-textprimary;
+		font-weight: 600;
+		font-size: $font-xl;
+		line-height: 1.4;
 	}
+}
+
+.cardContent {
+	flex: 1;
+}
+
+.statusBadge {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	font-size: $font-xs;
+	font-weight: 500;
+	border-radius: $spacing-xl;
+	white-space: nowrap;
+}
+
+.statusToStudy {
+	background: $warning-light;
+	color: $warning;
+}
+
+.statusInProgress {
+	background: $primary-light;
+	color: $primary-dark;
+}
+
+.statusCompleted {
+	background: $success-light;
+	color: $success;
+}
+
+.card p {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	margin: $spacing-xs 0;
+	color: $variables-textsecondary;
+	font-size: $font-md;
+
+	&::before {
+		content: '•';
+		color: $primary;
+		font-weight: bold;
+	}
+}
+
+.link {
+  display: block;
+  margin-top: auto; 
+  padding: $spacing-sm $spacing-xl;
+  color: $white;
+  font-weight: 500;
+  font-size: $font-md;
+  text-align: center;
+  text-decoration: none;
+  background: $primary;
+  border: none;
+  border-radius: $border-radius-xl;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+
+  &:hover {
+    background: $primary-hover;
+    box-shadow: $shadow-sm;
+    transform: translateY(-2px);
+  }
 }
 
 .addBtn {
@@ -257,5 +231,53 @@
 	&:hover {
 		background: darken($success, 10%);
 		transform: translateY(-1px);
+	}
+}
+
+.emptyState {
+	grid-column: 1 / -1;
+	padding: $spacing-xxxl;
+	color: $variables-textsecondary;
+	font-size: $font-lg;
+	text-align: center;
+	background: $derivatives-gray-10;
+	border-radius: $border-radius-md;
+}
+
+.emptyHint {
+	margin-top: $spacing-sm;
+	font-size: $font-md;
+	color: $derivatives-gray-70;
+}
+
+@include mobile {
+	.page {
+		padding: $spacing-lg;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-lg;
+	}
+
+	.grid {
+		grid-template-columns: 1fr;
+		gap: $spacing-lg;
+	}
+
+	.card {
+		padding: $spacing-lg;
+
+		h3 {
+			font-size: $font-lg;
+		}
+	}
+
+	.filters {
+		flex-direction: column;
+		gap: $spacing-md;
 	}
 }

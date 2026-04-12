@@ -1,4 +1,6 @@
-// Цвета
+// variables.module.scss
+
+// Цвета - в соответствии с дизайном
 $primary: #1976d2;
 $primary-hover: #1565c0;
 $primary-light: #e3f2fd;
@@ -14,13 +16,41 @@ $danger: #d32f2f;
 $danger-light: #ffebee;
 
 $text-primary: #1a1a1a;
-$text-secondary: #666;
-$text-disabled: #999;
+$text-secondary: #666666;
+$text-disabled: #999999;
 
 $border-color: #eaeaea;
 $background-light: #f5f4f2;
 $background-hover: #f5f5f5;
 $white: #ffffff;
+
+// Цвета из дизайна (дополнительные)
+$base-main: rgba(240, 73, 35, 1);
+$base-black: rgba(57, 51, 48, 1);
+$base-gray: rgba(163, 164, 176, 1);
+$base-accent: rgba(0, 80, 78, 1);
+$base-red: rgba(249, 40, 40, 1);
+$base-green: rgba(8, 177, 76, 1);
+
+$derivatives-black-50: rgba(57, 51, 48, 0.5);
+$derivatives-black-70: rgba(57, 51, 48, 0.7);
+$derivatives-gray-10: rgba(163, 164, 176, 0.1);
+$derivatives-gray-20: rgba(163, 164, 176, 0.2);
+$derivatives-gray-30: rgba(163, 164, 176, 0.3);
+$derivatives-gray-50: rgba(163, 164, 176, 0.5);
+$derivatives-gray-70: rgba(163, 164, 176, 0.7);
+$derivatives-main-20: rgba(240, 73, 35, 0.2);
+$derivatives-red-70: rgba(249, 40, 40, 0.7);
+$derivatives-red-90: rgba(249, 40, 40, 0.9);
+
+$variables-background: rgba(237, 242, 245, 1);
+$variables-containers-background: rgba(255, 255, 255, 1);
+$variables-textprimary: $base-black;
+$variables-textsecondary: $derivatives-black-50;
+$variables-textaccent: $base-accent;
+$variables-disabled-color: $derivatives-gray-70;
+$variables-input-base-color: $derivatives-black-70;
+$variables-dialog-windows-backdrop: $derivatives-black-70;
 
 // Размеры
 $border-radius-sm: 6px;
@@ -36,6 +66,7 @@ $spacing-lg: 16px;
 $spacing-xl: 20px;
 $spacing-xxl: 24px;
 $spacing-xxxl: 32px;
+$spacing-xxxxl: 40px;
 
 $font-xs: 12px;
 $font-sm: 13px;
@@ -47,9 +78,42 @@ $font-xxxl: 24px;
 $font-xxxxl: 28px;
 $font-xxxxxl: 32px;
 
+// Типографика
+$font-size-h1: 32px;
+$font-size-h4: 16px;
+$font-size-regular: 16px;
+$font-size-label: 14px;
+$font-size-small: 12px;
+
+$font-weight-regular: 400;
+$font-weight-semi-bold: 600;
+
+// Размеры из дизайна
+$windows-screens-height: 1024px;
+$windows-windows-and-blocks-padding: 20px;
+$windows-windows-and-blocks-corner-angle: 12px;
+$windows-filters-menu-width: 335px;
+$header-height-1440px: 80px;
+
+$inputs-input-height: 40px;
+$inputs-button-height: 40px;
+$inputs-inputs-corner-angle: 8px;
+$inputs-buttons-corner-angle: 8px;
+$inputs-tiny-input-height: 32px;
+$inputs-button-focus-width: 2px;
+
+$components-date-item-size-1440px: 36px;
+$components-date-item-corner-angle: 8px;
+$components-table-line-corner-angle: $windows-windows-and-blocks-corner-angle;
+
+// Шрифты
+$fonts-main-font: "Geologica";
+
+// Тени
 $shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
 $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
 $shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+$shadow-dialog: 0px 12px 20px 0px rgba(0, 0, 0, 0.14), 0px 4px 24px 0px rgba(0, 0, 0, 0.12);
 
 // Миксины
 @mixin flex-center {
@@ -99,4 +163,24 @@ $breakpoint-md: 768px;
 	@media (max-width: #{$breakpoint-md}) {
 		@content;
 	}
+}
+
+// Экспорт переменных для JS
+:export {
+  white: $white;
+  primary: $primary;
+  success: $success;
+  warning: $warning;
+  danger: $danger;
+  textPrimary: $text-primary;
+  textSecondary: $text-secondary;
+  borderColor: $border-color;
+  baseMain: $base-main;
+  baseBlack: $base-black;
+  baseGray: $base-gray;
+  baseAccent: $base-accent;
+  baseRed: $base-red;
+  baseGreen: $base-green;
+  background: $variables-background;
+  containerBg: $variables-containers-background;
 }

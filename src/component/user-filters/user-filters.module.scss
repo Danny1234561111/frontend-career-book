@@ -2,13 +2,11 @@
 
 .filters {
 	width: 100%;
-	max-width: 100%;
-	margin: 0 auto $spacing-xl auto;
 	margin-bottom: $spacing-xl;
 	padding: $spacing-xl;
-	background: $white;
-	border-radius: $border-radius-lg;
-	box-shadow: $shadow-sm;
+	background: $derivatives-gray-10;
+	border: 1px solid $border-color;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 }
 
 .header {
@@ -30,14 +28,17 @@
 .searchInput {
 	width: 100%;
 	padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
-	color: $text-primary;
+	color: $variables-textprimary;
 	font-size: $font-md;
+	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	transition: all 0.2s;
 
 	&:focus {
 		border-color: $primary;
 		outline: none;
+		box-shadow: 0 0 0 2px $derivatives-main-20;
 	}
 }
 
@@ -45,23 +46,26 @@
 	position: absolute;
 	top: 50%;
 	left: $spacing-md;
-	color: $text-disabled;
+	color: $derivatives-gray-70;
 	font-size: $font-lg;
 	transform: translateY(-50%);
 }
 
 .expandBtn {
-	@include button-reset;
 	padding: $spacing-sm $spacing-lg;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-md;
 	white-space: nowrap;
+	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
 
 	&:hover {
 		color: $primary;
-		background: $background-hover;
+		background: $derivatives-gray-10;
+		border-color: $primary;
 	}
 
 	@include mobile {
@@ -91,24 +95,31 @@
 	label {
 		display: block;
 		margin-bottom: $spacing-sm;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 500;
-		font-size: $font-md;
+		font-size: $font-sm;
 	}
 
 	select,
 	input {
 		width: 100%;
 		padding: $spacing-sm $spacing-lg;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-size: $font-md;
 		background: $white;
 		border: 1px solid $border-color;
 		border-radius: $border-radius-md;
+		transition: all 0.2s;
+		cursor: pointer;
 
 		&:focus {
 			border-color: $primary;
 			outline: none;
+			box-shadow: 0 0 0 2px $derivatives-main-20;
+		}
+
+		&:hover {
+			border-color: $primary;
 		}
 	}
 }
@@ -119,12 +130,14 @@
 }
 
 .clearBtn {
-	@include button-reset;
 	padding: $spacing-sm $spacing-xl;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-md;
+	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
 
 	&:hover {
 		color: $danger;

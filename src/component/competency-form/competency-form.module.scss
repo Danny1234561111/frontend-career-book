@@ -1,29 +1,140 @@
 @import '../../variables.module';
 
-.form {
-	max-width: 800px;
-	margin: 0 auto;
-	padding: $spacing-xxxl;
-	background: $white;
-	border-radius: $border-radius-lg;
-	box-shadow: $shadow-md;
+// ===== ОВЕРЛЕЙ И ДРАЙВЕР =====
+.overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 999;
+	background: $derivatives-black-70;
+	animation: fadeIn 0.3s ease;
+}
 
-	h3 {
-		margin-bottom: $spacing-xxl;
-		color: $text-primary;
-		font-size: $font-xxl;
+.drawer {
+	position: fixed;
+	top: 0;
+	right: -800px;
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	max-width: 800px;
+	height: 100vh;
+	background: $variables-containers-background;
+	box-shadow: $shadow-lg;
+	transition: right 0.3s ease;
+
+	&.open {
+		right: 0;
 	}
 }
 
+.drawerHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: $spacing-xl $spacing-xxl;
+	background: $variables-containers-background;
+	border-bottom: 1px solid $border-color;
+
+	h3 {
+		margin: 0;
+		color: $variables-textprimary;
+		font-size: $font-xl;
+		font-weight: 600;
+	}
+}
+
+.closeBtn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 40px;
+	height: 40px;
+	color: $variables-textsecondary;
+	font-size: $font-xxl;
+	line-height: 1;
+	background: none;
+	border: none;
+	border-radius: $border-radius-round;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		color: $danger;
+		background: $derivatives-gray-10;
+	}
+}
+
+.drawerContent {
+	flex: 1;
+	padding: $spacing-xxl;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: $derivatives-gray-10;
+		border-radius: $border-radius-md;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: $border-color;
+		border-radius: $border-radius-md;
+
+		&:hover {
+			background: $derivatives-gray-70;
+		}
+	}
+}
+
+.drawerFooter {
+	display: flex;
+	justify-content: flex-end;
+	gap: $spacing-md;
+	padding: $spacing-xl $spacing-xxl;
+	background: $variables-containers-background;
+	border-top: 1px solid $border-color;
+}
+
+// ===== СЕКЦИИ =====
+.section {
+	margin-bottom: $spacing-xxl;
+	padding-bottom: $spacing-lg;
+	border-bottom: 1px solid $border-color;
+	
+	&:last-child {
+		border-bottom: none;
+		margin-bottom: 0;
+		padding-bottom: 0;
+	}
+}
+
+.sectionHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+	font-size: $font-lg;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
+}
+
+// ===== ФОРМА =====
 .formGroup {
 	margin-bottom: $spacing-xl;
 
 	label {
 		display: block;
 		margin-bottom: $spacing-sm;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 500;
-		font-size: $font-md;
+		font-size: $font-sm;
 	}
 
 	input,
@@ -31,20 +142,27 @@
 	textarea {
 		width: 100%;
 		padding: $spacing-sm $spacing-lg;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-size: $font-md;
 		background: $white;
 		border: 1px solid $border-color;
 		border-radius: $border-radius-md;
+		transition: all 0.2s;
 
 		&:focus {
 			border-color: $primary;
 			outline: none;
+			box-shadow: 0 0 0 2px $derivatives-main-20;
+		}
+
+		&::placeholder {
+			color: $derivatives-gray-70;
 		}
 	}
 
 	textarea {
 		min-height: 100px;
+		font-family: inherit;
 		resize: vertical;
 	}
 }
@@ -60,737 +178,219 @@
 	}
 }
 
-.levelSelect {
-	option {
-		padding: $spacing-sm;
-	}
-}
-
-.requirementInput {
-	display: flex;
-	gap: $spacing-sm;
-
-	input {
-		flex: 1;
-	}
-
-	.addBtn {
-		padding: $spacing-sm $spacing-xl;
-		color: $primary;
-		font-size: $font-md;
-		white-space: nowrap;
-		background: none;
-		border: 1px solid $primary;
-		border-radius: $border-radius-md;
-		cursor: pointer;
-		transition: all 0.2s ease;
-
-		&:hover {
-			background: $primary-light;
-		}
-	}
-}
-
-.requirementsList {
-	margin-top: $spacing-md;
-	padding: 0;
-	list-style: none;
-
-	li {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: $spacing-sm;
-		padding: $spacing-sm $spacing-md;
-		color: $text-primary;
-		font-size: $font-md;
-		background: $background-light;
-		border-radius: $border-radius-md;
-
-		&:last-child {
-			margin-bottom: 0;
-		}
-
-		.removeBtn {
-			padding: 0 $spacing-xs;
-			color: $text-secondary;
-			font-size: $font-xl;
-			line-height: 1;
-			background: none;
-			border: none;
-			cursor: pointer;
-			transition: color 0.2s ease;
-
-			&:hover {
-				color: $danger;
-			}
-		}
-	}
-}
-
-.actions {
-	display: flex;
-	gap: $spacing-md;
-	margin-top: $spacing-xxl;
-
-	button {
-		padding: $spacing-md $spacing-xxxl;
-		font-weight: 500;
-		font-size: $font-md;
-		background: none;
-		border: none;
-		border-radius: $border-radius-md;
-		cursor: pointer;
-		transition: all 0.2s ease;
-
-		&.submitBtn {
-			color: $white;
-			background: $primary;
-
-			&:hover {
-				background: $primary-hover;
-			}
-		}
-
-		&.cancelBtn {
-			color: $text-secondary;
-			border: 1px solid $border-color;
-
-			&:hover {
-				color: $danger;
-				background: $danger-light;
-				border-color: $danger;
-			}
-		}
-	}
-}
-
-.overlay {
-	position: fixed;
-	inset: 0;
-	z-index: 999;
-	background: rgb(0 0 0 / 50%);
-	animation: fadeIn 0.3s ease;
-}
-
-.drawer {
-	position: fixed;
-	top: 0;
-	right: -800px;
-	z-index: 1000;
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	max-width: 800px;
-	height: 100vh;
-	background: white;
-	box-shadow: 0 8px 24px rgb(0 0 0 / 15%);
-	transition: right 0.3s ease;
-
-	&.open {
-		right: 0;
-	}
-}
-
-.drawerHeader {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 24px 32px;
-	background: white;
-	border-bottom: 1px solid #eaeaea;
-
-	h3 {
-		margin: 0;
-		color: #1a1a1a;
-		font-size: 20px;
-	}
-}
-
-.closeBtn {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 40px;
-	height: 40px;
-	color: #666666;
-	font-size: 32px;
-	line-height: 1;
-	background: none;
-	border: none;
-	border-radius: 50%;
-	cursor: pointer;
-	transition: all 0.3s;
-
-	&:hover {
-		color: #d32f2f;
-		background: #f5f4f2;
-	}
-}
-
-.drawerContent {
-	flex: 1;
-	padding: 24px 32px;
-	overflow-y: auto;
-
-	&::-webkit-scrollbar {
-		width: 8px;
-	}
-
-	&::-webkit-scrollbar-track {
-		background: #f5f4f2;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: #eaeaea;
-		border-radius: 4px;
-
-		&:hover {
-			background: #999999;
-		}
-	}
-}
-
-.drawerFooter {
-	display: flex;
-	justify-content: flex-end;
-	gap: 16px;
-	padding: 20px 32px;
-	background: white;
-	border-top: 1px solid #eaeaea;
-}
-
-.formGroup {
-	margin-bottom: 20px;
-
-	label {
-		display: block;
-		margin-bottom: 8px;
-		color: #1a1a1a;
-		font-weight: 500;
-		font-size: 14px;
-	}
-
-	input,
-	select,
-	textarea {
-		width: 100%;
-		padding: 10px 16px;
-		color: #1a1a1a;
-		font-size: 14px;
-		background: white;
-		border: 1px solid #eaeaea;
-		border-radius: 8px;
-		transition: all 0.3s;
-
-		&:focus {
-			border-color: #1976d2;
-			outline: none;
-			box-shadow: 0 0 0 3px rgb(25 118 210 / 10%);
-		}
-
-		&::placeholder {
-			color: #999999;
-		}
-	}
-
-	textarea {
-		min-height: 100px;
-		font-family: inherit;
-		resize: vertical;
-	}
-}
-
-.formRow {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 20px;
-
-	@media (width <= 600px) {
-		grid-template-columns: 1fr;
-		gap: 16px;
-	}
-}
-
-.levelSelect {
-	option {
-		padding: 8px;
-	}
-}
-
-.requirementInput {
-	display: flex;
-	gap: 10px;
-
-	input {
-		flex: 1;
-	}
-
-	.addBtn {
-		padding: 10px 24px;
-		color: #1976d2;
-		font-size: 14px;
-		white-space: nowrap;
-		background: none;
-		border: 1px solid #1976d2;
-		border-radius: 8px;
-		cursor: pointer;
-		transition: all 0.3s;
-
-		&:hover {
-			background: #e3f2fd;
-		}
-	}
-}
-
-.requirementsList {
-	margin-top: 12px;
-	padding: 0;
-	list-style: none;
-
-	li {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 8px;
-		padding: 10px 16px;
-		color: #1a1a1a;
-		font-size: 14px;
-		background: #f5f4f2;
-		border-radius: 8px;
-
-		&:last-child {
-			margin-bottom: 0;
-		}
-
-		.removeBtn {
-			padding: 0 8px;
-			color: #666666;
-			font-size: 20px;
-			line-height: 1;
-			background: none;
-			border: none;
-			border-radius: 4px;
-			cursor: pointer;
-			transition: all 0.3s;
-
-			&:hover {
-				color: #d32f2f;
-				background: rgb(211 47 47 / 10%);
-			}
-		}
-	}
-}
-
-.submitBtn {
-	padding: 12px 32px;
-	color: white;
-	font-weight: 500;
-	font-size: 14px;
-	background: #1976d2;
-	border: none;
-	border-radius: 8px;
-	cursor: pointer;
-	transition: all 0.3s;
-
-	&:hover {
-		background: #1565c0;
-		box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
-		transform: translateY(-2px);
-	}
-
-	&:active {
-		transform: translateY(0);
-	}
-}
-
-.cancelBtn {
-	padding: 12px 32px;
-	color: #666666;
-	font-weight: 500;
-	font-size: 14px;
-	background: white;
-	border: 1px solid #eaeaea;
-	border-radius: 8px;
-	cursor: pointer;
-	transition: all 0.3s;
-
-	&:hover {
-		color: #d32f2f;
-		background: #ffebee;
-		border-color: #d32f2f;
-	}
-}
-
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-
-	to {
-		opacity: 1;
-	}
-}
-
-@media (width <= 768px) {
-	.drawer {
-		max-width: 100%;
-	}
-
-	.drawerHeader {
-		padding: 16px 20px;
-	}
-
-	.drawerContent {
-		padding: 20px;
-	}
-
-	.drawerFooter {
-		padding: 16px 20px;
-
-		button {
-			flex: 1;
-			text-align: center;
-		}
-	}
-}
-// Добавьте в competency-form.module.scss
-
-.hint {
-	margin-top: $spacing-md;
-	padding: $spacing-md;
-	color: $text-secondary;
-	font-size: $font-sm;
-	background: $background-light;
-	border-radius: $border-radius-md;
-	border-left: 3px solid $primary;
-}
-
-.materialsHeader {
-	display: flex;
-	align-items: center;
-	gap: $spacing-sm;
-	cursor: pointer;
-	padding: $spacing-sm 0;
-	
-	&:hover {
-		opacity: 0.8;
-	}
-	
-	label {
-		margin-bottom: 0;
-		cursor: pointer;
-	}
-}
-
-.materialsCount {
-	color: $text-secondary;
-	font-size: $font-sm;
-}
-
-.materialsSection {
-	margin-top: $spacing-md;
-	padding: $spacing-md;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
-}
-
-.searchWrapper {
-	position: relative;
-	margin-bottom: $spacing-md;
-	
-	.searchInput {
-		width: 100%;
-		padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
-		font-size: $font-sm;
-	}
-	
-	.searchIcon {
-		position: absolute;
-		top: 50%;
-		left: $spacing-md;
-		transform: translateY(-50%);
-	}
-}
-
-.materialsList {
-	display: flex;
-	flex-direction: column;
-	gap: $spacing-sm;
-	max-height: 300px;
-	overflow-y: auto;
-	
-	.materialItem {
-		display: flex;
-		align-items: center;
-		gap: $spacing-sm;
-		padding: $spacing-sm;
-		cursor: pointer;
-		border: 1px solid $border-color;
-		border-radius: $border-radius-sm;
-		transition: all 0.2s;
-		
-		&:hover {
-			background: $background-hover;
-		}
-		
-		input {
-			width: auto;
-			margin: 0;
-		}
-		
-		.materialName {
-			flex: 1;
-			font-size: $font-md;
-		}
-		
-		.materialType {
-			padding: $spacing-xs $spacing-sm;
-			font-size: $font-xs;
-			background: $background-light;
-			border-radius: $border-radius-sm;
-		}
-	}
-}
-
-.emptyMaterials {
-	padding: $spacing-xl;
-	text-align: center;
-	color: $text-secondary;
-}
-// Добавить эти стили в competency-form.module.scss
-
-.section {
-	margin-bottom: 24px;
-	padding-bottom: 16px;
-	border-bottom: 1px solid #e0e0e0;
-	
-	&:last-child {
-		border-bottom: none;
-	}
-}
-
-.sectionHeader {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 16px;
-}
-
-.sectionTitle {
-	font-size: 16px;
-	font-weight: 600;
-	color: #333;
-	margin: 0;
-}
-
-.addLevelBtn {
-	padding: 6px 12px;
-	background: #4caf50;
-	color: white;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 12px;
-	
-	&:hover {
-		background: #45a049;
-	}
-	
-	&:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-}
-
+// ===== УРОВНИ =====
 .levelsList {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
+	gap: $spacing-md;
 }
 
 .emptyLevels {
-	padding: 24px;
+	padding: $spacing-xxl;
 	text-align: center;
-	background: #f9f9f9;
-	border-radius: 8px;
-	border: 1px dashed #ccc;
-	
+	background: $derivatives-gray-10;
+	border: 1px dashed $border-color;
+	border-radius: $border-radius-md;
+
 	p {
-		margin: 0 0 8px 0;
-		color: #666;
+		margin: 0 0 $spacing-sm 0;
+		color: $variables-textsecondary;
+		font-size: $font-md;
 	}
 	
 	small {
-		color: #999;
+		color: $derivatives-gray-70;
+		font-size: $font-sm;
 	}
 }
 
 .levelCard {
-	border: 1px solid #e0e0e0;
-	border-radius: 8px;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
 	overflow: hidden;
+	background: $white;
 }
 
 .levelHeader {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 12px 16px;
-	background: #fafafa;
+	padding: $spacing-md $spacing-lg;
+	background: $derivatives-gray-10;
 	border-left: 4px solid;
 	cursor: pointer;
 	transition: background 0.2s;
 	
 	&:hover {
-		background: #f5f5f5;
+		background: $derivatives-gray-20;
 	}
 }
 
 .levelTitle {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: $spacing-md;
 	flex-wrap: wrap;
 }
 
 .levelIcon {
-	font-size: 18px;
+	font-size: $font-lg;
 }
 
 .levelName {
 	font-weight: 500;
-	color: #333;
+	color: $variables-textprimary;
+	font-size: $font-md;
 }
 
 .levelValue {
-	font-size: 12px;
-	color: #666;
-	background: #f0f0f0;
-	padding: 2px 6px;
-	border-radius: 4px;
+	font-size: $font-xs;
+	color: $variables-textsecondary;
+	background: $white;
+	padding: 2px 8px;
+	border-radius: $spacing-xl;
 }
 
 .materialsBadge {
-	font-size: 11px;
-	color: #1976d2;
-	background: #e3f2fd;
+	font-size: $font-xs;
+	color: $primary;
+	background: $primary-light;
 	padding: 2px 8px;
-	border-radius: 12px;
+	border-radius: $spacing-xl;
 }
 
 .levelActions {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: $spacing-sm;
 }
 
 .editLevelBtn, .removeLevelBtn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 28px;
+	height: 28px;
+	font-size: $font-md;
 	background: none;
 	border: none;
+	border-radius: $border-radius-sm;
 	cursor: pointer;
-	font-size: 14px;
-	padding: 4px;
-	border-radius: 4px;
-	transition: background 0.2s;
+	transition: all 0.2s;
 	
 	&:hover {
-		background: #e0e0e0;
+		background: $derivatives-gray-20;
 	}
 }
 
 .removeLevelBtn:hover {
-	background: #ffebee;
+	color: $danger;
+	background: $danger-light;
 }
 
 .expandIcon {
-	font-size: 12px;
-	color: #999;
+	font-size: $font-xs;
+	color: $derivatives-gray-70;
 }
 
 .levelContent {
-	padding: 16px;
-	background: white;
-	border-top: 1px solid #e0e0e0;
+	padding: $spacing-lg;
+	background: $white;
+	border-top: 1px solid $border-color;
 }
 
 .levelDescription, .levelExample {
-	margin-bottom: 16px;
+	margin-bottom: $spacing-lg;
 	
 	strong {
 		display: block;
-		margin-bottom: 8px;
-		font-size: 13px;
-		color: #555;
+		margin-bottom: $spacing-sm;
+		font-size: $font-sm;
+		color: $variables-textprimary;
 	}
 	
 	p {
 		margin: 0;
-		font-size: 14px;
+		font-size: $font-md;
 		line-height: 1.5;
-		color: #333;
+		color: $variables-textsecondary;
 	}
 }
 
 .levelMaterialsSection {
-	margin-top: 16px;
-	padding-top: 16px;
-	border-top: 1px solid #eee;
+	margin-top: $spacing-lg;
+	padding-top: $spacing-lg;
+	border-top: 1px solid $border-color;
 	
 	strong {
 		display: block;
-		margin-bottom: 12px;
-		font-size: 13px;
-		color: #555;
+		margin-bottom: $spacing-md;
+		font-size: $font-sm;
+		color: $variables-textprimary;
 	}
 }
 
+// ===== МАТЕРИАЛЫ =====
 .materialsList {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-	max-height: 200px;
+	gap: $spacing-sm;
+	max-height: 300px;
 	overflow-y: auto;
 }
 
 .materialItem {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	padding: 8px;
-	border-radius: 4px;
+	gap: $spacing-md;
+	padding: $spacing-sm;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
 	cursor: pointer;
-	transition: background 0.2s;
+	transition: all 0.2s;
 	
 	&:hover {
-		background: #f5f5f5;
+		background: $derivatives-gray-10;
 	}
 	
 	input {
+		width: auto;
 		margin: 0;
+		cursor: pointer;
+	}
+	
+	.materialName {
+		flex: 1;
+		font-size: $font-md;
+		color: $variables-textprimary;
+	}
+	
+	.materialType {
+		padding: $spacing-xs $spacing-sm;
+		font-size: $font-xs;
+		color: $variables-textsecondary;
+		background: $derivatives-gray-10;
+		border-radius: $border-radius-sm;
 	}
 }
 
-.materialName {
-	flex: 1;
-	font-size: 14px;
+.disabledMaterial {
+	opacity: 0.5;
+	cursor: not-allowed;
+	
+	&:hover {
+		background: none;
+	}
 }
 
-.materialType {
-	font-size: 11px;
-	color: #666;
-	background: #f0f0f0;
-	padding: 2px 6px;
-	border-radius: 4px;
-}
-
+// ===== МОДАЛЬНОЕ ОКНО =====
 .modal {
 	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background: rgba(0, 0, 0, 0.5);
+	background: $derivatives-black-70;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -798,110 +398,285 @@
 }
 
 .modalContent {
-	background: white;
-	border-radius: 12px;
-	padding: 24px;
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	padding: $spacing-xl;
 	min-width: 500px;
 	max-width: 600px;
+	width: 90%;
 	max-height: 80vh;
 	overflow-y: auto;
+	box-shadow: $shadow-lg;
 	
 	h3 {
-		margin: 0 0 20px 0;
+		margin: 0 0 $spacing-lg 0;
+		color: $variables-textprimary;
+		font-size: $font-xl;
+		font-weight: 600;
 	}
 }
 
 .modalMaterialsList {
-	margin-top: 8px;
+	margin-top: $spacing-sm;
 }
 
 .materialsCheckList {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: $spacing-sm;
 	max-height: 200px;
 	overflow-y: auto;
-	margin-top: 8px;
+	margin-top: $spacing-sm;
 }
 
 .modalActions {
 	display: flex;
 	justify-content: flex-end;
-	gap: 12px;
-	margin-top: 24px;
+	gap: $spacing-md;
+	margin-top: $spacing-xl;
 	
 	button {
-		padding: 8px 16px;
-		border-radius: 4px;
+		padding: $spacing-sm $spacing-xl;
+		font-size: $font-md;
+		border-radius: $border-radius-md;
 		border: none;
 		cursor: pointer;
+		transition: all 0.2s;
 		
 		&:first-child {
-			background: #f0f0f0;
+			color: $variables-textsecondary;
+			background: $derivatives-gray-10;
 			
 			&:hover {
-				background: #e0e0e0;
+				background: $border-color;
 			}
 		}
 		
 		&:last-child {
-			background: #4caf50;
-			color: white;
+			color: $white;
+			background: $success;
 			
 			&:hover {
-				background: #45a049;
+				background: darken($success, 10%);
+				transform: translateY(-1px);
 			}
 		}
 	}
 }
 
+// ===== ПОИСК =====
 .searchWrapper {
 	position: relative;
-	margin-bottom: 12px;
+	margin-bottom: $spacing-md;
 }
 
 .searchInput {
 	width: 100%;
-	padding: 8px 12px;
-	padding-right: 32px;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-	font-size: 14px;
+	padding: $spacing-sm $spacing-lg;
+	padding-right: $spacing-xxxl;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	font-size: $font-md;
+	transition: all 0.2s;
 	
 	&:focus {
 		outline: none;
-		border-color: #007bff;
+		border-color: $primary;
+		box-shadow: 0 0 0 2px $derivatives-main-20;
 	}
 }
 
 .searchIcon {
 	position: absolute;
-	right: 10px;
+	right: $spacing-md;
 	top: 50%;
 	transform: translateY(-50%);
-	font-size: 14px;
-	color: #999;
+	font-size: $font-md;
+	color: $derivatives-gray-70;
+}
+
+// ===== КНОПКИ =====
+.addLevelBtn {
+	padding: $spacing-sm $spacing-lg;
+	background: $success;
+	color: $white;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	font-size: $font-sm;
+	transition: all 0.2s;
+	
+	&:hover {
+		background: darken($success, 10%);
+		transform: translateY(-1px);
+	}
+	
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		transform: none;
+	}
+}
+
+.submitBtn {
+	padding: $spacing-md $spacing-xxxl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $primary;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: $primary-hover;
+		transform: translateY(-1px);
+		box-shadow: $shadow-sm;
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+	
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		transform: none;
+	}
+}
+
+.cancelBtn {
+	padding: $spacing-md $spacing-xxxl;
+	color: $variables-textsecondary;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+		border-color: $danger;
+	}
+}
+
+// ===== ПОДСКАЗКА =====
+.hint {
+	margin-top: $spacing-xl;
+	padding: $spacing-md $spacing-lg;
+	color: $primary;
+	font-size: $font-sm;
+	background: $primary-light;
+	border-radius: $border-radius-md;
+	border-left: 4px solid $primary;
+	line-height: 1.5;
+	
+	strong {
+		font-weight: 600;
+	}
 }
 
 .emptyMaterials {
-	padding: 16px;
+	padding: $spacing-xl;
 	text-align: center;
-	color: #999;
+	color: $derivatives-gray-70;
+	font-size: $font-sm;
 }
 
 .disabledInput {
-	background: #f5f5f5;
-	border: 1px solid #e0e0e0;
-	padding: 8px 12px;
-	border-radius: 4px;
+	background: $derivatives-gray-10;
+	border: 1px solid $border-color;
+	padding: $spacing-sm $spacing-lg;
+	border-radius: $border-radius-md;
 	width: 100%;
+	color: $variables-textsecondary;
+	cursor: not-allowed;
 }
 
-.hint {
-	margin-top: 16px;
-	padding: 12px;
-	background: #e3f2fd;
-	border-radius: 6px;
-	font-size: 12px;
-	color: #1976d2;
+// ===== АНИМАЦИИ =====
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+// ===== АДАПТИВНОСТЬ =====
+@include mobile {
+	.drawer {
+		max-width: 100%;
+	}
+
+	.drawerHeader {
+		padding: $spacing-lg $spacing-xl;
+		
+		h3 {
+			font-size: $font-lg;
+		}
+	}
+
+	.drawerContent {
+		padding: $spacing-lg;
+	}
+
+	.drawerFooter {
+		padding: $spacing-lg $spacing-xl;
+		flex-direction: column;
+		
+		button {
+			width: 100%;
+			text-align: center;
+		}
+	}
+
+	.section {
+		margin-bottom: $spacing-xl;
+		padding-bottom: $spacing-lg;
+	}
+
+	.levelHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-sm;
+	}
+
+	.levelTitle {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-xs;
+	}
+
+	.levelActions {
+		width: 100%;
+		justify-content: flex-end;
+	}
+
+	.modalContent {
+		min-width: auto;
+		padding: $spacing-lg;
+	}
+
+	.modalActions {
+		flex-direction: column;
+		gap: $spacing-sm;
+		
+		button {
+			width: 100%;
+		}
+	}
+
+	.materialItem {
+		flex-wrap: wrap;
+		gap: $spacing-sm;
+	}
+	
+	.materialName {
+		width: 100%;
+	}
 }

@@ -1,5 +1,3 @@
-// my-competencies.module.tsx (ИСПРАВЛЕННАЯ)
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../../store/strore';
@@ -11,20 +9,9 @@ interface Competency {
 	block: string;
 	currentLevel: number;
 	targetLevel: number;
+	nextLevel: number;
 	progress: number;
 	materialsCount: number;
-}
-
-interface CompetencyFromApi {
-	id: string;
-	name: string;
-	currentLevel: number;
-	requiredLevel: number;
-	progress: {
-		percent: number;
-		completedMaterials: number;
-		totalRequiredMaterials: number;
-	};
 }
 
 interface CompetencyFull {
@@ -65,17 +52,16 @@ const MyCompetenciesPage = () => {
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [addingCompetencyId, setAddingCompetencyId] = useState<string | null>(null);
 
-	// Получение количества материалов в компетенции
-	const fetchMaterialsCountForCompetency = async (competencyId: string): Promise<number> => {
+	const fetchMaterialsCountForNextLevel = async (competencyId: string): Promise<number> => {
 		try {
 			const token = localStorage.getItem('accessToken');
 			if (!token) return 0;
-
-			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}`, {
+			
+			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}/next-level`, {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -85,20 +71,33 @@ const MyCompetenciesPage = () => {
 			}
 			return 0;
 		} catch (error) {
-			console.error(`Error fetching materials count for competency ${competencyId}:`, error);
+			console.error(`Error fetching next-level materials for competency ${competencyId}:`, error);
 			return 0;
 		}
 	};
 
-	// Получение количества материалов для всех компетенций
-	const fetchMaterialsCountsForCompetencies = async (competenciesList: CompetencyFull[]) => {
-		const competenciesWithCounts = await Promise.all(
-			competenciesList.map(async (comp) => {
-				const count = await fetchMaterialsCountForCompetency(comp.id);
-				return { ...comp, materialsCount: count };
-			})
-		);
-		return competenciesWithCounts;
+	const fetchTotalMaterialsCountForCompetency = async (competencyId: string): Promise<number> => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return 0;
+
+			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data: EducationalMaterialCompetency[] = await response.json();
+				return data.length;
+			}
+			return 0;
+		} catch (error) {
+			console.error(`Error fetching total materials for competency ${competencyId}:`, error);
+			return 0;
+		}
 	};
 
 	const fetchMyCompetencies = async () => {
@@ -114,7 +113,7 @@ const MyCompetenciesPage = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -129,15 +128,22 @@ const MyCompetenciesPage = () => {
 						for (const category of block.categories || []) {
 							for (const group of category.groups || []) {
 								for (const comp of group.competencies || []) {
-									// Получаем реальное количество материалов в компетенции
-									const materialsCount = await fetchMaterialsCountForCompetency(comp.id);
+									const currentLevel = comp.currentLevel || 0;
+									const targetLevel = comp.requiredLevel || 0;
+									const nextLevel = Math.min(currentLevel + 1, targetLevel);
+									
+									let materialsCount = 0;
+									if (currentLevel < targetLevel) {
+										materialsCount = await fetchMaterialsCountForNextLevel(comp.id);
+									}
 									
 									transformedCompetencies.push({
 										id: comp.id,
 										name: comp.name,
 										block: block.name,
-										currentLevel: comp.currentLevel || 0,
-										targetLevel: comp.requiredLevel || 0,
+										currentLevel: currentLevel,
+										targetLevel: targetLevel,
+										nextLevel: nextLevel,
 										progress: comp.progress?.percent || 0,
 										materialsCount: materialsCount,
 									});
@@ -166,7 +172,7 @@ const MyCompetenciesPage = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -179,14 +185,22 @@ const MyCompetenciesPage = () => {
 						for (const category of block.categories || []) {
 							for (const group of category.groups || []) {
 								for (const comp of group.competencies || []) {
-									const materialsCount = await fetchMaterialsCountForCompetency(comp.id);
+									const currentLevel = comp.currentLevel || 0;
+									const targetLevel = comp.requiredLevel || 0;
+									const nextLevel = Math.min(currentLevel + 1, targetLevel);
+									
+									let materialsCount = 0;
+									if (currentLevel < targetLevel) {
+										materialsCount = await fetchMaterialsCountForNextLevel(comp.id);
+									}
 									
 									transformedCompetencies.push({
 										id: comp.id,
 										name: comp.name,
 										block: block.name,
-										currentLevel: comp.currentLevel || 0,
-										targetLevel: comp.requiredLevel || 0,
+										currentLevel: currentLevel,
+										targetLevel: targetLevel,
+										nextLevel: nextLevel,
 										progress: comp.progress?.percent || 0,
 										materialsCount: materialsCount,
 									});
@@ -211,7 +225,7 @@ const MyCompetenciesPage = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -239,8 +253,12 @@ const MyCompetenciesPage = () => {
 					}
 				}
 				
-				// Получаем количество материалов для всех компетенций
-				const competenciesWithCounts = await fetchMaterialsCountsForCompetencies(allComps);
+				const competenciesWithCounts = await Promise.all(
+					allComps.map(async (comp) => {
+						const count = await fetchTotalMaterialsCountForCompetency(comp.id);
+						return { ...comp, materialsCount: count };
+					})
+				);
 				setAllCompetencies(competenciesWithCounts);
 			}
 		} catch (error) {
@@ -248,7 +266,6 @@ const MyCompetenciesPage = () => {
 		}
 	};
 
-	// ИСПРАВЛЕННАЯ функция добавления компетенции
 	const addCompetencyToMe = async (competencyId: string) => {
 		try {
 			setAddingCompetencyId(competencyId);
@@ -258,7 +275,6 @@ const MyCompetenciesPage = () => {
 				return;
 			}
 
-			// Используем правильный эндпоинт для добавления компетенции текущему пользователю
 			const response = await fetch('http://localhost:5217/api/competency-task', {
 				method: 'POST',
 				headers: {
@@ -268,11 +284,8 @@ const MyCompetenciesPage = () => {
 				body: JSON.stringify({ competencyId: competencyId }),
 			});
 
-			console.log('Add competency response:', response.status);
-
 			if (response.ok || response.status === 204 || response.status === 201) {
 				setSuccessMessage('Компетенция успешно добавлена');
-				// Обновляем списки
 				await fetchMyCompetencies();
 				await fetchNextLevelCompetencies();
 				await fetchAllCompetencies();
@@ -313,8 +326,8 @@ const MyCompetenciesPage = () => {
 		const labels: Record<number, string> = {
 			0: 'Не определен',
 			1: 'Базовые знания',
-			2: 'Профессионал',
-			3: 'Эксперт',
+			2: 'Эксперт',
+			3: 'Проффесионал',
 		};
 		return labels[level] || `Уровень ${level}`;
 	};
@@ -333,6 +346,13 @@ const MyCompetenciesPage = () => {
 				competencyId: competencyId,
 			},
 		});
+	};
+
+	const getMaterialsWord = (count: number) => {
+		if (count === 0) return 'материалов';
+		if (count === 1) return 'материал';
+		if (count >= 2 && count <= 4) return 'материала';
+		return 'материалов';
 	};
 
 	const renderCompetencyTable = (competenciesList: Competency[], showProgress = true) => {
@@ -354,50 +374,81 @@ const MyCompetenciesPage = () => {
 							<th>Компетенция</th>
 							<th>Блок</th>
 							<th>Текущий уровень</th>
-							<th>Целевой уровень</th>
+							<th>Следующий уровень</th>
 							{showProgress && <th>Прогресс</th>}
-							<th>Действия</th>
-						</tr>
+							<th>Материалы для изучения</th>
+							</tr>
 					</thead>
 					<tbody>
-						{filteredList.map((comp) => (
-							<tr key={comp.id}>
-								<td className={styles.competencyName}>{comp.name}</td>
-								<td className={styles.blockCell}>
-									<span className={styles.blockBadge}>{comp.block}</span>
-								</td>
-								<td className={styles.levelCell}>
-									<span className={`${styles.levelBadge} ${getLevelClass(comp.currentLevel)}`}>
-										{getLevelLabel(comp.currentLevel)}
-									</span>
-								</td>
-								<td className={styles.levelCell}>
-									<span className={`${styles.levelBadge} ${getLevelClass(comp.targetLevel)}`}>
-										{getLevelLabel(comp.targetLevel)}
-									</span>
-								</td>
-								{showProgress && (
-									<td className={styles.progressCell}>
-										<div className={styles.progressContainer}>
-											<div className={styles.progressBar}>
-												<div
-													className={styles.progressFill}
-													style={{ width: `${comp.progress}%` }}
-												/>
+						{filteredList.map((comp) => {
+							const isTargetReached = comp.currentLevel >= comp.targetLevel;
+							const hasMaterials = comp.materialsCount > 0;
+							
+							return (
+								<tr key={comp.id}>
+									<td className={styles.competencyName}>{comp.name}</td>
+									<td className={styles.blockCell}>
+										<span className={styles.blockBadge}>{comp.block}</span>
+										</td>
+									<td className={styles.levelCell}>
+										<span className={`${styles.levelBadge} ${getLevelClass(comp.currentLevel)}`}>
+											{getLevelLabel(comp.currentLevel)}
+										</span>
+										</td>
+									<td className={styles.levelCell}>
+										<span className={`${styles.levelBadge} ${getLevelClass(comp.nextLevel)}`}>
+											{isTargetReached ? '✓ Достигнут' : getLevelLabel(comp.nextLevel)}
+										</span>
+										</td>
+									{showProgress && (
+										<td className={styles.progressCell}>
+											<div className={styles.progressContainer}>
+												<div className={styles.progressBar}>
+													<div
+														className={styles.progressFill}
+														style={{ width: `${comp.progress}%` }}
+													/>
+												</div>
+												<span className={styles.progressText}>{Math.round(comp.progress)}%</span>
 											</div>
-											<span className={styles.progressText}>{comp.progress}%</span>
-										</div>
+										</td>
+									)}
+									<td className={styles.materialsCountCell}>
+										{isTargetReached ? (
+											<span className={styles.completedBadge}>✓ Уровень достигнут</span>
+										) : !hasMaterials ? (
+											<span className={styles.noMaterialsBadge}>Нет материалов для изучения</span>
+										) : (
+											<button
+												className={styles.materialsBtn}
+												onClick={() => handleViewMaterials(comp.id, comp.name)}>
+												📚 {comp.materialsCount} {getMaterialsWord(comp.materialsCount)}
+											</button>
+										)}
+										{!isTargetReached && hasMaterials && (
+											<div className={styles.materialsHint}>
+												Для перехода на уровень {getLevelLabel(comp.nextLevel)}
+											</div>
+										)}
+										{!isTargetReached && !hasMaterials && comp.currentLevel < comp.targetLevel && (
+											<div className={styles.materialsHint}>
+												Нет материалов для повышения уровня
+											</div>
+										)}
+										{comp.currentLevel >= 3 && (
+											<div className={styles.materialsHint}>
+												Максимальный уровень достигнут
+											</div>
+										)}
+										{!isTargetReached && hasMaterials && comp.materialsCount > 0 && (
+											<div className={styles.materialsInfo}>
+												Осталось изучить: {Math.ceil(comp.materialsCount * (1 - comp.progress / 100))} {getMaterialsWord(Math.ceil(comp.materialsCount * (1 - comp.progress / 100)))}
+											</div>
+										)}
 									</td>
-								)}
-								<td className={styles.actionsCell}>
-									<button
-										className={styles.materialsBtn}
-										onClick={() => handleViewMaterials(comp.id, comp.name)}>
-										📚 {comp.materialsCount} материал{comp.materialsCount !== 1 ? 'ов' : ''}
-									</button>
-								</td>
-							</tr>
-						))}
+								</tr>
+							);
+						})}
 					</tbody>
 				</table>
 			</div>
@@ -419,9 +470,9 @@ const MyCompetenciesPage = () => {
 						<tr>
 							<th>Компетенция</th>
 							<th>Блок</th>
-							<th>Материалов</th>
+							<th>Всего материалов</th>
 							<th>Описание</th>
-							<th>Действия</th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -432,7 +483,9 @@ const MyCompetenciesPage = () => {
 									<span className={styles.blockBadge}>{comp.hierarchy?.name || 'Без блока'}</span>
 								</td>
 								<td className={styles.materialsCountCell}>
-									<span className={styles.materialsBadge}>📚 {comp.materialsCount || 0}</span>
+									<span className={styles.materialsBadge}>
+										📚 {comp.materialsCount || 0} {getMaterialsWord(comp.materialsCount || 0)}
+									</span>
 								</td>
 								<td className={styles.descriptionCell}>{comp.description?.slice(0, 100) || '—'}</td>
 								<td className={styles.actionsCell}>

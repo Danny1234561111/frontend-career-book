@@ -1,4 +1,3 @@
-// manager-dashboard.module.tsx (исправленная версия с правильным расчетом прогресса)
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './manager-dashboard.module.scss';

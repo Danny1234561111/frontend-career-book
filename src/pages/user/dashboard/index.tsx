@@ -46,22 +46,19 @@ const EmployeeDashboard: React.FC = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	// Получение профиля пользователя через /api/users/profile
 	const fetchProfile = async () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/users/profile', {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
 			if (response.ok) {
 				const data = await response.json();
-				console.log('Profile data from /api/users/profile:', data);
 				
-				// Преобразуем department, если это объект
 				let departmentStr = 'Не указан';
 				if (data.department) {
 					if (typeof data.department === 'string') {
@@ -74,75 +71,61 @@ const EmployeeDashboard: React.FC = () => {
 				setProfile({
 					id: data.id,
 					fullName: data.fullName || `${data.lastName || ''} ${data.firstName || ''}`.trim() || 'Пользователь',
-					currentPosition: data.currentPosition || data.employee?.workPlaces?.[0]?.jobTitle?.name || 'Не указана',
+					currentPosition: data.currentPosition || 'Не указана',
 					targetPosition: data.targetPosition || 'Не указана',
 					progress: data.progress || { percent: 0, completedMaterials: 0, totalRequiredMaterials: 0 },
 					department: departmentStr,
 					role: data.role,
 				});
-			} else {
-				console.error('Failed to fetch profile:', response.status);
 			}
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		}
 	};
 
-	// Получение последних обновлений через /api/applogs/own
 	const fetchRecentUpdates = async () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/applogs/own', {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
 			if (response.ok) {
 				const data: AppLog[] = await response.json();
-				console.log('Recent updates from API:', data);
 				setRecentUpdates(data);
 			} else if (response.status === 404) {
-				console.log('No updates found (404)');
 				setRecentUpdates([]);
-			} else {
-				console.error('Failed to fetch updates:', response.status);
-				const errorText = await response.text();
-				console.error('Error details:', errorText);
 			}
 		} catch (error) {
 			console.error('Error fetching updates:', error);
 		}
 	};
 
-	// Получение материалов сотрудника для расчета прогресса
 	const fetchMaterials = async () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/material-task?withDeleted=false', {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
 			if (response.ok) {
 				const data: MaterialTask[] = await response.json();
 				setMaterials(data);
-				console.log('Materials for progress:', data);
 				return data;
-			} else {
-				console.error('Failed to fetch materials:', response.status);
-				return [];
 			}
+			return [];
 		} catch (error) {
 			console.error('Error fetching materials:', error);
 			return [];
 		}
 	};
 
-	// Расчет прогресса на основе материалов
 	const calculateProgressFromMaterials = (materialsData: MaterialTask[]) => {
 		if (!materialsData || materialsData.length === 0) {
 			return {
@@ -155,8 +138,6 @@ const EmployeeDashboard: React.FC = () => {
 		const completedMaterials = materialsData.filter(m => m.status === 2).length;
 		const totalMaterials = materialsData.length;
 		const percent = totalMaterials > 0 ? Math.round((completedMaterials / totalMaterials) * 100) : 0;
-		
-		console.log(`📊 Progress calculated: ${completedMaterials}/${totalMaterials} = ${percent}%`);
 		
 		return {
 			percent: percent,
@@ -177,22 +158,15 @@ const EmployeeDashboard: React.FC = () => {
 			}
 
 			try {
-				// Загружаем профиль
 				await fetchProfile();
-				
-				// Загружаем материалы для расчета прогресса
 				const materialsData = await fetchMaterials();
-				
-				// Рассчитываем реальный прогресс из материалов
 				const realProgress = calculateProgressFromMaterials(materialsData);
 				
-				// Обновляем профиль с реальным прогрессом
 				setProfile(prev => prev ? {
 					...prev,
 					progress: realProgress,
 				} : prev);
 				
-				// Загружаем обновления
 				await fetchRecentUpdates();
 			} catch (error) {
 				console.error('Error loading dashboard data:', error);
@@ -217,11 +191,19 @@ const EmployeeDashboard: React.FC = () => {
 	};
 
 	if (isLoading) {
-		return <div className={styles.loading}>Загрузка...</div>;
+		return (
+			<div className={styles.page}>
+				<div className={styles.loading}>Загрузка...</div>
+			</div>
+		);
 	}
 
 	if (error) {
-		return <div className={styles.error}>{error}</div>;
+		return (
+			<div className={styles.page}>
+				<div className={styles.error}>{error}</div>
+			</div>
+		);
 	}
 
 	return (
@@ -231,73 +213,79 @@ const EmployeeDashboard: React.FC = () => {
 			</div>
 
 			<div className={styles.content}>
-				<div className={styles.welcomeSection}>
-					<h2 className={styles.greeting}>
-						{profile?.fullName || user?.name || 'Пользователь'}
-					</h2>
-					<div className={styles.positionInfo}>
-						<p>
-							Текущая должность:{' '}
-							<strong>{profile?.currentPosition || 'Не указана'}</strong>
-						</p>
-						<p>
-							Целевая должность:{' '}
-							<strong>{profile?.targetPosition || 'Не указана'}</strong>
-						</p>
-						{profile?.department && profile.department !== 'Не указан' && (
-							<p>
-								Отдел: <strong>{profile.department}</strong>
-							</p>
-						)}
-						{profile?.role && (
-							<p>
-								Роль: <strong>{profile.role.name || profile.role.value}</strong>
-							</p>
-						)}
+				{/* Приветственная карточка */}
+				<div className={styles.card}>
+					<div className={styles.welcomeSection}>
+						<h2 className={styles.greeting}>
+							{profile?.fullName || user?.name || 'Пользователь'}
+						</h2>
+						<div className={styles.positionInfo}>
+							<div className={styles.infoRow}>
+								<span className={styles.infoLabel}>Текущая должность:</span>
+								<span className={styles.infoValue}>{profile?.currentPosition || 'Не указана'}</span>
+							</div>
+							<div className={styles.infoRow}>
+								<span className={styles.infoLabel}>Целевая должность:</span>
+								<span className={styles.infoValue}>{profile?.targetPosition || 'Не указана'}</span>
+							</div>
+							{profile?.department && profile.department !== 'Не указан' && (
+								<div className={styles.infoRow}>
+									<span className={styles.infoLabel}>Отдел:</span>
+									<span className={styles.infoValue}>{profile.department}</span>
+								</div>
+							)}
+							{profile?.role && (
+								<div className={styles.infoRow}>
+									<span className={styles.infoLabel}>Роль:</span>
+									<span className={styles.infoValue}>{profile.role.name || profile.role.value}</span>
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 
 				{/* Прогресс развития */}
 				{profile?.progress && (
-					<div className={styles.progressSection}>
-						<div className={styles.progressHeader}>
-							<span className={styles.progressLabel}>
-								Текущий прогресс развития
-							</span>
-							<span className={styles.progressPercent}>
-								{profile.progress.percent}%
-							</span>
-						</div>
-						<div className={styles.progressBar}>
-							<div
-								className={styles.progressFill}
-								style={{ width: `${profile.progress.percent}%` }}
-							/>
-						</div>
-						<div className={styles.competenciesCount}>
-							Выполнено материалов: {profile.progress.completedMaterials}/
-							{profile.progress.totalRequiredMaterials}
+					<div className={styles.card}>
+						<div className={styles.progressSection}>
+							<div className={styles.progressHeader}>
+								<span className={styles.progressLabel}>Текущий прогресс развития</span>
+								<span className={styles.progressPercent}>{profile.progress.percent}%</span>
+							</div>
+							<div className={styles.progressBar}>
+								<div
+									className={styles.progressFill}
+									style={{ width: `${profile.progress.percent}%` }}
+								/>
+							</div>
+							<div className={styles.progressStats}>
+								<span className={styles.completedCount}>
+									Выполнено: {profile.progress.completedMaterials} {" "} из {profile.progress.totalRequiredMaterials} материалов
+								</span>
+							</div>
 						</div>
 					</div>
 				)}
 
 				{/* Блок последних обновлений */}
-				<div className={styles.updatesSection}>
-					<h2>Последние обновления</h2>
-					{recentUpdates.length > 0 ? (
-						<div className={styles.updatesList}>
-							{recentUpdates.map((update) => (
-								<div key={update.id} className={styles.updateItem}>
-									<span className={styles.updateDate}>
-										{formatDate(update.createdAt)}
-									</span>
-									<span className={styles.updateText}>{update.text}</span>
-								</div>
-							))}
-						</div>
-					) : (
-						<p className={styles.noUpdates}>Нет обновлений</p>
-					)}
+				<div className={styles.card}>
+					<div className={styles.updatesSection}>
+						<h2 className={styles.sectionTitle}>Последние обновления</h2>
+						{recentUpdates.length > 0 ? (
+							<div className={styles.updatesList}>
+								{recentUpdates.map((update) => (
+									<div key={update.id} className={styles.updateItem}>
+										<span className={styles.updateDate}>
+											{formatDate(update.createdAt)}
+										</span>
+										<span className={styles.updateText}>{update.text}</span>
+									</div>
+								))}
+							</div>
+						) : (
+							<p className={styles.noUpdates}>Нет обновлений</p>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>

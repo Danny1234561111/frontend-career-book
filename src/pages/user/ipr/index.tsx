@@ -3,6 +3,7 @@ import styles from './ipr.module.scss';
 
 interface MaterialTask {
 	id: string;
+	materialId: string;
 	name: string;
 	type: string;
 	status: number;
@@ -18,6 +19,11 @@ interface Column {
 	items: MaterialTask[];
 }
 
+interface MaterialType {
+	id: string;
+	name: string;
+}
+
 const IprPage = () => {
 	const accessToken = localStorage.getItem('accessToken');
 	
@@ -31,6 +37,38 @@ const IprPage = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [draggedItem, setDraggedItem] = useState<MaterialTask | null>(null);
 
+	// Получение типов материалов
+	const fetchMaterialTypes = async (): Promise<Map<string, string>> => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return new Map();
+
+			const response = await fetch('http://localhost:5217/api/materialtypes?withDeleted=false', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data: MaterialType[] = await response.json();
+				const typeMap = new Map<string, string>();
+				data.forEach(type => {
+					if (type && type.id && type.name) {
+						typeMap.set(type.id, type.name);
+					}
+				});
+				return typeMap;
+			}
+			return new Map();
+		} catch (error) {
+			console.error('Error fetching material types:', error);
+			return new Map();
+		}
+	};
+
+	// Получение всех материалов пользователя и фильтрация только для текущего уровня
 	const fetchMaterials = async () => {
 		try {
 			const token = localStorage.getItem('accessToken');
@@ -40,29 +78,97 @@ const IprPage = () => {
 				return;
 			}
 
+			// Получаем маппинг типов материалов
+			const typeMap = await fetchMaterialTypes();
+
+			// 1. Получаем компетенции пользователя с их текущими уровнями
+			const competenciesResponse = await fetch('http://localhost:5217/api/competencies/own', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (!competenciesResponse.ok) {
+				throw new Error('Failed to fetch competencies');
+			}
+
+			const competenciesData = await competenciesResponse.json();
+			
+			// 2. Собираем ID материалов, которые относятся к следующему уровню каждой компетенции
+			const validMaterialIds = new Set<string>();
+
+			if (competenciesData.blocks && Array.isArray(competenciesData.blocks)) {
+				for (const block of competenciesData.blocks) {
+					for (const category of block.categories || []) {
+						for (const group of category.groups || []) {
+							for (const comp of group.competencies || []) {
+								const currentLevel = comp.currentLevel || 0;
+								const targetLevel = comp.requiredLevel || 0;
+								
+								// Если текущий уровень меньше целевого, есть материалы для изучения
+								if (currentLevel < targetLevel) {
+									// Получаем материалы для следующего уровня
+									const nextLevelResponse = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${comp.id}/next-level`, {
+										method: 'GET',
+										headers: {
+											'Authorization': `Bearer ${token}`,
+											'accept': 'application/json',
+										},
+									});
+									
+									if (nextLevelResponse.ok) {
+										const nextLevelMaterials = await nextLevelResponse.json();
+										nextLevelMaterials.forEach((material: any) => {
+											if (material.educationalMaterialId) {
+												validMaterialIds.add(material.educationalMaterialId);
+											}
+										});
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			console.log('✅ Valid material IDs (next level only):', Array.from(validMaterialIds));
+
+			// 3. Получаем все материалы пользователя
 			const response = await fetch('http://localhost:5217/api/material-task?withDeleted=false', {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
 			if (response.ok) {
 				const data = await response.json();
-				console.log('Materials for IPR:', data);
+				console.log('All materials from API:', data);
 				
 				const newColumns = [...columns];
 				newColumns.forEach(col => {
 					col.items = [];
 				});
 				
-				data.forEach((item: any) => {
-					if (item.material) {
+				// 4. Фильтруем материалы - оставляем только те, которые есть в validMaterialIds
+				for (const item of data) {
+					if (item.material && validMaterialIds.has(item.material.id)) {
+						// Получаем тип материала через typeMap (как в MaterialsPage)
+						let materialType = 'Без типа';
+						if (item.material.typeId && typeMap.has(item.material.typeId)) {
+							materialType = typeMap.get(item.material.typeId) || 'Без типа';
+						} else if (item.material.type?.name) {
+							materialType = item.material.type.name;
+						}
+						
 						const materialItem: MaterialTask = {
 							id: item.id,
+							materialId: item.material.id,
 							name: item.material.name || 'Без названия',
-							type: item.material.type?.name || 'Без типа',
+							type: materialType,
 							status: item.status,
 							duration: item.material.duration || 0,
 							link: item.material.link || '',
@@ -74,7 +180,7 @@ const IprPage = () => {
 							targetColumn.items.push(materialItem);
 						}
 					}
-				});
+				}
 				
 				setColumns(newColumns);
 			} else if (response.status === 404) {
@@ -91,12 +197,12 @@ const IprPage = () => {
 		}
 	};
 
-	const updateMaterialStatus = async (materialId: string, newStatus: number) => {
+	const updateMaterialStatus = async (materialTaskId: string, newStatus: number) => {
 		try {
 			const token = localStorage.getItem('accessToken');
 			if (!token) return false;
 
-			const response = await fetch(`http://localhost:5217/api/material-task/${materialId}`, {
+			const response = await fetch(`http://localhost:5217/api/material-task/${materialTaskId}`, {
 				method: 'PATCH',
 				headers: {
 					'Authorization': `Bearer ${token}`,
@@ -106,7 +212,7 @@ const IprPage = () => {
 			});
 
 			if (response.ok) {
-				console.log(`Material ${materialId} status updated to ${newStatus}`);
+				console.log(`Material ${materialTaskId} status updated to ${newStatus}`);
 				return true;
 			} else {
 				console.error('Failed to update material status:', response.status);
@@ -167,11 +273,7 @@ const IprPage = () => {
 
 	const formatDuration = (minutes: number) => {
 		if (!minutes || minutes === 0) return 'Не указано';
-		if (minutes < 60) return `${minutes} ч`;
-		const hours = Math.floor(minutes / 60);
-		const mins = minutes % 60;
-		if (mins === 0) return `${hours} ч`;
-		return `${hours} ч ${mins} мин`;
+		else return `${minutes} ч`;
 	};
 
 	const handleOpenMaterial = (link: string) => {

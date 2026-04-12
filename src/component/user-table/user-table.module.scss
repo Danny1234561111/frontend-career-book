@@ -2,11 +2,10 @@
 
 .container {
 	width: 100%;
-	max-width: 100%;
-	margin: 0 auto;
 	overflow: hidden;
-	background: $white;
-	border-radius: $border-radius-lg;
+	background: $variables-containers-background;
+	border: 1px solid $border-color;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	box-shadow: $shadow-sm;
 }
 
@@ -16,18 +15,18 @@
 	border-collapse: collapse;
 
 	th {
-		padding: $spacing-lg $spacing-md;
-		color: $text-secondary;
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
 		font-weight: 600;
-		font-size: $font-md;
+		font-size: $font-sm;
 		text-align: left;
-		background: $background-hover;
+		background: $derivatives-gray-10;
 		border-bottom: 2px solid $border-color;
 	}
 
 	td {
-		padding: $spacing-md;
-		color: $text-primary;
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
 		font-size: $font-md;
 		vertical-align: middle;
 		border-bottom: 1px solid $border-color;
@@ -37,7 +36,7 @@
 		transition: background 0.2s ease;
 
 		&:hover {
-			background: $background-hover;
+			background: $derivatives-gray-10;
 		}
 
 		&.clickableRow {
@@ -46,7 +45,7 @@
 
 		&.editedRow {
 			position: relative;
-			background: rgba($primary, 0.05);
+			background: $derivatives-main-20;
 
 			&::after {
 				position: absolute;
@@ -63,13 +62,14 @@
 
 .roleSelect {
 	width: 130px;
-	padding: $spacing-xs $spacing-sm;
-	color: $text-primary;
+	padding: $spacing-xs $spacing-md;
+	color: $variables-textprimary;
 	font-size: $font-sm;
 	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-sm;
 	cursor: pointer;
+	transition: all 0.2s;
 
 	&:focus {
 		border-color: $primary;
@@ -97,8 +97,8 @@
 
 .positionSelect {
 	width: 180px;
-	padding: $spacing-xs $spacing-sm;
-	color: $text-primary;
+	padding: $spacing-xs $spacing-md;
+	color: $variables-textprimary;
 	font-size: $font-sm;
 	background: $white;
 	border: 1px solid $border-color;
@@ -111,30 +111,41 @@
 	}
 
 	&.edited {
-		background: rgba($primary, 0.05);
+		background: $derivatives-main-20;
 		border-color: $primary;
 	}
+}
+
+.editedBadge {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	color: $primary;
+	font-size: $font-xs;
+	font-weight: 500;
+	background: $primary-light;
+	border-radius: $border-radius-round;
 }
 
 .tableFooter {
 	display: flex;
 	justify-content: flex-end;
-	padding: $spacing-lg $spacing-md;
-	background: $background-hover;
+	padding: $spacing-lg $spacing-lg;
+	background: $derivatives-gray-10;
 	border-top: 1px solid $border-color;
 }
 
 .saveButton {
-	@include button-reset;
 	padding: $spacing-sm $spacing-xl;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-md;
 	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
 
 	&:hover:not(:disabled) {
-		background: $background-hover;
+		background: $derivatives-gray-10;
 	}
 
 	&.active {
@@ -144,6 +155,7 @@
 
 		&:hover {
 			background: $primary-hover;
+			transform: translateY(-1px);
 		}
 	}
 
@@ -155,19 +167,19 @@
 
 .emptyState {
 	padding: $spacing-xxxl;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-lg;
 	text-align: center;
-	background: $white;
+	background: $variables-containers-background;
 }
 
-@media (width <= 768px) {
+@include mobile {
 	.container {
 		overflow-x: auto;
 	}
 
 	.table {
-		min-width: 1000px;
+		min-width: 800px;
 	}
 
 	.saveButton {

@@ -1,5 +1,3 @@
-// competencies.module.tsx (СОКРАЩЕННАЯ ВЕРСИЯ БЕЗ ЛОГОВ)
-
 import React, { useState, useEffect } from 'react';
 import { CompetenciesMatrix, CompetencyForm } from '../../../component';
 import styles from './competencies.module.scss';
@@ -327,9 +325,14 @@ const CompetenciesPage: React.FC = () => {
 				method: 'POST',
 				headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					name: competency.name, type: 'hard', hierarchyId: competency.groupId, departmentId: null,
-					description: competency.description, text: competency.article || '',
-					defenseTasks: competency.defenseTasks || '', admissionCriteria: competency.acceptanceCriteria || '',
+					name: competency.name,
+					type: 'hard',
+					hierarchyId: competency.groupId,
+					departmentId: null,
+					description: competency.description || '',
+					text: competency.article || '',
+					defenseTasks: competency.defenseTasks || '',
+					admissionCriteria: competency.acceptanceCriteria || '',
 				}),
 			});
 			if (!response.ok) throw new Error();
@@ -353,45 +356,68 @@ const CompetenciesPage: React.FC = () => {
 		}
 	};
 
+	// ИСПРАВЛЕННАЯ функция updateCompetency - отправляет ВСЕ поля
 	const updateCompetency = async (id: string, competency: CompetencyData) => {
 		try {
-			const updateData: any = {};
-			if (competency.name) updateData.name = competency.name;
-			if (competency.groupId) updateData.hierarchyId = competency.groupId;
-			if (competency.description !== undefined) updateData.description = competency.description;
-			if (competency.article !== undefined) updateData.text = competency.article;
-			if (competency.defenseTasks !== undefined) updateData.defenseTasks = competency.defenseTasks;
-			if (competency.acceptanceCriteria !== undefined) updateData.admissionCriteria = competency.acceptanceCriteria;
+			// Формируем объект с ВСЕМИ полями, которые могут быть обновлены
+			const updateData: any = {
+				name: competency.name,
+				hierarchyId: competency.groupId,
+				description: competency.description || '',
+				text: competency.article || '',
+				defenseTasks: competency.defenseTasks || '',
+				admissionCriteria: competency.acceptanceCriteria || '',
+				type: 'hard',
+				departmentId: null,
+			};
+			
+			console.log('📤 Sending update to API:', JSON.stringify(updateData, null, 2));
 			
 			const response = await fetch(`http://localhost:5217/api/competencies/${id}`, {
 				method: 'PATCH',
-				headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+				headers: { 
+					'Authorization': `Bearer ${accessToken}`, 
+					'Content-Type': 'application/json' 
+				},
 				body: JSON.stringify(updateData),
 			});
-			if (!response.ok) throw new Error();
+			
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error('Update failed:', response.status, errorText);
+				throw new Error(`Failed to update competency: ${response.status}`);
+			}
+			
+			console.log('✅ Competency basic info updated');
 
+			// Получаем существующие уровни
 			const existingLevelsResponse = await fetch(`http://localhost:5217/api/proficiency-level-competencies/by-competency/${id}`, {
 				method: 'GET',
 				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
 			});
 			let existingLevels: ProficiencyLevelCompetency[] = existingLevelsResponse.ok ? await existingLevelsResponse.json() : [];
 
+			// Получаем существующие связи материалов
 			const existingLinksResponse = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${id}`, {
 				method: 'GET',
 				headers: { 'Authorization': `Bearer ${accessToken}`, 'accept': 'text/plain' },
 			});
 			let existingLinks: EducationalMaterialLink[] = existingLinksResponse.ok ? await existingLinksResponse.json() : [];
 
+			// Обрабатываем уровни
 			for (const levelFromForm of competency.levels) {
 				const existingLevel = existingLevels.find(l => l.proficiencyLevelId === levelFromForm.levelId);
 				
 				if (!existingLevel) {
+					// Создаем новый уровень
 					const addLevelResponse = await fetch('http://localhost:5217/api/proficiency-level-competencies', {
 						method: 'POST',
 						headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
 						body: JSON.stringify({
-							competencyId: id, proficiencyLevelId: levelFromForm.levelId,
-							description: levelFromForm.description || '', example: levelFromForm.example || '',
+							competencyId: id,
+							proficiencyLevelId: levelFromForm.levelId,
+							description: levelFromForm.description || '',
+							example: levelFromForm.example || '',
 						}),
 					});
 					if (addLevelResponse.ok || addLevelResponse.status === 201) {
@@ -402,6 +428,7 @@ const CompetenciesPage: React.FC = () => {
 						}
 					}
 				} else {
+					// Обновляем существующий уровень
 					if (existingLevel.description !== levelFromForm.description || existingLevel.example !== levelFromForm.example) {
 						await updateLevel(existingLevel.id, levelFromForm.description, levelFromForm.example);
 					}
@@ -416,6 +443,7 @@ const CompetenciesPage: React.FC = () => {
 				}
 			}
 			
+			// Удаляем уровни, которых нет в форме
 			const formLevelIds = competency.levels.map(l => l.levelId);
 			const levelsToDelete = existingLevels.filter(l => !formLevelIds.includes(l.proficiencyLevelId));
 			for (const level of levelsToDelete) {
@@ -429,6 +457,7 @@ const CompetenciesPage: React.FC = () => {
 			setTimeout(() => setSuccessMessage(null), 3000);
 			return true;
 		} catch (error) {
+			console.error('Error updating competency:', error);
 			setError('Ошибка при обновлении компетенции');
 			setTimeout(() => setError(null), 3000);
 			return false;
@@ -467,45 +496,104 @@ const CompetenciesPage: React.FC = () => {
 		setIsFormOpen(true);
 	};
 
-	const handleEditCompetency = (competency: CompetencyFromApi) => {
-		let blockId = '', blockName = '', categoryId = '', categoryName = '';
-		const groupId = competency.hierarchy?.id || '';
-		const groupName = competency.hierarchy?.name || '';
+	// ИСПРАВЛЕННАЯ функция handleEditCompetency - загружает актуальные данные
+const handleEditCompetency = async (competency: CompetencyFromApi) => {
+	console.log('✏️ Editing competency:', competency);
+	
+	// Загружаем свежие данные компетенции с сервера
+	try {
+		const response = await fetch(`http://localhost:5217/api/competencies/${competency.id}`, {
+			method: 'GET',
+			headers: {
+				'Authorization': `Bearer ${accessToken}`,
+				'accept': 'text/plain',
+			},
+		});
 		
-		for (const block of hierarchy) {
-			if (block.type === 0 && block.children) {
-				for (const category of block.children) {
-					if (category.type === 1 && category.children) {
-						for (const group of category.children) {
-							if (group.type === 2 && group.id === groupId) {
-								categoryId = category.id; categoryName = category.name;
-								blockId = block.id; blockName = block.name;
-								break;
+		if (response.ok) {
+			const freshCompetency = await response.json();
+			console.log('📥 Fresh competency data from server:', freshCompetency);
+			
+			// Используем свежие данные
+			const groupId = competency.hierarchy?.id || '';
+			const groupName = competency.hierarchy?.name || '';
+			
+			let blockId = '', blockName = '', categoryId = '', categoryName = '';
+			
+			for (const block of hierarchy) {
+				if (block.type === 0 && block.children) {
+					for (const category of block.children) {
+						if (category.type === 1 && category.children) {
+							for (const group of category.children) {
+								if (group.type === 2 && group.id === groupId) {
+									categoryId = category.id;
+									categoryName = category.name;
+									blockId = block.id;
+									blockName = block.name;
+									break;
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-		
-		const compLevels = proficiencyLevelCompetencies.filter(plc => plc.competencyId === competency.id);
-		const levelsData: CompetencyLevel[] = compLevels.map(plc => {
-			const levelMaterials = materialLinks.filter(link => link.competencyId === competency.id && link.targetLevelId === plc.proficiencyLevelId);
-			return {
-				id: plc.id, levelId: plc.proficiencyLevelId, levelName: plc.proficiencyLevel.name,
-				levelValue: plc.proficiencyLevel.value, description: plc.description || '',
-				example: plc.example || '', materialIds: levelMaterials.map(link => link.educationalMaterialId),
+			
+			// Получаем уровни компетенции
+			const levelsResponse = await fetch(`http://localhost:5217/api/proficiency-level-competencies/by-competency/${competency.id}`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'text/plain',
+				},
+			});
+			
+			let levelsData: CompetencyLevel[] = [];
+			if (levelsResponse.ok) {
+				const compLevels: ProficiencyLevelCompetency[] = await levelsResponse.json();
+				levelsData = compLevels.map(plc => {
+					const levelMaterials = materialLinks.filter(link => 
+						link.competencyId === competency.id && link.targetLevelId === plc.proficiencyLevelId
+					);
+					return {
+						id: plc.id,
+						levelId: plc.proficiencyLevelId,
+						levelName: plc.proficiencyLevel.name,
+						levelValue: plc.proficiencyLevel.value,
+						description: plc.description || '',
+						example: plc.example || '',
+						materialIds: levelMaterials.map(link => link.educationalMaterialId),
+					};
+				}).sort((a, b) => a.levelValue - b.levelValue);
+			}
+			
+			const editingData: CompetencyData = {
+				id: freshCompetency.id,
+				name: freshCompetency.name || '',
+				groupId: groupId,
+				groupName: groupName,
+				blockId: blockId,
+				blockName: blockName,
+				categoryId: categoryId,
+				categoryName: categoryName,
+				description: freshCompetency.description || '',
+				defenseTasks: freshCompetency.defenseTasks || '',
+				acceptanceCriteria: freshCompetency.admissionCriteria || '',
+				article: freshCompetency.text || '',
+				levels: levelsData,
 			};
-		}).sort((a, b) => a.levelValue - b.levelValue);
-		
-		setEditingCompetency({
-			id: competency.id, name: competency.name, groupId, groupName,
-			blockId, blockName, categoryId, categoryName, description: competency.description || '',
-			defenseTasks: competency.defenseTasks || '', acceptanceCriteria: competency.admissionCriteria || '',
-			article: competency.text || '', levels: levelsData,
-		});
-		setIsFormOpen(true);
-	};
+			
+			console.log('✅ Editing data prepared:', editingData);
+			setEditingCompetency(editingData);
+			setIsFormOpen(true);
+		} else {
+			console.error('Failed to fetch fresh competency data');
+			setError('Ошибка загрузки данных компетенции');
+		}
+	} catch (error) {
+		console.error('Error fetching fresh competency:', error);
+		setError('Ошибка загрузки данных компетенции');
+	}
+};
 
 	const handleSubmitCompetency = async (competency: CompetencyData) => {
 		let success = false;

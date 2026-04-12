@@ -1,52 +1,77 @@
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
-}
-
-.container {
-	max-width: 1400px;
-	margin: 0 auto;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
+	box-shadow: $shadow-md;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.successMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $success;
+	font-size: $font-md;
+	background: $success-light;
+	border-radius: $border-radius-md;
+	border-left: 4px solid $success;
+}
+
+.errorMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+	border-left: 4px solid $danger;
 }
 
 .stats {
 	margin-top: $spacing-xl;
-	padding: $spacing-md;
-	color: $text-secondary;
+	padding: $spacing-md $spacing-lg;
+	color: $variables-textsecondary;
 	font-size: $font-md;
 	text-align: right;
-	background: $white;
+	background: $derivatives-gray-10;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 
 	strong {
 		margin-left: $spacing-xs;
 		color: $primary;
+		font-weight: 600;
 		font-size: $font-lg;
 	}
 }
 
 @include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
+	.page {
+		padding: $spacing-lg;
 	}
 
 	.title {
@@ -54,7 +79,7 @@
 	}
 
 	.content {
-		padding: $spacing-xl;
+		padding: $spacing-lg;
 	}
 
 	.stats {

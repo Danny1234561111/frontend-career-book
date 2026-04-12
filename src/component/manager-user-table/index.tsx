@@ -1,11 +1,11 @@
-// manager_user_table.module.tsx
+// manager_user_table.tsx (исправленный - без email)
+
 import React from 'react';
 import styles from './manager_user_table.module.scss';
 
 type User = {
 	id: string;
 	fullName: string;
-	email: string;
 	department?: string;
 	targetPosition?: string;
 	currentPosition?: string;
@@ -46,12 +46,11 @@ const ManagerUserTable: React.FC<ManagerUserTableProps> = ({
 			<table className={styles.table}>
 				<thead>
 					<tr>
-						<th style={{ width: '20%' }}>ФИО</th>
-						<th style={{ width: '20%' }}>Email</th>
-						<th style={{ width: '15%' }}>Текущая должность</th>
-						<th style={{ width: '20%' }}>Целевая должность</th>
+						<th style={{ width: '25%' }}>Сотрудник</th>
+						<th style={{ width: '20%' }}>Текущая должность</th>
+						<th style={{ width: '25%' }}>Целевая должность</th>
 						<th style={{ width: '15%' }}>Прогресс</th>
-						<th style={{ width: '10%' }}>Дата рег.</th>
+						<th style={{ width: '15%' }}>Дата рег.</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -62,11 +61,8 @@ const ManagerUserTable: React.FC<ManagerUserTableProps> = ({
 							className={onUserSelect ? styles.clickableRow : ''}
 						>
 							<td>{user.fullName}</td>
-							<td>{user.email}</td>
 							<td>{user.currentPosition || '-'}</td>
-							<td className={styles.targetPositionCell}>
-								{user.targetPosition || '-'}
-							</td>
+							<td>{user.targetPosition || '-'}</td>
 							<td>
 								<div className={styles.progressContainer}>
 									<div className={styles.progressBar}>
@@ -79,9 +75,9 @@ const ManagerUserTable: React.FC<ManagerUserTableProps> = ({
 										{user.progress || 0}%
 									</span>
 								</div>
-							</td>
-							<td>{formatDate(user.createdAt)}</td>
-						</tr>
+								</td>
+								<td className={styles.dateCell}>{formatDate(user.createdAt)}</td>
+							</tr>
 					))}
 				</tbody>
 			</table>

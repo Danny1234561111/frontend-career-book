@@ -1,4 +1,3 @@
-// import-excel.module.tsx
 import React, { useState, useEffect } from 'react';
 import styles from './import-excel.module.scss';
 

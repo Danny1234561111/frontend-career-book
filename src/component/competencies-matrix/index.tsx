@@ -1,5 +1,3 @@
-// competencies-matrix.tsx (ИСПРАВЛЕННАЯ ВЕРСИЯ)
-
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './competencies-matrix.module.scss';
 

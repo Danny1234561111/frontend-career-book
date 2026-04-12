@@ -1,4 +1,3 @@
-// materials-table.tsx
 import React from 'react';
 import styles from './materials-table.module.scss';
 

@@ -2,12 +2,10 @@
 
 .container {
 	width: 100%;
-	max-width: 100%;
-	margin: 0 auto;
 	padding: $spacing-xl;
-	background: $white;
-	border-radius: $border-radius-lg;
-	box-shadow: $shadow-sm;
+	background: $derivatives-gray-10;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	border: 1px solid $border-color;
 }
 
 .header {
@@ -18,53 +16,43 @@
 
 	h3 {
 		margin: 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 600;
-		font-size: $font-xxl;
-	}
-
-	@include mobile {
-		flex-direction: column;
-		align-items: stretch;
-		gap: $spacing-md;
+		font-size: $font-xl;
 	}
 }
 
 .headerButtons {
 	display: flex;
 	gap: $spacing-md;
-	align-items: center;
 }
 
-.addBlockBtn {
-	@include button-reset;
+.addBlockBtn, .saveBtn {
 	padding: $spacing-sm $spacing-xl;
 	color: $white;
 	font-weight: 500;
 	font-size: $font-md;
-	background: $primary;
+	border: none;
 	border-radius: $border-radius-md;
 	cursor: pointer;
-	transition: background 0.2s;
+	transition: all 0.2s;
+}
+
+.addBlockBtn {
+	background: $primary;
 
 	&:hover {
 		background: $primary-hover;
+		transform: translateY(-1px);
 	}
 }
 
 .saveBtn {
-	@include button-reset;
-	padding: $spacing-sm $spacing-xl;
-	color: $white;
-	font-weight: 500;
-	font-size: $font-md;
 	background: $success;
-	border-radius: $border-radius-md;
-	cursor: pointer;
-	transition: background 0.2s;
 
-	&:hover {
+	&:hover:not(:disabled) {
 		background: darken($success, 10%);
+		transform: translateY(-1px);
 	}
 
 	&:disabled {
@@ -79,8 +67,10 @@
 	gap: $spacing-md;
 }
 
+// Блоки
 .block {
 	overflow: hidden;
+	background: $variables-containers-background;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 }
@@ -90,12 +80,12 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: $spacing-md $spacing-lg;
-	background: $background-hover;
+	background: $derivatives-gray-10;
 	cursor: pointer;
 	transition: background 0.2s;
 
 	&:hover {
-		background: darken($background-hover, 2%);
+		background: $derivatives-gray-20;
 	}
 }
 
@@ -106,7 +96,7 @@
 
 	h4 {
 		margin: 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 600;
 		font-size: $font-lg;
 	}
@@ -118,17 +108,15 @@
 }
 
 .blockContent {
-	display: flex;
-	flex-direction: column;
-	gap: $spacing-md;
 	padding: $spacing-lg;
 	background: $white;
 }
 
-// Стили для Категорий
+// Категории
 .category {
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	margin-bottom: $spacing-md;
 }
 
 .categoryHeader {
@@ -136,12 +124,12 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: $spacing-md $spacing-lg;
-	background: $background-hover;
+	background: $derivatives-gray-10;
 	cursor: pointer;
 	transition: background 0.2s;
 
 	&:hover {
-		background: darken($background-hover, 2%);
+		background: $derivatives-gray-20;
 	}
 }
 
@@ -152,9 +140,9 @@
 
 	h5 {
 		margin: 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 600;
-		font-size: $font-lg;
+		font-size: $font-md;
 	}
 }
 
@@ -168,15 +156,11 @@
 	background: $white;
 }
 
-// Стили для Групп
+// Группы
 .group {
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 	margin-bottom: $spacing-md;
-
-	&:last-child {
-		margin-bottom: 0;
-	}
 }
 
 .groupHeader {
@@ -184,69 +168,55 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: $spacing-sm $spacing-lg;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	cursor: pointer;
 	transition: background 0.2s;
-	border-bottom: 1px solid transparent;
-
-	&:hover {
-		background: darken($background-light, 3%);
-	}
 }
 
 .groupTitle {
 	display: flex;
 	align-items: center;
 	gap: $spacing-sm;
-	flex: 1;
 
 	h6 {
 		margin: 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 500;
 		font-size: $font-md;
 	}
 }
 
 .competencyCount {
-	margin-left: $spacing-sm;
 	padding: $spacing-xs $spacing-sm;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-xs;
 	background: $white;
-	border-radius: $border-radius-xl;
+	border-radius: $spacing-xl;
 }
 
 .groupContent {
 	padding: $spacing-md;
 	background: $white;
-	display: flex;
-	flex-direction: column;
-	gap: $spacing-md;
 }
 
 .emptyGroup {
 	padding: $spacing-lg;
 	text-align: center;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-sm;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	border-radius: $border-radius-md;
-
-	p {
-		margin: 0;
-	}
 }
 
-// Стили для компетенций
+// Компетенции
 .competencyContainer {
-	overflow: hidden;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	margin-bottom: $spacing-md;
 	transition: all 0.2s;
 
 	&:hover {
-		border-color: $primary-light;
+		border-color: $primary;
 		box-shadow: $shadow-sm;
 	}
 }
@@ -258,11 +228,6 @@
 	padding: $spacing-sm $spacing-md;
 	background: $white;
 	border-bottom: 1px solid $border-color;
-	transition: background 0.2s;
-
-	&:hover {
-		background: $background-light;
-	}
 }
 
 .competencyTitle {
@@ -271,22 +236,20 @@
 	align-items: center;
 	gap: $spacing-sm;
 	cursor: pointer;
-	user-select: none;
 
 	.competencyName {
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 500;
 		font-size: $font-md;
-		flex: 1;
 	}
 }
 
 .addLevelBtn {
-	@include button-reset;
 	padding: $spacing-xs $spacing-md;
 	color: $success;
 	font-size: $font-sm;
 	background: $success-light;
+	border: none;
 	border-radius: $border-radius-sm;
 	cursor: pointer;
 	transition: all 0.2s;
@@ -296,7 +259,7 @@
 	}
 }
 
-// Стили для уровней и материалов
+// Уровни и материалы
 .materialsByLevel {
 	display: flex;
 	flex-direction: column;
@@ -305,7 +268,6 @@
 }
 
 .levelSection {
-	overflow: hidden;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 	background: $white;
@@ -316,14 +278,10 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: $spacing-sm $spacing-md;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	cursor: pointer;
 	border-left: 4px solid;
 	transition: all 0.2s;
-
-	&:hover {
-		background: darken($background-light, 2%);
-	}
 }
 
 .levelTitle {
@@ -332,22 +290,18 @@
 	gap: $spacing-sm;
 }
 
-.levelIcon {
-	font-size: $font-md;
-}
-
 .levelName {
 	font-weight: 600;
 	font-size: $font-md;
-	color: $text-primary;
+	color: $variables-textprimary;
 }
 
 .materialCount {
 	padding: $spacing-xs $spacing-sm;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-xs;
 	background: $white;
-	border-radius: $border-radius-xl;
+	border-radius: $spacing-xl;
 }
 
 .levelActions {
@@ -357,11 +311,11 @@
 }
 
 .addMaterialBtn {
-	@include button-reset;
 	padding: $spacing-xs $spacing-md;
 	color: $primary;
 	font-size: $font-sm;
 	background: $primary-light;
+	border: none;
 	border-radius: $border-radius-sm;
 	cursor: pointer;
 	transition: all 0.2s;
@@ -373,7 +327,7 @@
 
 .expandIcon {
 	width: 20px;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-sm;
 	text-align: center;
 }
@@ -385,11 +339,6 @@
 	padding: $spacing-md;
 	min-height: 100px;
 	background: $white;
-	transition: background 0.2s;
-
-	&[data-drag-over="true"] {
-		background: $primary-light;
-	}
 }
 
 .materialCard {
@@ -404,12 +353,6 @@
 	&:hover {
 		border-color: $primary;
 		box-shadow: $shadow-sm;
-		transform: translateX(2px);
-	}
-
-	&:active {
-		cursor: grabbing;
-		opacity: 0.8;
 	}
 }
 
@@ -421,24 +364,19 @@
 }
 
 .materialName {
-	color: $text-primary;
+	color: $variables-textprimary;
 	font-weight: 500;
 	font-size: $font-sm;
 }
 
-.materialActions {
-	display: flex;
-	gap: $spacing-xs;
-}
-
 .removeMaterialBtn {
-	@include button-reset;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 24px;
 	height: 24px;
 	font-size: $font-sm;
+	background: none;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-sm;
 	cursor: pointer;
@@ -467,7 +405,6 @@
 		color: $primary;
 		font-size: $font-xs;
 		text-decoration: none;
-		word-break: break-all;
 
 		&:hover {
 			text-decoration: underline;
@@ -476,10 +413,7 @@
 }
 
 .duration {
-	display: flex;
-	align-items: center;
-	gap: $spacing-xs;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-xs;
 	white-space: nowrap;
 }
@@ -493,8 +427,7 @@
 	font-size: $font-xs;
 	font-weight: 600;
 	background: $success;
-	border-radius: $border-radius-xl;
-	box-shadow: $shadow-sm;
+	border-radius: $spacing-xl;
 }
 
 .emptyMaterials {
@@ -505,17 +438,17 @@
 
 	p {
 		margin: 0 0 $spacing-xs 0;
-		color: $text-secondary;
+		color: $variables-textsecondary;
 		font-size: $font-sm;
 	}
 
 	small {
-		color: $text-disabled;
+		color: $derivatives-gray-70;
 		font-size: $font-xs;
 	}
 }
 
-// Стили для модальных окон
+// Модальные окна
 .modal {
 	position: fixed;
 	top: 0;
@@ -526,22 +459,20 @@
 	align-items: center;
 	width: 100%;
 	height: 100%;
-	background: rgba(0, 0, 0, 0.5);
-	animation: fadeIn 0.2s ease-out;
+	background: $derivatives-black-70;
 }
 
 .modalContent {
 	width: 500px;
 	max-width: 90%;
 	padding: $spacing-xl;
-	background: $white;
-	border-radius: $border-radius-lg;
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	box-shadow: $shadow-lg;
-	animation: slideUp 0.3s ease-out;
 
 	h3 {
 		margin: 0 0 $spacing-lg 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-size: $font-xl;
 	}
 }
@@ -552,7 +483,7 @@
 	label {
 		display: block;
 		margin-bottom: $spacing-xs;
-		color: $text-secondary;
+		color: $variables-textsecondary;
 		font-size: $font-sm;
 		font-weight: 500;
 	}
@@ -568,12 +499,12 @@
 		&:focus {
 			border-color: $primary;
 			outline: none;
-			box-shadow: 0 0 0 2px rgba($primary, 0.1);
+			box-shadow: 0 0 0 2px $derivatives-main-20;
 		}
 	}
 
 	.disabledInput {
-		background: $background-light;
+		background: $derivatives-gray-10;
 		cursor: not-allowed;
 	}
 }
@@ -593,8 +524,8 @@
 		transition: all 0.2s;
 
 		&:first-child {
-			color: $text-secondary;
-			background: $background-light;
+			color: $variables-textsecondary;
+			background: $derivatives-gray-10;
 
 			&:hover {
 				background: $border-color;
@@ -618,78 +549,57 @@
 }
 
 // Сообщения
-.successMessage {
+.successMessage, .errorMessage {
 	position: fixed;
 	top: $spacing-xl;
 	right: $spacing-xl;
 	z-index: 1001;
 	padding: $spacing-md $spacing-xl;
-	color: $success;
 	font-weight: 500;
-	background: $success-light;
-	border: 1px solid $success;
+	font-size: $font-md;
 	border-radius: $border-radius-md;
 	box-shadow: $shadow-md;
-	animation: slideIn 0.3s ease-out;
+}
+
+.successMessage {
+	color: $success;
+	background: $success-light;
+	border-left: 4px solid $success;
 }
 
 .errorMessage {
-	position: fixed;
-	top: $spacing-xl;
-	right: $spacing-xl;
-	z-index: 1001;
-	padding: $spacing-md $spacing-xl;
 	color: $danger;
-	font-weight: 500;
 	background: $danger-light;
-	border: 1px solid $danger;
-	border-radius: $border-radius-md;
-	box-shadow: $shadow-md;
-	animation: slideIn 0.3s ease-out;
+	border-left: 4px solid $danger;
 }
 
 .loading {
-	display: flex;
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.iconBtn {
+	display: inline-flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 400px;
-	color: $text-secondary;
+	width: 32px;
+	height: 32px;
+	padding: $spacing-xs;
+	color: $variables-textsecondary;
 	font-size: $font-lg;
-}
+	background: none;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
 
-// Анимации
-@keyframes slideIn {
-	from {
-		transform: translateX(100%);
-		opacity: 0;
-	}
-	to {
-		transform: translateX(0);
-		opacity: 1;
+	&:hover {
+		background: $derivatives-gray-10;
 	}
 }
 
-@keyframes slideUp {
-	from {
-		transform: translateY(50px);
-		opacity: 0;
-	}
-	to {
-		transform: translateY(0);
-		opacity: 1;
-	}
-}
-
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
-// Адаптация для мобильных устройств
 @include mobile {
 	.container {
 		padding: $spacing-md;
@@ -708,67 +618,24 @@
 
 	.addBlockBtn, .saveBtn {
 		width: 100%;
+		text-align: center;
 	}
 
-	.blockHeader {
+	.blockHeader, .categoryHeader {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: $spacing-sm;
-		padding: $spacing-sm $spacing-md;
 	}
 
-	.blockActions {
-		justify-content: flex-end;
+	.blockActions, .categoryActions {
 		width: 100%;
-	}
-
-	.blockContent {
-		padding: $spacing-sm;
-	}
-
-	.categoryHeader {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: $spacing-sm;
-		padding: $spacing-sm $spacing-md;
-	}
-
-	.categoryActions {
 		justify-content: flex-end;
-		width: 100%;
-	}
-
-	.categoryContent {
-		padding: $spacing-sm;
-	}
-
-	.groupHeader {
-		padding: $spacing-sm $spacing-md;
-	}
-
-	.groupTitle h6 {
-		font-size: $font-sm;
-	}
-
-	.competencyCount {
-		font-size: $font-xs;
-		padding: $spacing-xs $spacing-sm;
-	}
-
-	.groupContent {
-		padding: $spacing-sm;
-		gap: $spacing-sm;
 	}
 
 	.competencyHeader {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: $spacing-sm;
-		padding: $spacing-sm;
-	}
-
-	.competencyTitle {
-		width: 100%;
 	}
 
 	.addLevelBtn {
@@ -776,28 +643,15 @@
 		text-align: center;
 	}
 
-	.materialsByLevel {
-		padding: $spacing-sm;
-	}
-
 	.levelHeader {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: $spacing-sm;
-		padding: $spacing-sm;
 	}
 
 	.levelActions {
 		width: 100%;
 		justify-content: flex-end;
-	}
-
-	.materialsList {
-		padding: $spacing-sm;
-	}
-
-	.materialCard {
-		padding: $spacing-xs $spacing-sm;
 	}
 
 	.materialMeta {
@@ -814,8 +668,6 @@
 		top: $spacing-md;
 		right: $spacing-md;
 		left: $spacing-md;
-		padding: $spacing-sm $spacing-md;
-		font-size: $font-sm;
 	}
 
 	.modalContent {

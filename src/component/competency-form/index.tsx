@@ -1,5 +1,3 @@
-// competency-form.module.tsx (ИСПРАВЛЕННАЯ ВЕРСИЯ - фильтрация материалов по уровням)
-
 import React, { useState, useEffect } from 'react';
 import styles from './competency-form.module.scss';
 
@@ -102,13 +100,12 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		return icons[value] || '📚';
 	};
 
-	// Получаем ID материалов, уже привязанных к ДРУГИМ уровням (не к редактируемому)
-	const getMaterialsUsedByOtherLevels = (currentLevelId?: string): Set<string> => {
+	// Получаем все ID материалов, уже привязанных к ЛЮБЫМ уровням (кроме редактируемого)
+	const getAllUsedMaterialIds = (exceptLevelId?: string): Set<string> => {
 		const usedMaterialIds = new Set<string>();
 		
 		formData.levels.forEach(level => {
-			// Если это редактируемый уровень - пропускаем его
-			if (currentLevelId && level.levelId === currentLevelId) {
+			if (exceptLevelId && level.levelId === exceptLevelId) {
 				return;
 			}
 			level.materialIds.forEach(mid => usedMaterialIds.add(mid));
@@ -117,23 +114,45 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		return usedMaterialIds;
 	};
 
-	// Фильтруем материалы для модального окна
-	const getFilteredMaterialsForModal = () => {
+	// Получаем доступные материалы для текущего редактируемого уровня
+	const getAvailableMaterialsForCurrentLevel = (): typeof materials => {
 		const currentLevelId = editingLevelIndex !== null 
 			? formData.levels[editingLevelIndex]?.levelId 
-			: undefined;
+			: newLevelData.levelId;
 		
-		const usedByOtherLevels = getMaterialsUsedByOtherLevels(currentLevelId);
+		const usedByOtherLevels = getAllUsedMaterialIds(currentLevelId);
 		
-		return materials.filter(material => {
-			// Поиск по названию
+		return materials.filter(material => !usedByOtherLevels.has(material.id));
+	};
+
+	// Фильтруем материалы для модального окна
+	const getFilteredMaterialsForModal = () => {
+		const availableMaterials = getAvailableMaterialsForCurrentLevel();
+		
+		return availableMaterials.filter(material => {
 			const matchesSearch = material.name.toLowerCase().includes(searchQuery.toLowerCase());
-			if (!matchesSearch) return false;
-			
-			// Если материал уже используется на другом уровне - не показываем его
-			if (usedByOtherLevels.has(material.id)) return false;
-			
-			return true;
+			return matchesSearch;
+		});
+	};
+
+	const handleMaterialToggleInModal = (materialId: string) => {
+		setNewLevelData(prev => {
+			const newIds = prev.materialIds.includes(materialId)
+				? prev.materialIds.filter(id => id !== materialId)
+				: [...prev.materialIds, materialId];
+			return { ...prev, materialIds: newIds };
+		});
+	};
+
+	const handleLevelChangeInModal = (levelId: string) => {
+		const level = getLevelById(levelId);
+		setNewLevelData({
+			levelId: levelId,
+			levelName: level?.name || '',
+			levelValue: level?.value || 1,
+			description: '',
+			example: '',
+			materialIds: [],
 		});
 	};
 
@@ -242,6 +261,15 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 		});
 	};
 
+	const handleDescriptionChangeForLevel = (levelIndex: number, field: 'description' | 'example', value: string) => {
+		setFormData(prev => {
+			const updatedLevels = [...prev.levels];
+			const level = updatedLevels[levelIndex];
+			updatedLevels[levelIndex] = { ...level, [field]: value };
+			return { ...prev, levels: updatedLevels };
+		});
+	};
+
 	const handleAddLevel = () => {
 		if (!newLevelData.levelId) {
 			alert('Выберите уровень владения');
@@ -261,9 +289,9 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 			levelId: newLevelData.levelId,
 			levelName: selectedLevel.name,
 			levelValue: selectedLevel.value,
-			description: newLevelData.description,
-			example: newLevelData.example,
-			materialIds: newLevelData.materialIds,
+			description: newLevelData.description || '',
+			example: newLevelData.example || '',
+			materialIds: newLevelData.materialIds || [],
 		};
 		
 		const updatedLevels = [...formData.levels, newLevel].sort((a, b) => a.levelValue - b.levelValue);
@@ -327,6 +355,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 			example: '',
 			materialIds: [],
 		});
+		setSearchQuery('');
 		setShowAddLevelModal(true);
 	};
 
@@ -337,10 +366,11 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 			levelId: level.levelId,
 			levelName: level.levelName,
 			levelValue: level.levelValue,
-			description: level.description,
-			example: level.example,
-			materialIds: level.materialIds,
+			description: level.description || '',
+			example: level.example || '',
+			materialIds: level.materialIds || [],
 		});
+		setSearchQuery('');
 		setShowAddLevelModal(true);
 	};
 
@@ -355,6 +385,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 	};
 
 	const filteredMaterialsForModal = getFilteredMaterialsForModal();
+	const availableMaterialsForModal = getAvailableMaterialsForCurrentLevel();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -490,7 +521,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 							</div>
 
 							<div className={styles.formGroup}>
-								<label>Теоретическая статья</label>
+								<label>Полученные знания</label>
 								<textarea
 									value={formData.article}
 									onChange={(e) =>
@@ -595,33 +626,47 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 											
 											{isExpanded && (
 												<div className={styles.levelContent}>
-													{level.description && (
-														<div className={styles.levelDescription}>
-															<strong>Описание уровня:</strong>
-															<p>{level.description}</p>
-														</div>
-													)}
+													<div className={styles.formGroup}>
+														<label>Описание уровня</label>
+														<textarea
+															value={level.description}
+															onChange={(e) => handleDescriptionChangeForLevel(index, 'description', e.target.value)}
+															rows={3}
+															placeholder="Опишите, что должен уметь сотрудник на этом уровне..."
+															disabled={isSubmitting}
+														/>
+													</div>
 													
-													{level.example && (
-														<div className={styles.levelExample}>
-															<strong>Пример:</strong>
-															<p>{level.example}</p>
-														</div>
-													)}
+													<div className={styles.formGroup}>
+														<label>Пример</label>
+														<textarea
+															value={level.example}
+															onChange={(e) => handleDescriptionChangeForLevel(index, 'example', e.target.value)}
+															rows={3}
+															placeholder="Приведите пример задач или ситуаций..."
+															disabled={isSubmitting}
+														/>
+													</div>
 													
 													{materials.length > 0 && (
 														<div className={styles.levelMaterialsSection}>
 															<strong>Учебные материалы для этого уровня:</strong>
 															<div className={styles.materialsList}>
 																{materials.map(material => {
+																	const usedByOtherLevels = getAllUsedMaterialIds(level.levelId);
 																	const isSelected = level.materialIds.includes(material.id);
+																	const isDisabled = !isSelected && usedByOtherLevels.has(material.id);
+																	
 																	return (
-																		<label key={material.id} className={styles.materialItem}>
+																		<label 
+																			key={material.id} 
+																			className={`${styles.materialItem} ${isDisabled ? styles.disabledMaterial : ''}`}
+																			title={isDisabled ? 'Этот материал уже используется на другом уровне' : ''}>
 																			<input
 																				type="checkbox"
 																				checked={isSelected}
 																				onChange={() => handleMaterialToggleForLevel(index, material.id)}
-																				disabled={isSubmitting}
+																				disabled={isDisabled || isSubmitting}
 																			/>
 																			<span className={styles.materialName}>{material.name}</span>
 																			<span className={styles.materialType}>{material.type}</span>
@@ -641,7 +686,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 						
 						<div className={styles.hint}>
 							💡 <strong>Примечание:</strong> Для каждой компетенции необходимо добавить хотя бы один уровень владения. 
-							Каждому уровню можно привязать учебные материалы.
+							Каждому уровню можно привязать учебные материалы. Один материал может быть привязан только к одному уровню в рамках компетенции.
 						</div>
 					</form>
 				</div>
@@ -675,15 +720,7 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 							<label>Уровень владения *</label>
 							<select
 								value={newLevelData.levelId}
-								onChange={(e) => {
-									const level = getLevelById(e.target.value);
-									setNewLevelData({
-										...newLevelData,
-										levelId: e.target.value,
-										levelName: level?.name || '',
-										levelValue: level?.value || 1,
-									});
-								}}
+								onChange={(e) => handleLevelChangeInModal(e.target.value)}
 								disabled={editingLevelIndex !== null}>
 								<option value=''>Выберите уровень</option>
 								{availableLevels
@@ -733,27 +770,25 @@ const CompetencyForm: React.FC<CompetencyFormProps> = ({
 										/>
 									</div>
 									<div className={styles.materialsCheckList}>
-										{filteredMaterialsForModal.length === 0 && (
+										{availableMaterialsForModal.length === 0 && (
 											<div className={styles.noMaterials}>
 												{searchQuery ? 'Материалы не найдены' : 'Нет доступных материалов (все уже привязаны к другим уровням)'}
 											</div>
 										)}
-										{filteredMaterialsForModal.map(material => (
-											<label key={material.id} className={styles.materialItem}>
-												<input
-													type='checkbox'
-													checked={newLevelData.materialIds.includes(material.id)}
-													onChange={() => {
-														const newIds = newLevelData.materialIds.includes(material.id)
-															? newLevelData.materialIds.filter(id => id !== material.id)
-															: [...newLevelData.materialIds, material.id];
-														setNewLevelData({ ...newLevelData, materialIds: newIds });
-													}}
-												/>
-												<span className={styles.materialName}>{material.name}</span>
-												<span className={styles.materialType}>{material.type}</span>
-											</label>
-										))}
+										{filteredMaterialsForModal.map(material => {
+											const isSelected = newLevelData.materialIds.includes(material.id);
+											return (
+												<label key={material.id} className={styles.materialItem}>
+													<input
+														type='checkbox'
+														checked={isSelected}
+														onChange={() => handleMaterialToggleInModal(material.id)}
+													/>
+													<span className={styles.materialName}>{material.name}</span>
+													<span className={styles.materialType}>{material.type}</span>
+												</label>
+											);
+										})}
 									</div>
 								</div>
 							</div>

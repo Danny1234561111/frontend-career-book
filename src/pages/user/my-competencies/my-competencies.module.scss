@@ -1,280 +1,166 @@
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
-	min-height: calc(100vh - 80px - 80px);
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
-	background: $white;
+	box-shadow: $shadow-md;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.successMessage {
+	background: $success-light;
+	color: $success;
+	padding: $spacing-md $spacing-lg;
+	border-radius: $border-radius-md;
+	margin-bottom: $spacing-xl;
+	border-left: 4px solid $success;
+}
+
+.errorMessage {
+	background: $danger-light;
+	color: $danger;
+	padding: $spacing-md $spacing-lg;
+	border-radius: $border-radius-md;
+	margin-bottom: $spacing-xl;
+	border-left: 4px solid $danger;
+}
+
+.emptyState {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	color: $variables-textsecondary;
+	
+	p {
+		margin: $spacing-sm 0;
+	}
+	
+	.emptyHint {
+		font-size: $font-md;
+		color: $derivatives-gray-70;
+	}
+}
+
+.tabs {
+	display: flex;
+	gap: $spacing-sm;
+	margin-bottom: $spacing-xxl;
+	border-bottom: 1px solid $border-color;
+}
+
+.tab {
+	padding: $spacing-sm $spacing-xl;
+	background: none;
+	border: none;
+	font-size: $font-md;
+	font-weight: 500;
+	color: $variables-textsecondary;
+	cursor: pointer;
+	transition: all 0.2s;
+	position: relative;
+	
+	&:hover {
+		color: $primary;
+	}
+	
+	&.active {
+		color: $primary;
+		
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: -1px;
+			left: 0;
+			right: 0;
+			height: 2px;
+			background: $primary;
+		}
+	}
 }
 
 .filters {
-	margin-bottom: $spacing-xl;
+	margin-bottom: $spacing-xxl;
+	padding-bottom: $spacing-lg;
+	border-bottom: 1px solid $border-color;
+}
 
-	.filterGroup {
-		display: flex;
-		align-items: center;
-		gap: $spacing-md;
-
-		label {
-			color: $text-secondary;
-			font-size: $font-md;
-			white-space: nowrap;
-		}
+.filterGroup {
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
+	
+	label {
+		font-size: $font-md;
+		font-weight: 500;
+		color: $variables-textprimary;
 	}
 }
 
 .filterSelect {
-	min-width: 250px;
-	padding: $spacing-sm $spacing-lg;
-	color: $text-primary;
-	font-size: $font-md;
-	background: $white;
+	padding: $spacing-sm $spacing-md;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
+	font-size: $font-md;
+	background: $white;
 	cursor: pointer;
-
+	min-width: 200px;
+	
 	&:focus {
-		border-color: $primary;
 		outline: none;
-	}
-
-	@include mobile {
-		width: 100%;
+		border-color: $primary;
+		box-shadow: 0 0 0 2px $derivatives-main-20;
 	}
 }
 
 .userStats {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: $spacing-xl;
+	display: flex;
+	gap: $spacing-xxl;
 	margin-bottom: $spacing-xxxl;
 	padding: $spacing-xl;
 	background: $background-light;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
+	border-radius: $border-radius-lg;
 }
 
 .statItem {
-	text-align: center;
-
-	.statValue {
-		display: block;
-		margin-bottom: $spacing-xs;
-		color: $primary;
-		font-weight: 700;
-		font-size: $font-xxxl;
-	}
-
-	.statLabel {
-		color: $text-secondary;
-		font-size: $font-sm;
-	}
-}
-
-.tableWrapper {
-	overflow-x: auto;
-	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
-}
-
-.table {
-	width: 100%;
-	min-width: 900px;
-	border-collapse: collapse;
-
-	th {
-		padding: $spacing-lg $spacing-md;
-		color: $text-secondary;
-		font-weight: 600;
-		font-size: $font-sm;
-		text-align: left;
-		background: $background-hover;
-		border-bottom: 2px solid $border-color;
-	}
-
-	td {
-		padding: $spacing-lg $spacing-md;
-		color: $text-primary;
-		font-size: $font-md;
-		vertical-align: middle;
-		border-bottom: 1px solid $border-color;
-	}
-
-	tbody tr:hover {
-		background: $background-hover;
-	}
-}
-
-.competencyName {
-	color: $primary;
-	font-weight: 500;
-}
-
-.blockBadge {
-	display: inline-block;
-	padding: $spacing-xs $spacing-md;
-	color: $text-secondary;
-	font-size: $font-sm;
-	background: $background-light;
-	border-radius: $border-radius-xl;
-}
-
-.levelBadge {
-	display: inline-block;
-	min-width: 120px;
-	padding: $spacing-xs $spacing-md;
-	font-weight: 500;
-	font-size: $font-sm;
-	text-align: center;
-	border-radius: $border-radius-xl;
-
-	&.level1 {
-		color: $warning;
-		background: $warning-light;
-	}
-
-	&.level2 {
-		color: $primary;
-		background: $primary-light;
-	}
-
-	&.level3 {
-		color: $success;
-		background: $success-light;
-	}
-}
-
-.progressContainer {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
-	gap: $spacing-md;
+	flex: 1;
 }
 
-.progressBar {
-	width: 120px;
-	height: 8px;
-	overflow: hidden;
-	background: $border-color;
-	border-radius: $border-radius-sm;
+.statValue {
+	font-size: $font-xxxxl;
+	font-weight: 700;
+	color: $variables-textprimary;
 }
 
-.progressFill {
-	height: 100%;
-	background: $primary;
-	border-radius: $border-radius-sm;
-	transition: width 0.3s;
-}
-
-.progressText {
-	min-width: 45px;
-	color: $text-secondary;
+.statLabel {
 	font-size: $font-sm;
-}
-
-.materialsBtn {
-	@include button-reset;
-	padding: $spacing-xs $spacing-md;
-	color: $primary;
-	font-size: $font-sm;
-	white-space: nowrap;
-	border: 1px solid $primary;
-	border-radius: $border-radius-xl;
-
-	&:hover {
-		background: $primary-light;
-	}
-}
-
-.emptyState {
-	margin-top: $spacing-xl;
-	padding: $spacing-xxxl;
-	color: $text-secondary;
-	font-size: $font-lg;
-	text-align: center;
-	background: $background-hover;
-	border-radius: $border-radius-md;
-}
-
-@include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
-	}
-
-	.title {
-		font-size: $font-xxl;
-	}
-
-	.content {
-		padding: $spacing-lg;
-	}
-
-	.userStats {
-		grid-template-columns: 1fr;
-		gap: $spacing-lg;
-	}
-
-	.filterGroup {
-		flex-direction: column;
-		align-items: flex-start;
-
-		label {
-			margin-bottom: $spacing-xs;
-		}
-	}
-
-	.filterSelect {
-		width: 100%;
-	}
-
-	.progressContainer {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: $spacing-xs;
-	}
-
-	.progressBar {
-		width: 80px;
-	}
-}
-.tabs {
-	display: flex;
-	gap: $spacing-sm;
-	margin-bottom: $spacing-xl;
-	border-bottom: 1px solid $border-color;
-	
-	.tab {
-		@include button-reset;
-		padding: $spacing-sm $spacing-lg;
-		font-size: $font-md;
-		color: $text-secondary;
-		border-bottom: 2px solid transparent;
-		
-		&.active {
-			color: $primary;
-			border-bottom-color: $primary;
-		}
-		
-		&:hover {
-			color: $primary;
-		}
-	}
+	color: $variables-textsecondary;
+	margin-top: $spacing-xs;
 }
 
 .requiredSection,
@@ -282,156 +168,288 @@
 	margin-bottom: $spacing-xxxl;
 }
 
-.requiredHeader,
-.otherHeader {
-	display: flex;
-	align-items: center;
-	gap: $spacing-sm;
-	margin-bottom: $spacing-lg;
-	padding-bottom: $spacing-sm;
-	border-bottom: 2px solid $border-color;
-	
-	.requiredIcon,
-	.otherIcon {
-		font-size: $font-xl;
-	}
-	
-	.requiredTitle,
-	.otherTitle {
-		margin: 0;
-		font-size: $font-xl;
-		font-weight: 600;
-	}
-	
-	.requiredBadge {
-		background: $warning-light;
-		color: $warning;
-		padding: $spacing-xs $spacing-sm;
-		border-radius: $border-radius-xl;
-		font-size: $font-sm;
-		font-weight: 500;
-	}
-	
-	.otherBadge {
-		background: $background-light;
-		color: $text-secondary;
-		padding: $spacing-xs $spacing-sm;
-		border-radius: $border-radius-xl;
-		font-size: $font-sm;
-		font-weight: 500;
-	}
-}
-
-.sectionTitle {
-	font-size: $font-lg;
-	font-weight: 600;
-	margin: $spacing-lg 0 $spacing-md;
-	color: $text-primary;
-}
-
-.addBtn {
-	padding: $spacing-md $spacing-xl;
-	color: $white;
-	font-size: $font-md;
-	font-weight: 500;
-	background: $primary;
-	border: none;
-	border-radius: $border-radius-md;
-	cursor: pointer;
-	transition: background 0.3s;
-
-	&:hover {
-		background: $primary-hover; 
-	}
-}
-
-.descriptionCell {
-	max-width: 300px;
-	color: $text-secondary;
-	font-size: $font-sm;
-}
-
-.successMessage {
-	padding: $spacing-md $spacing-lg;
-	background: $success-light;
-	color: $success;
-	border-radius: $border-radius-md;
-	margin-bottom: $spacing-xl;
-}
-
-.errorMessage {
-	padding: $spacing-md $spacing-lg;
-	background: $danger-light;
-	color: $danger;
-	border-radius: $border-radius-md;
-	margin-bottom: $spacing-xl;
-}
-// Добавьте в конец файла my-competencies.module.scss
-
 .sectionHeader {
 	display: flex;
 	align-items: center;
-	gap: $spacing-sm;
-	margin-bottom: $spacing-lg;
-	padding-bottom: $spacing-sm;
+	gap: $spacing-md;
+	margin-bottom: $spacing-xl;
+	padding-bottom: $spacing-md;
 	border-bottom: 2px solid $border-color;
 }
 
 .sectionIcon {
-	font-size: $font-xl;
+	font-size: $font-xxl;
 }
 
 .sectionTitle {
-	margin: 0;
 	font-size: $font-xl;
 	font-weight: 600;
-	color: $text-primary;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .sectionBadge {
-	padding: $spacing-xs $spacing-sm;
-	font-size: $font-sm;
+	background: $derivatives-gray-20;
+	color: $variables-textprimary;
+	padding: 2px $spacing-sm;
+	border-radius: $spacing-xl;
+	font-size: $font-xs;
 	font-weight: 500;
-	background: $background-light;
-	color: $text-secondary;
-	border-radius: $border-radius-xl;
 }
 
-.requiredSection .sectionBadge {
-	background: $warning-light;
-	color: $warning;
+.tableWrapper {
+	overflow-x: auto;
+	border-radius: $components-table-line-corner-angle;
+	border: 1px solid $border-color;
+}
+
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: $font-md;
+	
+	th {
+		text-align: left;
+		padding: $spacing-md $spacing-lg;
+		background: $background-light;
+		font-weight: 600;
+		color: $variables-textprimary;
+		border-bottom: 1px solid $border-color;
+	}
+	
+	td {
+		padding: $spacing-md $spacing-lg;
+		border-bottom: 1px solid $derivatives-gray-10;
+		vertical-align: middle;
+	}
+	
+	tr:last-child td {
+		border-bottom: none;
+	}
+	
+	tr:hover {
+		background: $background-light;
+	}
+}
+
+.competencyName {
+	font-weight: 500;
+	color: $variables-textprimary;
+}
+
+.blockCell {
+	min-width: 120px;
+}
+
+.blockBadge {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	background: $primary-light;
+	color: $primary-dark;
+	border-radius: $spacing-xl;
+	font-size: $font-xs;
+	font-weight: 500;
+}
+
+.levelCell {
+	min-width: 140px;
+}
+
+.levelBadge {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	border-radius: $spacing-xl;
+	font-size: $font-xs;
+	font-weight: 500;
+	
+	&.level0 {
+		background: $derivatives-gray-20;
+		color: $variables-textsecondary;
+	}
+	
+	&.level1 {
+		background: $primary-light;
+		color: $primary-dark;
+	}
+	
+	&.level2 {
+		background: $success-light;
+		color: $success;
+	}
+	
+	&.level3 {
+		background: $warning-light;
+		color: $warning;
+	}
+}
+
+.progressCell {
+	min-width: 150px;
+}
+
+.progressContainer {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+}
+
+.progressBar {
+	flex: 1;
+	height: 8px;
+	background: $derivatives-gray-20;
+	border-radius: $border-radius-sm;
+	overflow: hidden;
+}
+
+.progressFill {
+	height: 100%;
+	background: $primary;
+	border-radius: $border-radius-sm;
+	transition: width 0.3s ease;
+}
+
+.progressText {
+	font-size: $font-xs;
+	font-weight: 500;
+	color: $variables-textprimary;
+	min-width: 40px;
 }
 
 .materialsCountCell {
-	text-align: center;
+	min-width: 180px;
+}
+
+.materialsBtn {
+	padding: $spacing-sm $spacing-md;
+	background: $primary-light;
+	color: $primary-dark;
+	border: none;
+	border-radius: $border-radius-md;
+	font-size: $font-xs;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	width: 100%;
 	
-	.materialsBadge {
-		display: inline-block;
-		padding: $spacing-xs $spacing-md;
-		font-size: $font-sm;
-		background: $primary-light;
-		color: $primary;
-		border-radius: $border-radius-xl;
+	&:hover {
+		background: $derivatives-main-20;
+		transform: translateY(-2px);
 	}
 }
 
-.loading {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	min-height: 400px;
-	color: $text-secondary;
-	font-size: $font-lg;
+.addBtn {
+	padding: $spacing-sm $spacing-md;
+	background: $primary;
+	color: $white;
+	border: none;
+	border-radius: $border-radius-md;
+	font-size: $font-xs;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s;
+	white-space: nowrap;
+	
+	&:hover:not(:disabled) {
+		background: $primary-hover;
+		transform: translateY(-2px);
+	}
+	
+	&:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+}
+
+.completedBadge {
+	display: inline-block;
+	padding: $spacing-sm $spacing-md;
+	background: $success-light;
+	color: $success;
+	border-radius: $border-radius-md;
+	font-size: $font-xs;
+	font-weight: 500;
+	width: 100%;
+	text-align: center;
+}
+
+.noMaterialsBadge {
+	display: inline-block;
+	padding: $spacing-sm $spacing-md;
+	background: $derivatives-gray-20;
+	color: $variables-textsecondary;
+	border-radius: $border-radius-md;
+	font-size: $font-xs;
+	font-weight: 500;
+	width: 100%;
+	text-align: center;
+}
+
+.materialsBadge {
+	display: inline-block;
+	padding: $spacing-xs $spacing-md;
+	background: $derivatives-gray-10;
+	color: $variables-textprimary;
+	border-radius: $border-radius-md;
+	font-size: $font-xs;
+	font-weight: 500;
+}
+
+.materialsHint {
+	font-size: $font-xs;
+	color: $variables-textsecondary;
+	margin-top: $spacing-xs;
+	text-align: center;
+}
+
+.materialsInfo {
+	font-size: $font-xs;
+	color: $primary;
+	margin-top: $spacing-xs;
+	text-align: center;
+	font-weight: 500;
+}
+
+.actionsCell {
+	min-width: 120px;
+	text-align: center;
+}
+
+.descriptionCell {
+	max-width: 300px;
+	color: $variables-textsecondary;
+	font-size: $font-sm;
+	line-height: 1.4;
 }
 
 @include mobile {
-	.sectionHeader {
-		flex-wrap: wrap;
+	.page {
+		padding: $spacing-lg;
 	}
 	
-	.materialsCountCell {
-		.materialsBadge {
-			white-space: nowrap;
+	.content {
+		padding: $spacing-lg;
+	}
+	
+	.userStats {
+		flex-direction: column;
+		gap: $spacing-md;
+	}
+	
+	.statItem {
+		flex-direction: row;
+		justify-content: space-between;
+		padding: $spacing-sm 0;
+	}
+	
+	.table {
+		font-size: $font-xs;
+		
+		th, td {
+			padding: $spacing-sm $spacing-md;
 		}
+	}
+	
+	.descriptionCell {
+		max-width: 150px;
 	}
 }

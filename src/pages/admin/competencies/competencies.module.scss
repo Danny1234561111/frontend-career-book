@@ -1,25 +1,54 @@
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
+	box-shadow: $shadow-md;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.successMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $success;
+	font-size: $font-md;
+	background: $success-light;
+	border-radius: $border-radius-md;
+	border-left: 4px solid $success;
+}
+
+.errorMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+	border-left: 4px solid $danger;
 }
 
 .toolbar {
@@ -29,7 +58,6 @@
 }
 
 .addBtn {
-	@include button-reset;
 	display: flex;
 	align-items: center;
 	gap: $spacing-sm;
@@ -38,16 +66,15 @@
 	font-weight: 500;
 	font-size: $font-md;
 	background: $primary;
+	border: none;
 	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.3s;
 
 	&:hover {
 		background: $primary-hover;
-		box-shadow: $shadow-md;
-		transform: translateY(-2px);
-	}
-
-	&:active {
-		transform: translateY(0);
+		transform: translateY(-1px);
+		box-shadow: $shadow-sm;
 	}
 }
 
@@ -57,8 +84,8 @@
 }
 
 @include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
+	.page {
+		padding: $spacing-lg;
 	}
 
 	.title {
@@ -66,11 +93,11 @@
 	}
 
 	.content {
-		padding: $spacing-xl;
+		padding: $spacing-lg;
 	}
 
 	.addBtn {
-		justify-content: center;
 		width: 100%;
+		justify-content: center;
 	}
 }

@@ -1,4 +1,3 @@
-// department-materials.tsx
 import React, { useState, useEffect } from 'react';
 import styles from './materials.module.scss';
 
@@ -66,7 +65,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -91,7 +90,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -119,7 +118,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -141,7 +140,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -187,7 +186,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 					method: 'GET',
 					headers: {
 						'Authorization': `Bearer ${accessToken}`,
-						'accept': 'text/plain',
+						'accept': 'application/json',
 					},
 				});
 
@@ -284,8 +283,6 @@ const DepartmentMaterialsPage: React.FC = () => {
 					if (employeesList.length > 0) {
 						await fetchAllEmployeesCompetencies(employeesList);
 					}
-					setSuccessMessage('Данные успешно загружены');
-					setTimeout(() => setSuccessMessage(null), 3000);
 				} else {
 					setError('Не удалось определить ваш департамент');
 				}
@@ -329,13 +326,17 @@ const DepartmentMaterialsPage: React.FC = () => {
 	const competencyFilterOptions = getCompetencyFilterOptions();
 
 	if (isLoading) {
-		return <div className={styles.loading}>Загрузка учебных материалов...</div>;
+		return (
+			<div className={styles.page}>
+				<div className={styles.loading}>Загрузка учебных материалов...</div>
+			</div>
+		);
 	}
 
 	return (
 		<div className={styles.page}>
 			<div className={styles.header}>
-				<h1 className={styles.title}>Учебные материалы</h1>
+				<h1 className={styles.title}>Учебные материалы отдела</h1>
 				{departmentName && <div className={styles.departmentName}>{departmentName}</div>}
 			</div>
 
@@ -347,7 +348,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 					<div className={styles.error}>{error}</div>
 				)}
 
-				<div className={styles.filters}>
+				<div className={styles.filtersBar}>
 					<div className={styles.filterGroup}>
 						<label>Сотрудник:</label>
 						<select
@@ -378,10 +379,17 @@ const DepartmentMaterialsPage: React.FC = () => {
 							))}
 						</select>
 					</div>
+
+					<button className={styles.resetBtn} onClick={() => {
+						setSelectedEmployee('all');
+						setSelectedCompetency('all');
+					}}>
+						⟳ Сбросить
+					</button>
 				</div>
 
 				<div className={styles.materialsInfo}>
-					<span>Найдено материалов: {filteredTasks.length}</span>
+					<span>📚 Найдено материалов: {filteredTasks.length}</span>
 					{selectedEmployee !== 'all' && competencyFilterOptions.length === 0 && (
 						<span className={styles.warning}>⚠ У сотрудника нет назначенных компетенций</span>
 					)}
@@ -389,37 +397,39 @@ const DepartmentMaterialsPage: React.FC = () => {
 
 				{/* Прогресс выбранного сотрудника */}
 				{selectedEmployee !== 'all' && employeeProgress && (
-					<div className={styles.employeeProgressCard}>
-						<h3>Прогресс сотрудника: {selectedEmployeeData?.fullName}</h3>
-						<div className={styles.progressStats}>
-							<div className={styles.progressStat}>
-								<span className={styles.statValue}>{employeeProgress.percent}%</span>
-								<span className={styles.statLabel}>Общий прогресс</span>
+					<div className={styles.card}>
+						<div className={styles.progressSection}>
+							<h3>Прогресс сотрудника: {selectedEmployeeData?.fullName}</h3>
+							<div className={styles.progressStats}>
+								<div className={styles.progressStat}>
+									<span className={styles.statValue}>{employeeProgress.percent}%</span>
+									<span className={styles.statLabel}>Общий прогресс</span>
+								</div>
+								<div className={styles.progressStat}>
+									<span className={styles.statValue}>{employeeProgress.completed}</span>
+									<span className={styles.statLabel}>Изучено</span>
+								</div>
+								<div className={styles.progressStat}>
+									<span className={styles.statValue}>{employeeProgress.inProgress}</span>
+									<span className={styles.statLabel}>В процессе</span>
+								</div>
+								<div className={styles.progressStat}>
+									<span className={styles.statValue}>{employeeProgress.toStudy}</span>
+									<span className={styles.statLabel}>К изучению</span>
+								</div>
 							</div>
-							<div className={styles.progressStat}>
-								<span className={styles.statValue}>{employeeProgress.completed}</span>
-								<span className={styles.statLabel}>Изучено</span>
+							<div className={styles.progressBarWrapper}>
+								<div 
+									className={styles.progressFill}
+									style={{ width: `${employeeProgress.percent}%` }}
+								/>
 							</div>
-							<div className={styles.progressStat}>
-								<span className={styles.statValue}>{employeeProgress.inProgress}</span>
-								<span className={styles.statLabel}>В процессе</span>
-							</div>
-							<div className={styles.progressStat}>
-								<span className={styles.statValue}>{employeeProgress.toStudy}</span>
-								<span className={styles.statLabel}>К изучению</span>
-							</div>
-						</div>
-						<div className={styles.progressBarWrapper}>
-							<div 
-								className={styles.progressBarFill}
-								style={{ width: `${employeeProgress.percent}%` }}
-							/>
 						</div>
 					</div>
 				)}
 
 				<div className={styles.tableWrapper}>
-					<table className={styles.materialsTable}>
+					<table className={styles.table}>
 						<thead>
 							<tr>
 								<th>Название материала</th>
@@ -439,8 +449,8 @@ const DepartmentMaterialsPage: React.FC = () => {
 											: selectedEmployee !== 'all' && competencyFilterOptions.length === 0
 											? 'У сотрудника нет назначенных компетенций'
 											: 'Нет материалов для отображения'}
-									</td>
-								</tr>
+										</td>
+									</tr>
 							) : (
 								filteredTasks.map((task) => {
 									const employee = task.employee || employees.find(e => e.id === task.employeeId);
@@ -450,9 +460,13 @@ const DepartmentMaterialsPage: React.FC = () => {
 									return (
 										<tr key={task.id}>
 											<td className={styles.materialName}>
-												<a href={material.link} target="_blank" rel="noopener noreferrer">
-													{material.name}
-												</a>
+												{material.link ? (
+													<a href={material.link} target="_blank" rel="noopener noreferrer">
+														{material.name}
+													</a>
+												) : (
+													material.name
+												)}
 											</td>
 											<td>
 												<span className={styles.materialType}>
@@ -473,16 +487,16 @@ const DepartmentMaterialsPage: React.FC = () => {
 													task.status === 1 ? styles.statusInProgress :
 													styles.statusToStudy
 												}`}>
-													{task.status === 2 ? 'Изучено' : 
-													 task.status === 1 ? 'В процессе' : 
-													 'К изучению'}
+													{task.status === 2 ? '✅ Изучено' : 
+													 task.status === 1 ? '🔄 В процессе' : 
+													 '📚 К изучению'}
 												</span>
 											</td>
 											<td>
 												<div className={styles.progressCell}>
 													<div className={styles.progressBarSmall}>
 														<div 
-															className={styles.progressBarSmallFill}
+															className={styles.progressFillSmall}
 															style={{ width: task.status === 2 ? '100%' : task.status === 1 ? '50%' : '0%' }}
 														/>
 													</div>

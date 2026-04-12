@@ -1,56 +1,44 @@
-// materials.module.scss
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .departmentName {
 	margin-top: $spacing-sm;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-md;
 }
 
 .content {
-	min-height: calc(100vh - 80px - 80px);
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
-	background: $white;
+	box-shadow: $shadow-md;
 }
 
 .loading {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	min-height: 400px;
-	color: $text-secondary;
-	font-size: $font-lg;
-}
-
-.error {
-	margin-bottom: $spacing-xl;
-	padding: $spacing-md $spacing-lg;
-	color: $danger;
-	font-size: $font-md;
-	background: $danger-light;
-	border-radius: $border-radius-md;
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
 }
 
 .successMessage {
-	margin-bottom: $spacing-xl;
+	margin-bottom: $spacing-lg;
 	padding: $spacing-md $spacing-lg;
 	color: $success;
 	font-size: $font-md;
@@ -58,82 +46,107 @@
 	border-radius: $border-radius-md;
 }
 
-.filters {
+.error {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+}
+
+// ===== ФИЛЬТРЫ =====
+.filtersBar {
 	display: flex;
-	gap: $spacing-xl;
-	margin-bottom: $spacing-xl;
 	flex-wrap: wrap;
+	gap: $spacing-lg;
+	margin-bottom: $spacing-xxl;
+	padding: $spacing-xl;
+	background: $derivatives-gray-10;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+}
 
-	.filterGroup {
-		display: flex;
-		align-items: center;
-		gap: $spacing-md;
+.filterGroup {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-xs;
+	flex: 1;
+	min-width: 180px;
 
-		label {
-			color: $text-secondary;
-			font-size: $font-md;
-			font-weight: 500;
-			white-space: nowrap;
-		}
-	}
-
-	@include mobile {
-		flex-direction: column;
-		gap: $spacing-lg;
+	label {
+		color: $variables-textsecondary;
+		font-size: $font-xs;
+		text-transform: uppercase;
+		font-weight: 500;
+		letter-spacing: 0.5px;
 	}
 }
 
 .filterSelect {
-	min-width: 250px;
 	padding: $spacing-sm $spacing-lg;
-	color: $text-primary;
+	color: $variables-textprimary;
 	font-size: $font-md;
 	background: $white;
 	border: 1px solid $border-color;
 	border-radius: $border-radius-md;
 	cursor: pointer;
-	transition: all 0.3s;
+	transition: all 0.2s ease;
+	appearance: none;
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+	background-repeat: no-repeat;
+	background-position: right $spacing-md center;
+	background-size: 16px;
 
-	&:hover {
+	&:hover:not(:disabled) {
 		border-color: $primary;
 	}
 
 	&:focus {
-		border-color: $primary;
 		outline: none;
+		border-color: $primary;
+		box-shadow: 0 0 0 2px $derivatives-main-20;
 	}
 
 	&:disabled {
-		background: $background-light;
+		background: $derivatives-gray-10;
+		color: $derivatives-gray-70;
 		cursor: not-allowed;
-		opacity: 0.7;
-	}
-
-	@include mobile {
-		width: 100%;
 	}
 }
 
+.resetBtn {
+	padding: $spacing-sm $spacing-lg;
+	color: $primary;
+	font-size: $font-md;
+	font-weight: 500;
+	background: none;
+	border: 1px solid $primary;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	align-self: flex-end;
+	transition: all 0.3s;
+
+	&:hover {
+		background: $primary-light;
+		transform: translateY(-1px);
+	}
+}
+
+// ===== ИНФОРМАЦИЯ =====
 .materialsInfo {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	padding: $spacing-md $spacing-lg;
 	margin-bottom: $spacing-xl;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	border-radius: $border-radius-md;
 	font-size: $font-sm;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 
 	span:first-child {
 		font-weight: 500;
-		color: $text-primary;
-	}
-
-	@include mobile {
-		flex-direction: column;
-		gap: $spacing-sm;
-		align-items: flex-start;
+		color: $variables-textprimary;
 	}
 }
 
@@ -142,17 +155,20 @@
 	font-weight: 500;
 }
 
-.employeeProgressCard {
+// ===== КАРТОЧКА ПРОГРЕССА =====
+.card {
+	margin-bottom: $spacing-xxl;
 	padding: $spacing-xl;
-	margin-bottom: $spacing-xl;
-	background: linear-gradient(135deg, $white 0%, $background-light 100%);
-	border-radius: $border-radius-lg;
-	box-shadow: $shadow-sm;
+	background: $variables-containers-background;
 	border: 1px solid $border-color;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	box-shadow: $shadow-sm;
+}
 
+.progressSection {
 	h3 {
 		margin: 0 0 $spacing-lg 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 600;
 		font-size: $font-lg;
 	}
@@ -163,10 +179,6 @@
 	gap: $spacing-xxl;
 	margin-bottom: $spacing-xl;
 	flex-wrap: wrap;
-
-	@include mobile {
-		gap: $spacing-lg;
-	}
 }
 
 .progressStat {
@@ -184,51 +196,52 @@
 
 	.statLabel {
 		margin-top: $spacing-xs;
-		color: $text-secondary;
+		color: $variables-textsecondary;
 		font-size: $font-sm;
 	}
 }
 
 .progressBarWrapper {
 	height: 8px;
-	background: $border-color;
+	background: $derivatives-gray-20;
 	border-radius: $border-radius-md;
 	overflow: hidden;
 }
 
-.progressBarFill {
+.progressFill {
 	height: 100%;
-	background: linear-gradient(90deg, $success, lighten($success, 15%));
+	background: $success;
 	border-radius: $border-radius-md;
 	transition: width 0.3s ease;
 }
 
+// ===== ТАБЛИЦА =====
 .tableWrapper {
 	overflow-x: auto;
 	margin-top: $spacing-xl;
 	border: 1px solid $border-color;
-	border-radius: $border-radius-lg;
-	background: $white;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	background: $variables-containers-background;
 }
 
-.materialsTable {
+.table {
 	width: 100%;
 	min-width: 800px;
 	border-collapse: collapse;
 
 	th {
-		padding: $spacing-lg $spacing-md;
-		color: $text-secondary;
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
 		font-weight: 600;
 		font-size: $font-sm;
 		text-align: left;
-		background: $background-hover;
+		background: $derivatives-gray-10;
 		border-bottom: 2px solid $border-color;
 	}
 
 	td {
-		padding: $spacing-lg $spacing-md;
-		color: $text-primary;
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
 		font-size: $font-md;
 		vertical-align: middle;
 		border-bottom: 1px solid $border-color;
@@ -238,7 +251,7 @@
 		transition: background 0.3s;
 
 		&:hover {
-			background: $background-hover;
+			background: $derivatives-gray-10;
 		}
 
 		&:last-child td {
@@ -266,9 +279,9 @@
 .materialType {
 	display: inline-block;
 	padding: $spacing-xs $spacing-md;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-sm;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	border-radius: $border-radius-sm;
 	white-space: nowrap;
 }
@@ -279,7 +292,7 @@
 	color: $white;
 	font-size: $font-sm;
 	font-weight: 500;
-	background: linear-gradient(135deg, $primary, darken($primary, 10%));
+	background: $primary;
 	border-radius: $border-radius-md;
 	white-space: nowrap;
 }
@@ -318,12 +331,12 @@
 .progressBarSmall {
 	flex: 1;
 	height: 6px;
-	background: $border-color;
+	background: $derivatives-gray-20;
 	border-radius: $border-radius-sm;
 	overflow: hidden;
 }
 
-.progressBarSmallFill {
+.progressFillSmall {
 	height: 100%;
 	background: $success;
 	border-radius: $border-radius-sm;
@@ -332,31 +345,21 @@
 
 .progressPercent {
 	min-width: 40px;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-sm;
 }
 
 .emptyState {
 	padding: $spacing-xxl;
 	text-align: center;
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-md;
-
-	p {
-		margin: 0;
-	}
-
-	.searchHint {
-		margin-top: $spacing-sm;
-		color: $text-disabled;
-		font-size: $font-sm;
-	}
 }
 
-// Адаптивность для мобильных устройств
+// ===== АДАПТИВНОСТЬ =====
 @include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
+	.page {
+		padding: $spacing-lg;
 	}
 
 	.title {
@@ -367,26 +370,26 @@
 		padding: $spacing-lg;
 	}
 
-	.filterGroup {
+	.filtersBar {
 		flex-direction: column;
-		align-items: flex-start;
-		width: 100%;
+		padding: $spacing-lg;
+	}
 
-		label {
-			margin-bottom: $spacing-xs;
-		}
+	.filterGroup {
+		width: 100%;
+		min-width: auto;
 	}
 
 	.filterSelect {
 		width: 100%;
 	}
 
-	.employeeProgressCard {
-		padding: $spacing-lg;
+	.resetBtn {
+		align-self: stretch;
+	}
 
-		h3 {
-			font-size: $font-md;
-		}
+	.progressStats {
+		gap: $spacing-lg;
 	}
 
 	.progressStat {
@@ -395,11 +398,11 @@
 		}
 	}
 
-	.materialsTable {
+	.table {
 		min-width: 600px;
 
 		th, td {
-			padding: $spacing-md;
+			padding: $spacing-sm $spacing-md;
 		}
 	}
 
@@ -411,20 +414,5 @@
 	.statusBadge {
 		font-size: $font-xs;
 		padding: $spacing-xs $spacing-sm;
-	}
-}
-
-// Планшеты
-@media (min-width: 768px) and (max-width: 1024px) {
-	.content {
-		padding: $spacing-xl;
-	}
-
-	.filters {
-		gap: $spacing-lg;
-	}
-
-	.progressStats {
-		gap: $spacing-xl;
 	}
 }

@@ -1,27 +1,59 @@
 @import '../../../variables.module';
 
 .page {
-	min-height: calc(100vh - 80px);
-	background: $background-light;
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
 }
 
 .header {
-	padding: $spacing-xl $spacing-xxl;
-	background: $white;
-	border-bottom: 1px solid $border-color;
+	margin-bottom: $spacing-xxl;
 }
 
 .title {
-	margin: 0;
-	color: $text-primary;
-	font-weight: 600;
 	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
 }
 
 .content {
-	min-height: calc(100vh - 80px - 80px);
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	padding: $spacing-xxl;
-	background: $white;
+	box-shadow: $shadow-md;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.error {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	
+	p {
+		color: $danger;
+		font-size: $font-lg;
+		margin-bottom: $spacing-lg;
+	}
+}
+
+.retryBtn {
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-size: $font-md;
+	background: $primary;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	
+	&:hover {
+		background: $primary-hover;
+	}
 }
 
 .statsGrid {
@@ -34,14 +66,15 @@
 .statCard {
 	padding: $spacing-xl;
 	text-align: center;
-	background: $background-light;
+	background: $derivatives-gray-10;
 	border: 1px solid $border-color;
-	border-radius: $border-radius-md;
+	border-radius: $windows-windows-and-blocks-corner-angle;
 	transition: all 0.2s ease;
 
 	&:hover {
 		border-color: $primary;
-		box-shadow: $shadow-sm;
+		box-shadow: $shadow-md;
+		transform: translateY(-2px);
 	}
 }
 
@@ -54,16 +87,18 @@
 }
 
 .statLabel {
-	color: $text-secondary;
+	color: $variables-textsecondary;
 	font-size: $font-lg;
 }
 
 .eventsSection {
+	margin-top: $spacing-xxxl;
+
 	h2 {
 		margin: 0 0 $spacing-lg 0;
-		color: $text-primary;
+		color: $variables-textprimary;
 		font-weight: 600;
-		font-size: $font-xxl;
+		font-size: $font-xl;
 	}
 }
 
@@ -76,26 +111,39 @@
 .eventItem {
 	display: flex;
 	gap: $spacing-xl;
-	padding: $spacing-md;
-	background: $background-hover;
+	padding: $spacing-md $spacing-lg;
+	background: $derivatives-gray-10;
 	border-left: 4px solid $primary;
 	border-radius: $border-radius-md;
+	transition: all 0.2s;
+
+	&:hover {
+		background: $derivatives-gray-20;
+	}
 }
 
 .eventDate {
-	min-width: 100px;
-	color: $text-secondary;
-	font-size: $font-md;
+	min-width: 120px;
+	color: $variables-textsecondary;
+	font-size: $font-sm;
 }
 
 .eventText {
-	color: $text-primary;
+	color: $variables-textprimary;
 	font-size: $font-md;
+	flex: 1;
+}
+
+.emptyColumn {
+	padding: $spacing-xxxl;
+	color: $variables-textsecondary;
+	font-size: $font-md;
+	text-align: center;
 }
 
 @include mobile {
-	.header {
-		padding: $spacing-lg $spacing-xl;
+	.page {
+		padding: $spacing-lg;
 	}
 
 	.title {
@@ -109,6 +157,10 @@
 	.statsGrid {
 		grid-template-columns: 1fr;
 		gap: $spacing-md;
+	}
+
+	.statValue {
+		font-size: $font-xxxl;
 	}
 
 	.eventItem {
