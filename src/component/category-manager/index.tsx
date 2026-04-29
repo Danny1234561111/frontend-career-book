@@ -1034,7 +1034,7 @@ const CategoryManager: React.FC = () => {
 																								</a>
 																							</span>
 																							{material.duration && (
-																								<span className={styles.duration}>⏱️ {material.duration} мин</span>
+																								<span className={styles.duration}>⏱️ {material.duration} м</span>
 																							)}
 																						</div>
 																						{material._isNew && (

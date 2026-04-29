@@ -7,8 +7,6 @@ type User = {
 	email: string;
 	role: 'admin' | 'manager' | 'user';
 	department?: string;
-	currentPosition?: string;
-	targetPosition?: string;
 	createdAt: string;
 };
 
@@ -80,13 +78,11 @@ const UserTable: React.FC<UserTableProps> = ({
 			<table className={styles.table}>
 				<thead>
 					<tr>
-						<th style={{ width: '20%' }}>ФИО</th>
-						<th style={{ width: '18%' }}>Email</th>
-						<th style={{ width: '12%' }}>Роль</th>
-						<th style={{ width: '12%' }}>Отдел</th>
-						<th style={{ width: '15%' }}>Текущая должность</th>
-						<th style={{ width: '13%' }}>Дата рег.</th>
-						<th style={{ width: '10%' }}>Статус</th>
+						<th style={{ width: '25%' }}>ФИО</th>
+						<th style={{ width: '25%' }}>Email</th>
+						<th style={{ width: '15%' }}>Отдел</th>
+						<th style={{ width: '20%' }}>Роль</th>
+						<th style={{ width: '15%' }}>Дата рег.</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -103,6 +99,7 @@ const UserTable: React.FC<UserTableProps> = ({
 								}`}>
 								<td style={{ fontWeight: 500 }}>{user.fullName}</td>
 								<td style={{ color: '#666' }}>{user.email}</td>
+								<td>{user.department || '-'}</td>
 								<td>
 									<select
 										className={`${styles.roleSelect} ${getRoleClass(currentRole)}`}
@@ -116,14 +113,7 @@ const UserTable: React.FC<UserTableProps> = ({
 										<option value='admin'>Администратор</option>
 									</select>
 								</td>
-								<td>{user.department || '-'}</td>
-								<td>{user.currentPosition || '-'}</td>
 								<td>{new Date(user.createdAt).toLocaleDateString()}</td>
-								<td>
-									{isEdited && (
-										<span className={styles.editedBadge}>Изменено</span>
-									)}
-								</td>
 							</tr>
 						);
 					})}

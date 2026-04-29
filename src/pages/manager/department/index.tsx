@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ManagerUserTable } from '../../../component';
 import styles from './department.module.scss';
@@ -7,7 +8,6 @@ interface Employee {
 	fullName: string;
 	department: string;
 	currentPosition: string;
-	targetPosition: string;
 	progress: number;
 	createdAt: string;
 }
@@ -32,22 +32,6 @@ interface DepartmentEmployee {
 	jobTitle?: {
 		id: string;
 		name: string;
-	};
-	targetJobTitle?: {
-		id: string;
-		name: string;
-	};
-}
-
-interface DepartmentInfo {
-	id: string;
-	name: string;
-	shortName: string;
-	progress?: {
-		toStudy: number;
-		inProgress: number;
-		studied: number;
-		count: number;
 	};
 }
 
@@ -84,6 +68,7 @@ const DepartmentPage: React.FC = () => {
 
 			if (response.ok) {
 				const data = await response.json();
+				console.log('📱 User profile:', data);
 				return data;
 			}
 		} catch (error) {
@@ -103,7 +88,7 @@ const DepartmentPage: React.FC = () => {
 			});
 
 			if (response.ok) {
-				const data: DepartmentInfo = await response.json();
+				const data = await response.json();
 				return data;
 			}
 		} catch (error) {
@@ -124,7 +109,7 @@ const DepartmentPage: React.FC = () => {
 
 			if (response.ok) {
 				const data: DepartmentEmployee[] = await response.json();
-				console.log('Raw employees data from API:', data);
+				console.log('📋 Raw employees data from API (first employee):', data[0]);
 				return data;
 			}
 		} catch (error) {
@@ -168,16 +153,28 @@ const DepartmentPage: React.FC = () => {
 					
 					const totalEmployees = employeesData.length;
 					
+					console.log('\n' + '='.repeat(80));
+					console.log('📊 Обработка данных сотрудников:');
+					console.log('='.repeat(80));
+					
 					if (employeesData.length > 0) {
-						const formattedEmployees: Employee[] = employeesData.map(emp => {
+						const formattedEmployees: Employee[] = employeesData.map((emp, index) => {
+							console.log(`\n👤 Сотрудник ${index + 1}:`);
+							console.log(`  ID: ${emp.id}`);
+							console.log(`  ФИО: ${emp.lastName} ${emp.firstName} ${emp.middleName || ''}`);
+							console.log(`  Отдел: ${emp.department?.name}`);
+							
+							const currentPosition = emp.jobTitle?.name || 'Не указана';
 							const progressPercent = calculateEmployeeProgress(emp.progress);
+							
+							console.log(`  Текущая должность: ${currentPosition}`);
+							console.log(`  Прогресс: ${progressPercent}%`);
 							
 							return {
 								id: emp.id,
 								fullName: formatFullName(emp.firstName, emp.lastName, emp.middleName),
 								department: emp.department?.name || profile.department.name,
-								currentPosition: emp.jobTitle?.name || 'Не указана',
-								targetPosition: emp.targetJobTitle?.name || 'Не указана',
+								currentPosition: currentPosition,
 								progress: progressPercent,
 								createdAt: new Date().toISOString().split('T')[0],
 							};
@@ -202,13 +199,16 @@ const DepartmentPage: React.FC = () => {
 							? Math.round((totalStudied / totalMaterials) * 100) 
 							: 0;
 						
+						console.log('\n' + '='.repeat(80));
 						console.log('📊 Детальная статистика отдела:');
+						console.log('='.repeat(80));
 						console.log(`  Всего сотрудников: ${totalEmployees}`);
 						console.log(`  Сумма материалов в процессе: ${totalInProgress}`);
 						console.log(`  Сумма изученных материалов: ${totalStudied}`);
 						console.log(`  Сумма выданных материалов: ${totalMaterials}`);
 						console.log(`  Общий прогресс отдела: ${totalProgressPercent}%`);
 						console.log(`  Средний уровень компетенций: ${avgLevel}`);
+						console.log('='.repeat(80));
 						
 						setDepartmentStats({
 							totalEmployees: totalEmployees,

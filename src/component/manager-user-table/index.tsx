@@ -48,7 +48,6 @@ const ManagerUserTable: React.FC<ManagerUserTableProps> = ({
 					<tr>
 						<th style={{ width: '25%' }}>Сотрудник</th>
 						<th style={{ width: '20%' }}>Текущая должность</th>
-						<th style={{ width: '25%' }}>Целевая должность</th>
 						<th style={{ width: '15%' }}>Прогресс</th>
 						<th style={{ width: '15%' }}>Дата рег.</th>
 					</tr>
@@ -62,7 +61,6 @@ const ManagerUserTable: React.FC<ManagerUserTableProps> = ({
 						>
 							<td>{user.fullName}</td>
 							<td>{user.currentPosition || '-'}</td>
-							<td>{user.targetPosition || '-'}</td>
 							<td>
 								<div className={styles.progressContainer}>
 									<div className={styles.progressBar}>

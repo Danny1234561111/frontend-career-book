@@ -1,3 +1,5 @@
+// users_page.tsx (ИСПРАВЛЕННЫЙ - без должностей, но с email)
+
 import React, { useState, useEffect } from 'react';
 import { UserTable, UserFilters } from '../../../component';
 import styles from './users_page.module.scss';
@@ -8,8 +10,6 @@ interface User {
 	email: string;
 	role: 'admin' | 'manager' | 'user';
 	department?: string;
-	currentPosition?: string;
-	targetPosition?: string;
 	createdAt: string;
 	employeeId?: string;
 }
@@ -47,7 +47,7 @@ const UsersPage: React.FC = () => {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -66,14 +66,12 @@ const UsersPage: React.FC = () => {
 					const employee = user.employee || {};
 					
 					return {
-						id: user.id, // ИСПОЛЬЗУЕМ ПЕРВЫЙ ID
+						id: user.id,
 						employeeId: user.employeeId,
 						fullName: `${employee.lastName || ''} ${employee.firstName || ''} ${employee.middleName || ''}`.trim() || user.fullName || 'Не указано',
 						email: employee.email || user.email || 'Не указан',
 						role: role,
 						department: employee.department?.name || '-',
-						currentPosition: employee.workPlaces?.[0]?.jobTitle?.name || '-',
-						targetPosition: '-',
 						createdAt: user.createdAt || user.lastOnline || new Date().toISOString(),
 					};
 				});
@@ -92,7 +90,7 @@ const UsersPage: React.FC = () => {
 		}
 	};
 
-	// Обновление роли пользователя через /api/users/{userId}/role
+	// Обновление роли пользователя
 	const updateUserRole = async (userId: string, roleValue: number): Promise<boolean> => {
 		try {
 			console.log(`📤 Sending PATCH request to: http://localhost:5217/api/users/${userId}/role?userRole=${roleValue}`);
@@ -101,7 +99,7 @@ const UsersPage: React.FC = () => {
 				method: 'PATCH',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'text/plain',
+					'accept': 'application/json',
 				},
 			});
 
@@ -200,13 +198,11 @@ const UsersPage: React.FC = () => {
 			
 			if (errorCount === 0 && successCount > 0) {
 				setSuccessMessage(`Роли успешно сохранены на сервере (${successCount} изменений)`);
-				// ПЕРЕЗАГРУЖАЕМ ДАННЫЕ С СЕРВЕРА
 				await fetchUsers();
 				setTimeout(() => setSuccessMessage(null), 3000);
 			} else if (successCount > 0 && errorCount > 0) {
 				setError(`Сохранено на сервере: ${successCount}, ошибок: ${errorCount}. ${errors.join('; ')}`);
 				setTimeout(() => setError(null), 5000);
-				// Перезагружаем данные для синхронизации
 				await fetchUsers();
 			} else if (errorCount > 0) {
 				setError(`Ошибка при сохранении на сервере: ${errors.join('; ')}`);

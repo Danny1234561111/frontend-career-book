@@ -1,3 +1,5 @@
+// department-materials.tsx (ПОЛНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ)
+
 import React, { useState, useEffect } from 'react';
 import styles from './materials.module.scss';
 
@@ -14,15 +16,19 @@ interface Employee {
 	jobTitle?: { id: string; name: string };
 }
 
+interface MaterialType {
+	id: string;
+	name: string;
+}
+
 interface Material {
 	id: string;
 	name: string;
 	typeId: string;
-	type?: { id: string; name: string } | string;
+	type: { id: string; name: string } | null;
 	link: string;
 	duration: number;
-	competencyId?: string;
-	competency?: Competency;
+	description?: string;
 }
 
 interface MaterialTask {
@@ -32,13 +38,6 @@ interface MaterialTask {
 	status: number;
 	employeeId: string;
 	employee?: Employee;
-}
-
-interface EmployeeCompetency {
-	id: string;
-	employeeId: string;
-	competencyId: string;
-	competency: Competency;
 }
 
 const DepartmentMaterialsPage: React.FC = () => {
@@ -53,10 +52,43 @@ const DepartmentMaterialsPage: React.FC = () => {
 	const [employeeCompetencies, setEmployeeCompetencies] = useState<Map<string, Set<string>>>(new Map());
 	const [departmentId, setDepartmentId] = useState<string>('');
 	const [departmentName, setDepartmentName] = useState<string>('');
+	const [materialTypesMap, setMaterialTypesMap] = useState<Map<string, string>>(new Map());
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [filteredTasks, setFilteredTasks] = useState<MaterialTask[]>([]);
+
+	// Получение типов материалов (как в MaterialsPage)
+	const fetchMaterialTypes = async (): Promise<Map<string, string>> => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return new Map();
+
+			const response = await fetch('http://localhost:5217/api/materialtypes?withDeleted=false', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data: MaterialType[] = await response.json();
+				const typeMap = new Map<string, string>();
+				data.forEach(type => {
+					if (type && type.id && type.name) {
+						typeMap.set(type.id, type.name);
+					}
+				});
+				setMaterialTypesMap(typeMap);
+				return typeMap;
+			}
+			return new Map();
+		} catch (error) {
+			console.error('Error fetching material types:', error);
+			return new Map();
+		}
+	};
 
 	// Получение профиля пользователя и ID департамента
 	const fetchUserProfile = async () => {
@@ -133,8 +165,8 @@ const DepartmentMaterialsPage: React.FC = () => {
 		return [];
 	};
 
-	// Получение материалов департамента
-	const fetchDepartmentMaterials = async (deptId: string) => {
+	// Получение материалов департамента (как в админке с типом-объектом)
+	const fetchDepartmentMaterials = async (deptId: string, typeMap: Map<string, string>) => {
 		try {
 			const response = await fetch(`http://localhost:5217/api/material-task/department/${deptId}`, {
 				method: 'GET',
@@ -146,27 +178,52 @@ const DepartmentMaterialsPage: React.FC = () => {
 
 			if (response.ok) {
 				const data: any[] = await response.json();
-				const normalizedData: MaterialTask[] = data.map(task => ({
-					id: task.id,
-					materialId: task.material?.id,
-					material: {
-						id: task.material?.id,
-						name: task.material?.name,
-						typeId: task.material?.typeId,
-						type: task.material?.type?.name || task.material?.type,
-						link: task.material?.link,
-						duration: task.material?.duration,
-						competencyId: task.material?.competencyId,
-						competency: task.material?.competency
-					},
-					status: task.status,
-					employeeId: task.employee?.id,
-					employee: {
-						id: task.employee?.id,
-						fullName: `${task.employee?.lastName || ''} ${task.employee?.firstName || ''} ${task.employee?.middleName || ''}`.trim(),
-						email: task.employee?.email,
+				
+				// Нормализуем данные, получая тип через typeMap (как в MaterialsPage)
+				const normalizedData: MaterialTask[] = data.map(task => {
+					let material = task.material;
+					let materialType: { id: string; name: string } | null = null;
+					
+					if (material) {
+						// Пробуем получить тип через typeId и typeMap
+						if (material.typeId && typeMap.has(material.typeId)) {
+							materialType = {
+								id: material.typeId,
+								name: typeMap.get(material.typeId) || 'Не указан',
+							};
+						}
+						// Если уже есть type с name
+						else if (material.type && typeof material.type === 'object' && material.type.name) {
+							materialType = material.type;
+						}
+						// Если type пришел как строка
+						else if (typeof material.type === 'string') {
+							materialType = { id: material.typeId, name: material.type };
+						}
 					}
-				}));
+					
+					return {
+						id: task.id,
+						materialId: material?.id,
+						material: material ? {
+							id: material.id,
+							name: material.name || 'Без названия',
+							typeId: material.typeId,
+							type: materialType,
+							link: material.link,
+							duration: material.duration || 0,
+							description: material.description,
+						} : null as any,
+						status: task.status,
+						employeeId: task.employee?.id,
+						employee: task.employee ? {
+							id: task.employee.id,
+							fullName: `${task.employee.lastName || ''} ${task.employee.firstName || ''} ${task.employee.middleName || ''}`.trim(),
+							email: task.employee.email,
+						} : undefined,
+					};
+				});
+				
 				setMaterialsTasks(normalizedData);
 				return normalizedData;
 			}
@@ -205,47 +262,54 @@ const DepartmentMaterialsPage: React.FC = () => {
 		return competenciesMap;
 	};
 
-	// Получение доступных компетенций для выбранного сотрудника
-	const getAvailableCompetenciesForEmployee = (employeeId: string): Competency[] => {
-		if (employeeId === 'all') {
-			return competencies;
+	// Получение ID материалов для компетенции через эндпоинт /next-level
+	const getMaterialIdsForCompetency = async (competencyId: string, employeeId: string): Promise<Set<string>> => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return new Set();
+			
+			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}/next-level`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				const materialIds = new Set(data.map((item: any) => item.educationalMaterialId));
+				return materialIds;
+			}
+		} catch (error) {
+			console.error('Error fetching materials for competency:', error);
+		}
+		return new Set();
+	};
+
+	// Получение названия типа материала (как в MaterialsPage)
+	const getMaterialTypeName = (material: Material): string => {
+		if (!material) return 'Не указан';
+		
+		// Если type это объект с name
+		if (material.type && typeof material.type === 'object' && 'name' in material.type) {
+			return material.type.name;
 		}
 		
-		const employeeCompIds = employeeCompetencies.get(employeeId) || new Set();
-		return competencies.filter(comp => employeeCompIds.has(comp.id));
-	};
-
-	// Фильтрация материалов
-	const filterMaterials = () => {
-		let filtered = [...materialsTasks];
-
-		if (selectedEmployee !== 'all') {
-			filtered = filtered.filter(task => task.employeeId === selectedEmployee);
-			
-			if (selectedCompetency !== 'all') {
-				const employeeCompIds = employeeCompetencies.get(selectedEmployee) || new Set();
-				
-				if (!employeeCompIds.has(selectedCompetency)) {
-					setFilteredTasks([]);
-					return;
-				}
-				
-				filtered = filtered.filter(task => 
-					task.material?.competencyId === selectedCompetency
-				);
-			}
-		} else {
-			if (selectedCompetency !== 'all') {
-				filtered = filtered.filter(task => 
-					task.material?.competencyId === selectedCompetency
-				);
-			}
+		// Если type это строка
+		if (typeof material.type === 'string') {
+			return material.type;
 		}
-
-		setFilteredTasks(filtered);
+		
+		// Если есть typeId, но type не загружен
+		if (material.typeId && materialTypesMap.has(material.typeId)) {
+			return materialTypesMap.get(material.typeId) || 'Не указан';
+		}
+		
+		return 'Не указан';
 	};
 
-	// Получение списка компетенций для фильтра
+	// Получение доступных компетенций для фильтра
 	const getCompetencyFilterOptions = (): Competency[] => {
 		if (selectedEmployee === 'all') {
 			return competencies;
@@ -253,6 +317,27 @@ const DepartmentMaterialsPage: React.FC = () => {
 		
 		const employeeCompIds = employeeCompetencies.get(selectedEmployee) || new Set();
 		return competencies.filter(comp => employeeCompIds.has(comp.id));
+	};
+
+	// Фильтрация материалов
+	const filterMaterials = async () => {
+		let filtered = [...materialsTasks];
+
+		// Фильтр по сотруднику
+		if (selectedEmployee !== 'all') {
+			filtered = filtered.filter(task => task.employeeId === selectedEmployee);
+		}
+		
+		// Фильтр по компетенции
+		if (selectedCompetency !== 'all') {
+			const employeeId = selectedEmployee !== 'all' ? selectedEmployee : employees[0]?.id;
+			if (employeeId) {
+				const validMaterialIds = await getMaterialIdsForCompetency(selectedCompetency, employeeId);
+				filtered = filtered.filter(task => validMaterialIds.has(task.materialId));
+			}
+		}
+
+		setFilteredTasks(filtered);
 	};
 
 	// Подсчет прогресса сотрудника
@@ -274,11 +359,15 @@ const DepartmentMaterialsPage: React.FC = () => {
 			setError(null);
 			
 			try {
+				// 1. Получаем типы материалов (как в MaterialsPage)
+				const typeMap = await fetchMaterialTypes();
+				
 				const deptId = await fetchUserProfile();
 				if (deptId) {
 					const employeesList = await fetchDepartmentEmployees(deptId);
 					await fetchDepartmentCompetencies(deptId);
-					await fetchDepartmentMaterials(deptId);
+					// 2. Передаем typeMap для правильного определения типов
+					await fetchDepartmentMaterials(deptId, typeMap);
 					
 					if (employeesList.length > 0) {
 						await fetchAllEmployeesCompetencies(employeesList);
@@ -299,14 +388,14 @@ const DepartmentMaterialsPage: React.FC = () => {
 		}
 	}, [accessToken]);
 
-	// Применяем фильтры
+	// Применяем фильтры при изменении
 	useEffect(() => {
-		if (materialsTasks.length > 0 && employeeCompetencies.size > 0) {
+		if (materialsTasks.length > 0) {
 			filterMaterials();
 		}
-	}, [selectedEmployee, selectedCompetency, materialsTasks, employeeCompetencies]);
+	}, [selectedEmployee, selectedCompetency, materialsTasks]);
 
-	// Сбрасываем выбранную компетенцию при смене сотрудника
+	// Сбрасываем выбранную компетенцию при смене сотрудника, если она недоступна
 	useEffect(() => {
 		if (selectedCompetency !== 'all') {
 			const availableCompetencies = getCompetencyFilterOptions();
@@ -353,7 +442,10 @@ const DepartmentMaterialsPage: React.FC = () => {
 						<label>Сотрудник:</label>
 						<select
 							value={selectedEmployee}
-							onChange={(e) => setSelectedEmployee(e.target.value)}
+							onChange={(e) => {
+								setSelectedEmployee(e.target.value);
+								setSelectedCompetency('all');
+							}}
 							className={styles.filterSelect}>
 							<option value='all'>Все сотрудники</option>
 							{employees.map((emp) => (
@@ -435,7 +527,6 @@ const DepartmentMaterialsPage: React.FC = () => {
 								<th>Название материала</th>
 								<th>Тип</th>
 								<th>Сотрудник</th>
-								<th>Компетенция</th>
 								<th>Статус</th>
 								<th>Прогресс</th>
 							</tr>
@@ -443,7 +534,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 						<tbody>
 							{filteredTasks.length === 0 ? (
 								<tr>
-									<td colSpan={6} className={styles.emptyState}>
+									<td colSpan={5} className={styles.emptyState}>
 										{selectedEmployee !== 'all' && selectedCompetency !== 'all' 
 											? 'У сотрудника нет материалов по выбранной компетенции'
 											: selectedEmployee !== 'all' && competencyFilterOptions.length === 0
@@ -455,32 +546,25 @@ const DepartmentMaterialsPage: React.FC = () => {
 								filteredTasks.map((task) => {
 									const employee = task.employee || employees.find(e => e.id === task.employeeId);
 									const material = task.material;
-									const materialCompetency = competencies.find(c => c.id === material?.competencyId);
+									const materialTypeName = getMaterialTypeName(material);
 									
 									return (
 										<tr key={task.id}>
 											<td className={styles.materialName}>
-												{material.link ? (
+												{material?.link ? (
 													<a href={material.link} target="_blank" rel="noopener noreferrer">
-														{material.name}
+														{material?.name}
 													</a>
 												) : (
-													material.name
+													material?.name || 'Не указан'
 												)}
-											</td>
-											<td>
+												</td>
+											<td className={styles.typeCell}>
 												<span className={styles.materialType}>
-													{typeof material.type === 'string' ? material.type : material.type?.name || 'Не указан'}
+													{materialTypeName}
 												</span>
-											</td>
+												</td>
 											<td>{employee?.fullName || 'Не указан'}</td>
-											<td>
-												{materialCompetency ? (
-													<span className={styles.competencyBadge}>
-														{materialCompetency.name}
-													</span>
-												) : '—'}
-											</td>
 											<td>
 												<span className={`${styles.statusBadge} ${
 													task.status === 2 ? styles.statusCompleted :
@@ -491,7 +575,7 @@ const DepartmentMaterialsPage: React.FC = () => {
 													 task.status === 1 ? '🔄 В процессе' : 
 													 '📚 К изучению'}
 												</span>
-											</td>
+												</td>
 											<td>
 												<div className={styles.progressCell}>
 													<div className={styles.progressBarSmall}>
@@ -504,8 +588,8 @@ const DepartmentMaterialsPage: React.FC = () => {
 														{task.status === 2 ? '100%' : task.status === 1 ? '50%' : '0%'}
 													</span>
 												</div>
-											</td>
-										</tr>
+												</td>
+											</tr>
 									);
 								})
 							)}

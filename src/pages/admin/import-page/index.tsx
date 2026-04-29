@@ -1,3 +1,5 @@
+// import-excel.tsx (ИСПРАВЛЕННАЯ - user-friendly ошибки)
+
 import React, { useState, useEffect } from 'react';
 import styles from './import-excel.module.scss';
 
@@ -28,8 +30,6 @@ const ImportPage: React.FC = () => {
 		const formData = new FormData();
 		formData.append('File', file);
 
-		console.log('Sending request to: http://localhost:5217/api/import-excel/bosses/preview');
-		
 		const response = await fetch('http://localhost:5217/api/import-excel/bosses/preview', {
 			method: 'POST',
 			headers: {
@@ -38,15 +38,17 @@ const ImportPage: React.FC = () => {
 			body: formData,
 		});
 
-		console.log('Response status:', response.status);
-		
 		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`Ошибка ${response.status}: ${errorText || 'Неизвестная ошибка'}`);
+			if (response.status === 400) {
+				throw new Error('Некорректный формат файла. Проверьте структуру данных.');
+			}
+			if (response.status === 401 || response.status === 403) {
+				throw new Error('У вас нет прав для выполнения импорта.');
+			}
+			throw new Error('Не удалось обработать файл. Проверьте формат и структуру данных.');
 		}
 
 		const data = await response.json();
-		console.log('Bosses preview data:', data);
 		return data;
 	};
 
@@ -64,8 +66,13 @@ const ImportPage: React.FC = () => {
 		});
 
 		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`Ошибка ${response.status}: ${errorText}`);
+			if (response.status === 400) {
+				throw new Error('Некорректный формат файла. Проверьте структуру данных.');
+			}
+			if (response.status === 401 || response.status === 403) {
+				throw new Error('У вас нет прав для выполнения импорта.');
+			}
+			throw new Error('Не удалось импортировать данные. Проверьте файл и попробуйте снова.');
 		}
 
 		return response;
@@ -76,8 +83,6 @@ const ImportPage: React.FC = () => {
 		const formData = new FormData();
 		formData.append('File', file);
 
-		console.log('Sending request to: http://localhost:5217/api/import-excel/employees/preview');
-		
 		const response = await fetch('http://localhost:5217/api/import-excel/employees/preview', {
 			method: 'POST',
 			headers: {
@@ -86,15 +91,17 @@ const ImportPage: React.FC = () => {
 			body: formData,
 		});
 
-		console.log('Response status:', response.status);
-		
 		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`Ошибка ${response.status}: ${errorText || 'Неизвестная ошибка'}`);
+			if (response.status === 400) {
+				throw new Error('Некорректный формат файла. Проверьте структуру данных.');
+			}
+			if (response.status === 401 || response.status === 403) {
+				throw new Error('У вас нет прав для выполнения импорта.');
+			}
+			throw new Error('Не удалось обработать файл. Проверьте формат и структуру данных.');
 		}
 
 		const data = await response.json();
-		console.log('Employees preview data:', data);
 		return data;
 	};
 
@@ -112,8 +119,13 @@ const ImportPage: React.FC = () => {
 		});
 
 		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`Ошибка ${response.status}: ${errorText}`);
+			if (response.status === 400) {
+				throw new Error('Некорректный формат файла. Проверьте структуру данных.');
+			}
+			if (response.status === 401 || response.status === 403) {
+				throw new Error('У вас нет прав для выполнения импорта.');
+			}
+			throw new Error('Не удалось импортировать данные. Проверьте файл и попробуйте снова.');
 		}
 
 		return response;
@@ -122,7 +134,23 @@ const ImportPage: React.FC = () => {
 	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			console.log('File selected:', file.name, file.type, file.size);
+			// Проверяем расширение файла
+			const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+			const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+			
+			if (!allowedExtensions.includes(fileExtension)) {
+				setError('Неподдерживаемый формат файла. Пожалуйста, используйте файлы .xlsx, .xls или .csv');
+				setSelectedFile(null);
+				return;
+			}
+			
+			// Проверяем размер файла (максимум 10 МБ)
+			if (file.size > 10 * 1024 * 1024) {
+				setError('Файл слишком большой. Максимальный размер файла - 10 МБ.');
+				setSelectedFile(null);
+				return;
+			}
+			
 			setSelectedFile(file);
 			setPreview(null);
 			setError(null);
@@ -143,7 +171,6 @@ const ImportPage: React.FC = () => {
 		try {
 			if (activeTab === 'bosses') {
 				const data = await fetchBossesPreview(selectedFile);
-				// Для руководителей данные в поле data
 				if (data && data.data) {
 					setPreview(data.data);
 				} else {
@@ -151,7 +178,6 @@ const ImportPage: React.FC = () => {
 				}
 			} else {
 				const data = await fetchEmployeesPreview(selectedFile);
-				// Для сотрудников данные уже в правильной структуре
 				setPreview(data);
 			}
 		} catch (err) {
@@ -165,6 +191,11 @@ const ImportPage: React.FC = () => {
 	const handleImport = async () => {
 		if (!selectedFile) {
 			setError('Пожалуйста, выберите файл');
+			return;
+		}
+
+		if (!preview) {
+			setError('Сначала выполните предпросмотр файла');
 			return;
 		}
 
@@ -227,32 +258,6 @@ const ImportPage: React.FC = () => {
 			</div>
 		);
 	};
-
-	// Проверка доступности эндпоинтов
-	useEffect(() => {
-		const checkEndpoints = async () => {
-			try {
-				const bossesUrl = 'http://localhost:5217/api/import-excel/bosses/preview';
-				const employeesUrl = 'http://localhost:5217/api/import-excel/employees/preview';
-				
-				const bossesResponse = await fetch(bossesUrl, {
-					method: 'OPTIONS',
-					headers: { 'Authorization': `Bearer ${accessToken}` },
-				});
-				const employeesResponse = await fetch(employeesUrl, {
-					method: 'OPTIONS',
-					headers: { 'Authorization': `Bearer ${accessToken}` },
-				});
-				
-				console.log('Bosses endpoint available:', bossesResponse.status !== 404);
-				console.log('Employees endpoint available:', employeesResponse.status !== 404);
-			} catch (error) {
-				console.error('Error checking endpoints:', error);
-			}
-		};
-		
-		checkEndpoints();
-	}, []);
 
 	return (
 		<div className={styles.page}>
@@ -364,16 +369,7 @@ const ImportPage: React.FC = () => {
 						<p><strong>👥 Для сотрудников:</strong> Excel файл должен содержать профили сотрудников и матрицу компетенций.</p>
 						<p><strong>📎 Поддерживаемые форматы:</strong> <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code></p>
 						<p><strong>📋 Порядок действий:</strong> Выберите файл → Нажмите "Предпросмотр" → Проверьте данные → Нажмите "Импортировать"</p>
-						{error && error.includes('404') && (
-							<div className={styles.hint}>
-								💡 <strong>Совет:</strong> Если вы видите ошибку 404, убедитесь, что:
-								<ul>
-									<li>Бэкенд сервер запущен на порту 5217</li>
-									<li>Эндпоинты импорта доступны (проверьте в Swagger)</li>
-									<li>У вас есть права администратора для импорта данных</li>
-								</ul>
-							</div>
-						)}
+						<p><strong>📏 Максимальный размер файла:</strong> 10 МБ</p>
 					</div>
 				</div>
 			</div>

@@ -159,7 +159,7 @@ const MaterialForm: React.FC<MaterialFormProps> = ({
 							</div>
 
 							<div className={styles.formGroup}>
-								<label>Длительность (минут)</label>
+								<label>Длительность (часов)</label>
 								<input
 									type='number'
 									value={formData.duration || 0}
