@@ -13,6 +13,7 @@ import InterfaceTab from './settings/interface_tab';
 import MonitoringTab from './settings/monitoring_tab';
 import ProfileTab from './settings/profile_tab';
 import ManagerUserTable from './manager-user-table';
+import JobHierarchyManager from './job_hierarchy_manager';
 
 export {
 	TodoList,
@@ -21,8 +22,6 @@ export {
 	Navigation,
 	UserFilters,
 	UserTable,
-	SystemParameters,
-	RoleSettings,
 	CategoryManager,
 	ManagerUserTable,
 	MaterialForm,
@@ -33,4 +32,6 @@ export {
 	InterfaceTab,
 	MonitoringTab,
 	ProfileTab,
+	JobHierarchyManager
+	
 };

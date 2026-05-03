@@ -1,0 +1,579 @@
+@import '../../variables.module';
+
+.container {
+	width: 100%;
+	padding: $spacing-xl;
+	background: $derivatives-gray-10;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	border: 1px solid $border-color;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: $spacing-xl;
+
+	h3 {
+		margin: 0;
+		color: $variables-textprimary;
+		font-weight: 600;
+		font-size: $font-xl;
+	}
+}
+
+.headerButtons {
+	display: flex;
+	gap: $spacing-md;
+}
+
+.addBtn, .addLevelBtn, .addHierarchyBtn {
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.addBtn {
+	background: $primary;
+
+	&:hover {
+		background: $primary-hover;
+		transform: translateY(-1px);
+	}
+}
+
+.addLevelBtn {
+	background: $success;
+
+	&:hover {
+		background: darken($success, 10%);
+		transform: translateY(-1px);
+	}
+}
+
+.addHierarchyBtn {
+	background: $warning;
+
+	&:hover {
+		background: darken($warning, 10%);
+		transform: translateY(-1px);
+	}
+}
+
+.hierarchyContainer {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
+}
+
+.jobGroup {
+	background: $variables-containers-background;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	overflow: hidden;
+}
+
+.jobHeader {
+	padding: $spacing-md $spacing-lg;
+	background: $primary;
+	color: $white;
+	cursor: pointer;
+	transition: background 0.2s;
+
+	&:hover {
+		background: $primary-hover;
+	}
+}
+
+.jobTitle {
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
+}
+
+.expandIcon {
+	font-size: $font-sm;
+	font-weight: bold;
+}
+
+.jobName {
+	font-weight: 600;
+	font-size: $font-lg;
+}
+
+.badge {
+	padding: $spacing-xs $spacing-md;
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: $spacing-xl;
+	font-size: $font-xs;
+}
+
+.levelsContainer {
+	padding: $spacing-md;
+	background: $derivatives-gray-10;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-md;
+}
+
+.emptyLevels {
+	padding: $spacing-xxl;
+	text-align: center;
+	color: $variables-textsecondary;
+	background: $white;
+	border: 1px dashed $border-color;
+	border-radius: $border-radius-md;
+
+	p {
+		margin: 0 0 $spacing-sm;
+	}
+
+	small {
+		color: $derivatives-gray-70;
+	}
+}
+
+.levelNode {
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	overflow: hidden;
+}
+
+.levelHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: $spacing-sm $spacing-lg;
+	background: $derivatives-gray-10;
+	cursor: pointer;
+	transition: background 0.2s;
+
+	&:hover {
+		background: $derivatives-gray-20;
+	}
+}
+
+.levelTitle {
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
+	flex-wrap: wrap;
+}
+
+.levelName {
+	font-weight: 600;
+	color: $variables-textprimary;
+	font-size: $font-md;
+}
+
+.levelBadge {
+	padding: $spacing-xs $spacing-md;
+	background: $derivatives-gray-20;
+	color: $variables-textsecondary;
+	font-size: $font-xs;
+	font-weight: 500;
+	border-radius: $spacing-xl;
+}
+
+.competencyCount {
+	padding: $spacing-xs $spacing-md;
+	background: $primary-light;
+	color: $primary;
+	font-size: $font-xs;
+	font-weight: 500;
+	border-radius: $spacing-xl;
+}
+
+.addCompetencyToLevelBtn {
+	padding: $spacing-xs $spacing-md;
+	color: $success;
+	font-size: $font-sm;
+	background: $success-light;
+	border: none;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		background: darken($success-light, 5%);
+	}
+}
+
+.competenciesContainer {
+	padding: $spacing-md;
+	background: $derivatives-gray-10;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-sm;
+}
+
+.competencyCard {
+	padding: $spacing-md;
+	background: $white;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	transition: all 0.2s;
+
+	&:hover {
+		border-color: $primary;
+		box-shadow: $shadow-sm;
+	}
+}
+
+.competencyHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: $spacing-md;
+	flex-wrap: wrap;
+}
+
+.competencyName {
+	font-weight: 500;
+	color: $variables-textprimary;
+	font-size: $font-md;
+	flex: 1;
+}
+
+.requiredLevel {
+	padding: $spacing-xs $spacing-md;
+	background: $primary-light;
+	color: $primary;
+	font-size: $font-xs;
+	font-weight: 500;
+	border-radius: $spacing-xl;
+}
+
+.removeBtn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 28px;
+	height: 28px;
+	font-size: $font-md;
+	background: none;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-sm;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+		border-color: $danger;
+	}
+}
+
+.competencyDesc {
+	margin-top: $spacing-sm;
+	padding-top: $spacing-sm;
+	color: $variables-textsecondary;
+	font-size: $font-sm;
+	line-height: 1.4;
+	border-top: 1px solid $derivatives-gray-20;
+}
+
+.emptyState {
+	padding: $spacing-xxl;
+	text-align: center;
+	color: $variables-textsecondary;
+	background: $white;
+	border: 1px dashed $border-color;
+	border-radius: $border-radius-md;
+
+	p {
+		margin: 0 0 $spacing-sm;
+	}
+
+	small {
+		color: $derivatives-gray-70;
+	}
+}
+
+// Модальные окна
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1000;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: $derivatives-black-70;
+}
+
+.modalContent {
+	width: 500px;
+	max-width: 90%;
+	padding: $spacing-xl;
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	box-shadow: $shadow-lg;
+
+	h3 {
+		margin: 0 0 $spacing-lg 0;
+		color: $variables-textprimary;
+		font-size: $font-xl;
+	}
+}
+
+.modalSubtitle {
+	margin-bottom: $spacing-lg;
+	padding-bottom: $spacing-md;
+	color: $variables-textsecondary;
+	font-size: $font-md;
+	border-bottom: 1px solid $border-color;
+
+	strong {
+		color: $primary;
+	}
+}
+
+.formGroup {
+	margin-bottom: $spacing-lg;
+
+	label {
+		display: block;
+		margin-bottom: $spacing-xs;
+		color: $variables-textsecondary;
+		font-size: $font-sm;
+		font-weight: 500;
+	}
+
+	input, select {
+		width: 100%;
+		padding: $spacing-sm $spacing-md;
+		font-size: $font-md;
+		border: 1px solid $border-color;
+		border-radius: $border-radius-md;
+		transition: all 0.2s;
+
+		&:focus {
+			border-color: $primary;
+			outline: none;
+			box-shadow: 0 0 0 2px $derivatives-main-20;
+		}
+	}
+}
+
+.modalActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: $spacing-md;
+	margin-top: $spacing-xl;
+
+	button {
+		padding: $spacing-sm $spacing-xl;
+		font-size: $font-md;
+		border: none;
+		border-radius: $border-radius-md;
+		cursor: pointer;
+		transition: all 0.2s;
+
+		&:first-child {
+			color: $variables-textsecondary;
+			background: $derivatives-gray-10;
+
+			&:hover {
+				background: $border-color;
+			}
+		}
+
+		&:last-child {
+			color: $white;
+			background: $primary;
+
+			&:hover:not(:disabled) {
+				background: $primary-hover;
+			}
+
+			&:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
+			}
+		}
+	}
+}
+
+.successMessage, .errorMessage {
+	position: fixed;
+	top: $spacing-xl;
+	right: $spacing-xl;
+	z-index: 1001;
+	padding: $spacing-md $spacing-xl;
+	font-weight: 500;
+	font-size: $font-md;
+	border-radius: $border-radius-md;
+	box-shadow: $shadow-md;
+}
+
+.successMessage {
+	color: $success;
+	background: $success-light;
+	border-left: 4px solid $success;
+}
+
+.errorMessage {
+	color: $danger;
+	background: $danger-light;
+	border-left: 4px solid $danger;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+@include mobile {
+	.container {
+		padding: $spacing-md;
+	}
+
+	.header {
+		flex-direction: column;
+		gap: $spacing-md;
+	}
+
+	.headerButtons {
+		width: 100%;
+		flex-direction: column;
+		gap: $spacing-sm;
+	}
+
+	.addBtn, .addLevelBtn, .addHierarchyBtn {
+		width: 100%;
+		text-align: center;
+	}
+
+	.levelHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-sm;
+	}
+
+	.levelActions {
+		width: 100%;
+	}
+
+	.addCompetencyToLevelBtn {
+		width: 100%;
+		text-align: center;
+	}
+
+	.competencyHeader {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.modalContent {
+		padding: $spacing-lg;
+	}
+
+	.modalActions {
+		flex-direction: column;
+
+		button {
+			width: 100%;
+		}
+	}
+
+	.successMessage, .errorMessage {
+		top: $spacing-md;
+		right: $spacing-md;
+		left: $spacing-md;
+	}
+}
+// Добавьте эти стили в конец файла
+
+// Поиск
+.searchBar {
+	margin-bottom: $spacing-xl;
+	padding: $spacing-md;
+	background: $derivatives-gray-10;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+}
+
+.searchWrapper {
+	position: relative;
+	margin-bottom: $spacing-sm;
+}
+
+.searchIcon {
+	position: absolute;
+	top: 50%;
+	left: $spacing-md;
+	transform: translateY(-50%);
+	color: $derivatives-gray-70;
+	font-size: $font-md;
+}
+
+.searchInput {
+	width: 100%;
+	padding: $spacing-sm $spacing-lg $spacing-sm $spacing-xxxl;
+	font-size: $font-md;
+	border: 1px solid $border-color;
+	border-radius: $border-radius-md;
+	background: $white;
+	transition: all 0.2s;
+
+	&:focus {
+		outline: none;
+		border-color: $primary;
+		box-shadow: 0 0 0 2px $derivatives-main-20;
+	}
+}
+
+.clearSearchBtn {
+	position: absolute;
+	top: 50%;
+	right: $spacing-md;
+	transform: translateY(-50%);
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: none;
+	border: none;
+	border-radius: $border-radius-round;
+	cursor: pointer;
+	color: $derivatives-gray-70;
+	font-size: $font-sm;
+	transition: all 0.2s;
+
+	&:hover {
+		color: $danger;
+		background: $danger-light;
+	}
+}
+
+.searchStats {
+	font-size: $font-sm;
+	color: $variables-textsecondary;
+	text-align: right;
+
+	strong {
+		color: $primary;
+	}
+}
+
+@include mobile {
+	.searchBar {
+		padding: $spacing-md;
+	}
+
+	.searchStats {
+		text-align: center;
+	}
+}

@@ -1,4 +1,4 @@
-// manager_user_table.tsx (исправленный - без email)
+// manager_user_table.tsx (исправленный - с прогрессом по текущей и следующей должности)
 
 import React from 'react';
 import styles from './manager_user_table.module.scss';
@@ -6,10 +6,12 @@ import styles from './manager_user_table.module.scss';
 type User = {
 	id: string;
 	fullName: string;
+	email?: string;
 	department?: string;
-	targetPosition?: string;
 	currentPosition?: string;
-	progress?: number;
+	nextPosition?: string;
+	currentProgress?: number;
+	nextProgress?: number;
 	createdAt: string;
 };
 
@@ -46,10 +48,12 @@ const ManagerUserTable: React.FC<ManagerUserTableProps> = ({
 			<table className={styles.table}>
 				<thead>
 					<tr>
-						<th style={{ width: '25%' }}>Сотрудник</th>
-						<th style={{ width: '20%' }}>Текущая должность</th>
-						<th style={{ width: '15%' }}>Прогресс</th>
-						<th style={{ width: '15%' }}>Дата рег.</th>
+						<th style={{ width: '20%' }}>Сотрудник</th>
+						<th style={{ width: '18%' }}>Текущая должность</th>
+						<th style={{ width: '18%' }}>Следующая должность</th>
+						<th style={{ width: '22%' }}>Прогресс по текущей</th>
+						<th style={{ width: '22%' }}>Прогресс по следующей</th>
+						<th style={{ width: '10%' }}>Дата рег.</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -59,23 +63,43 @@ const ManagerUserTable: React.FC<ManagerUserTableProps> = ({
 							onClick={() => onUserSelect?.(user)}
 							className={onUserSelect ? styles.clickableRow : ''}
 						>
-							<td>{user.fullName}</td>
-							<td>{user.currentPosition || '-'}</td>
-							<td>
+							<td className={styles.userName}>{user.fullName}</td>
+							<td className={styles.currentPosition}>{user.currentPosition || '-'}</td>
+							<td className={styles.nextPosition}>{user.nextPosition || '-'}</td>
+							<td className={styles.progressCell}>
 								<div className={styles.progressContainer}>
 									<div className={styles.progressBar}>
 										<div
-											className={`${styles.progressFill} ${getProgressColor(user.progress || 0)}`}
-											style={{ width: `${user.progress || 0}%` }}
+											className={`${styles.progressFill} ${getProgressColor(user.currentProgress || 0)}`}
+											style={{ width: `${user.currentProgress || 0}%` }}
 										/>
 									</div>
 									<span className={styles.progressText}>
-										{user.progress || 0}%
+										{user.currentProgress || 0}%
 									</span>
 								</div>
-								</td>
-								<td className={styles.dateCell}>{formatDate(user.createdAt)}</td>
-							</tr>
+								{user.currentProgress === 100 && (
+									<span className={styles.completedBadge}>✓ Готов</span>
+								)}
+							</td>
+							<td className={styles.progressCell}>
+								<div className={styles.progressContainer}>
+									<div className={styles.progressBar}>
+										<div
+											className={`${styles.progressFill} ${getProgressColor(user.nextProgress || 0)}`}
+											style={{ width: `${user.nextProgress || 0}%` }}
+										/>
+									</div>
+									<span className={styles.progressText}>
+										{user.nextProgress || 0}%
+									</span>
+								</div>
+								{user.nextProgress === 100 && (
+									<span className={styles.readyBadge}>🎯 Готов к повышению</span>
+								)}
+							</td>
+							<td className={styles.dateCell}>{formatDate(user.createdAt)}</td>
+						</tr>
 					))}
 				</tbody>
 			</table>

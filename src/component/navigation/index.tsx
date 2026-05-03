@@ -29,6 +29,7 @@ const Navigation = ({ devRole }: NavigationProps) => {
 					{ path: '/admin/users', label: 'Пользователи' },
 					{ path: '/admin/competencies', label: 'Компетенции' },
 					{ path: '/admin/materials', label: 'Учебные материалы' },
+					{ path: '/job-competencies', label: 'Компетенции должностей' },
 					{ path: '/settings', label: 'Настройки' },
 				];
 

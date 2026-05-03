@@ -2,17 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { useAppSelector } from '../../../store/strore';
 import styles from './user_dashboard.module.scss';
 
+interface JobHierarchy {
+	id: string;
+	jobTitleId: string;
+	jobTitle: { id: string; name: string };
+	jobLevelId: string;
+	jobLevel: { id: string; name: string };
+	level: number;
+}
+
+interface UserJobInfo {
+	currentJobTitle: string;
+	currentJobLevel: string;
+	nextJobTitle: string;
+	nextJobLevel: string;
+	specialization: string;
+}
+
 interface ProfileData {
 	id?: string;
 	fullName: string;
 	currentPosition: string;
 	targetPosition: string;
+	specialization: string;
 	progress: {
 		percent: number;
 		completedMaterials: number;
 		totalRequiredMaterials: number;
 	};
-	department: string;
+	department: {
+		id: string;
+		name: string;
+	};
 	role?: {
 		id: string;
 		name: string;
@@ -36,15 +57,124 @@ interface MaterialTask {
 	};
 }
 
+// Функция для извлечения специальности из названия должности
+const extractSpecialization = (jobTitle: string): string => {
+	if (!jobTitle) return '';
+	
+	// Паттерн: "Название должности (Специализация)"
+	const bracketMatch = jobTitle.match(/\(([^)]+)\)/);
+	if (bracketMatch) {
+		return bracketMatch[1];
+	}
+	
+	// Паттерн: "Название должности - Специализация"
+	const dashMatch = jobTitle.match(/[-–—]\s*(.+)$/);
+	if (dashMatch) {
+		return dashMatch[1];
+	}
+	
+	return '';
+};
+
+// Функция для получения основной должности без специализации
+const getMainJobTitle = (jobTitle: string): string => {
+	if (!jobTitle) return 'Не указана';
+	
+	// Убираем содержимое в скобках
+	let main = jobTitle.replace(/\s*\([^)]*\)\s*/, '');
+	// Убираем текст после дефиса
+	main = main.replace(/[-–—]\s*.+$/, '');
+	
+	return main.trim() || jobTitle;
+};
+
 const EmployeeDashboard: React.FC = () => {
 	const user = useAppSelector((state) => state.auth.user);
 	const accessToken = localStorage.getItem('accessToken');
 
 	const [profile, setProfile] = useState<ProfileData | null>(null);
+	const [userJobInfo, setUserJobInfo] = useState<UserJobInfo | null>(null);
 	const [recentUpdates, setRecentUpdates] = useState<AppLog[]>([]);
 	const [materials, setMaterials] = useState<MaterialTask[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Получение иерархии должностей
+	const fetchJobHierarchies = async (): Promise<JobHierarchy[]> => {
+		try {
+			const response = await fetch('http://localhost:5217/api/jobhierarchies?withDeleted=false', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data: JobHierarchy[] = await response.json();
+				return data;
+			}
+			return [];
+		} catch (error) {
+			console.error('Error fetching job hierarchies:', error);
+			return [];
+		}
+	};
+
+	// Получение информации о должностях пользователя
+	const fetchUserJobInfo = async (): Promise<UserJobInfo | null> => {
+		try {
+			// Сначала получаем профиль пользователя, чтобы узнать его должность
+			const profileResponse = await fetch('http://localhost:5217/api/users/profile', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (!profileResponse.ok) return null;
+			
+			const profileData = await profileResponse.json();
+			const userJobTitle = profileData.jobTitle?.name || profileData.currentPosition;
+			
+			if (!userJobTitle) return null;
+			
+			// Получаем все иерархии
+			const hierarchies = await fetchJobHierarchies();
+			
+			// Ищем текущую должность пользователя в иерархии
+			const currentHierarchy = hierarchies.find(h => 
+				h.jobTitle?.name === userJobTitle || 
+				getMainJobTitle(h.jobTitle?.name || '') === getMainJobTitle(userJobTitle)
+			);
+			
+			if (!currentHierarchy) {
+				console.log('Текущая должность не найдена в иерархии:', userJobTitle);
+				return null;
+			}
+			
+			// Ищем следующую должность (следующий уровень)
+			const nextHierarchy = hierarchies.find(h => 
+				h.jobTitleId === currentHierarchy.jobTitleId && 
+				h.level === currentHierarchy.level + 1
+			);
+			
+			const specialization = extractSpecialization(userJobTitle);
+			const mainJobTitle = getMainJobTitle(userJobTitle);
+			
+			return {
+				currentJobTitle: mainJobTitle,
+				currentJobLevel: currentHierarchy.jobLevel?.name || '',
+				nextJobTitle: nextHierarchy ? getMainJobTitle(nextHierarchy.jobTitle?.name || '') : 'Достигнут максимум',
+				nextJobLevel: nextHierarchy ? nextHierarchy.jobLevel?.name || '' : '',
+				specialization: specialization,
+			};
+		} catch (error) {
+			console.error('Error fetching user job info:', error);
+			return null;
+		}
+	};
 
 	const fetchProfile = async () => {
 		try {
@@ -59,22 +189,23 @@ const EmployeeDashboard: React.FC = () => {
 			if (response.ok) {
 				const data = await response.json();
 				
-				let departmentStr = 'Не указан';
+				let departmentObj = { id: '', name: 'Не указан' };
 				if (data.department) {
 					if (typeof data.department === 'string') {
-						departmentStr = data.department;
+						departmentObj = { id: '', name: data.department };
 					} else if (data.department.name) {
-						departmentStr = data.department.name;
+						departmentObj = data.department;
 					}
 				}
 				
 				setProfile({
 					id: data.id,
 					fullName: data.fullName || `${data.lastName || ''} ${data.firstName || ''}`.trim() || 'Пользователь',
-					currentPosition: data.currentPosition || 'Не указана',
+					currentPosition: data.currentPosition || data.jobTitle?.name || 'Не указана',
 					targetPosition: data.targetPosition || 'Не указана',
+					specialization: '',
 					progress: data.progress || { percent: 0, completedMaterials: 0, totalRequiredMaterials: 0 },
-					department: departmentStr,
+					department: departmentObj,
 					role: data.role,
 				});
 			}
@@ -159,12 +290,18 @@ const EmployeeDashboard: React.FC = () => {
 
 			try {
 				await fetchProfile();
+				const jobInfo = await fetchUserJobInfo();
+				setUserJobInfo(jobInfo);
+				
 				const materialsData = await fetchMaterials();
 				const realProgress = calculateProgressFromMaterials(materialsData);
 				
 				setProfile(prev => prev ? {
 					...prev,
 					progress: realProgress,
+					specialization: jobInfo?.specialization || '',
+					currentPosition: jobInfo?.currentJobTitle || prev.currentPosition,
+					targetPosition: jobInfo?.nextJobTitle || prev.targetPosition,
 				} : prev);
 				
 				await fetchRecentUpdates();
@@ -213,7 +350,6 @@ const EmployeeDashboard: React.FC = () => {
 			</div>
 
 			<div className={styles.content}>
-				{/* Приветственная карточка */}
 				<div className={styles.card}>
 					<div className={styles.welcomeSection}>
 						<h2 className={styles.greeting}>
@@ -222,18 +358,42 @@ const EmployeeDashboard: React.FC = () => {
 						<div className={styles.positionInfo}>
 							<div className={styles.infoRow}>
 								<span className={styles.infoLabel}>Текущая должность:</span>
-								<span className={styles.infoValue}>{profile?.currentPosition || 'Не указана'}</span>
+								<div className={styles.infoValueWrapper}>
+									<span className={styles.infoValue}>{userJobInfo?.currentJobTitle || profile?.currentPosition || 'Не указана'}</span>
+									{userJobInfo?.currentJobLevel && (
+										<span className={styles.levelBadge}>{userJobInfo.currentJobLevel}</span>
+									)}
+								</div>
 							</div>
+							
 							<div className={styles.infoRow}>
 								<span className={styles.infoLabel}>Целевая должность:</span>
-								<span className={styles.infoValue}>{profile?.targetPosition || 'Не указана'}</span>
+								<div className={styles.infoValueWrapper}>
+									<span className={styles.infoValue}>{userJobInfo?.nextJobTitle || profile?.targetPosition || 'Не указана'}</span>
+									{userJobInfo?.nextJobLevel && (
+										<span className={styles.levelBadge}>{userJobInfo.nextJobLevel}</span>
+									)}
+								</div>
 							</div>
-							{profile?.department && profile.department !== 'Не указан' && (
+							
+							{userJobInfo?.specialization && (
 								<div className={styles.infoRow}>
-									<span className={styles.infoLabel}>Отдел:</span>
-									<span className={styles.infoValue}>{profile.department}</span>
+									<span className={styles.infoLabel}>Специальность:</span>
+									<div className={styles.infoValueWrapper}>
+										<span className={styles.specializationMain}>
+											🎯 {userJobInfo.specialization}
+										</span>
+									</div>
 								</div>
 							)}
+							
+							{profile?.department && profile.department.name !== 'Не указан' && (
+								<div className={styles.infoRow}>
+									<span className={styles.infoLabel}>Отдел:</span>
+									<span className={styles.infoValue}>{profile.department.name}</span>
+								</div>
+							)}
+							
 							{profile?.role && (
 								<div className={styles.infoRow}>
 									<span className={styles.infoLabel}>Роль:</span>
@@ -244,7 +404,6 @@ const EmployeeDashboard: React.FC = () => {
 					</div>
 				</div>
 
-				{/* Прогресс развития */}
 				{profile?.progress && (
 					<div className={styles.card}>
 						<div className={styles.progressSection}>
@@ -260,14 +419,13 @@ const EmployeeDashboard: React.FC = () => {
 							</div>
 							<div className={styles.progressStats}>
 								<span className={styles.completedCount}>
-									Выполнено: {profile.progress.completedMaterials} {" "} из {profile.progress.totalRequiredMaterials} материалов
+									Выполнено: {profile.progress.completedMaterials} из {profile.progress.totalRequiredMaterials} материалов
 								</span>
 							</div>
 						</div>
 					</div>
 				)}
 
-				{/* Блок последних обновлений */}
 				<div className={styles.card}>
 					<div className={styles.updatesSection}>
 						<h2 className={styles.sectionTitle}>Последние обновления</h2>

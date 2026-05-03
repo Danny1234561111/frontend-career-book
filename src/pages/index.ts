@@ -14,6 +14,7 @@ import DepartmentMaterialsPage from './manager/matetials';
 import ManagerDashboard from './manager/dashboard';
 import EmployeeDashboard from './user/dashboard';
 import AdminDashboard from './admin/dashboard';
+import JobHierarchyPage from './admin/job-hierarchy-page';
 
 export {
 	Auth,
@@ -32,4 +33,5 @@ export {
 	AdminDashboard,
 	ManagerDashboard,
 	EmployeeDashboard,
+	JobHierarchyPage
 };

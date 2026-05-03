@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ManagerUserTable } from '../../../component';
 import styles from './department.module.scss';
@@ -8,7 +7,9 @@ interface Employee {
 	fullName: string;
 	department: string;
 	currentPosition: string;
-	progress: number;
+	nextPosition: string;
+	currentProgress: number;
+	nextProgress: number;
 	createdAt: string;
 }
 
@@ -23,15 +24,39 @@ interface DepartmentEmployee {
 		id: string;
 		name: string;
 	};
-	progress?: {
+	currentJobLevelProgress?: {
 		toStudy: number;
-		inProgress: number;
+		studied: number;
+		count: number;
+	};
+	nextJobLevelProgress?: {
+		toStudy: number;
 		studied: number;
 		count: number;
 	};
 	jobTitle?: {
 		id: string;
 		name: string;
+	};
+	currentJobLevel?: {
+		id: string;
+		name: string;
+	};
+	nextJobLevel?: {
+		id: string;
+		name: string;
+	};
+}
+
+interface DepartmentInfo {
+	id: string;
+	name: string;
+	shortName: string;
+	progress?: {
+		toStudy: number;
+		inProgress: number;
+		studied: number;
+		count: number;
 	};
 }
 
@@ -47,12 +72,13 @@ const DepartmentPage: React.FC = () => {
 	
 	const [departmentStats, setDepartmentStats] = useState({
 		totalEmployees: 0,
-		avgCompetencyLevel: 0,
-		inProgressIpr: 0,
-		completedIpr: 0,
+		avgCurrentLevel: 0,
+		avgNextLevel: 0,
+		totalEmployeesReadyForNext: 0,
 	});
 	
 	const [employees, setEmployees] = useState<Employee[]>([]);
+	const [departmentName, setDepartmentName] = useState<string>('');
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -77,26 +103,6 @@ const DepartmentPage: React.FC = () => {
 		return null;
 	};
 
-	const fetchDepartmentInfo = async (departmentId: string) => {
-		try {
-			const response = await fetch(`http://localhost:5217/api/departments/${departmentId}/info`, {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${accessToken}`,
-					'accept': 'application/json',
-				},
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				return data;
-			}
-		} catch (error) {
-			console.error('Error fetching department info:', error);
-		}
-		return null;
-	};
-
 	const fetchDepartmentEmployees = async (departmentId: string) => {
 		try {
 			const response = await fetch(`http://localhost:5217/api/departments/${departmentId}/employees`, {
@@ -109,7 +115,7 @@ const DepartmentPage: React.FC = () => {
 
 			if (response.ok) {
 				const data: DepartmentEmployee[] = await response.json();
-				console.log('📋 Raw employees data from API (first employee):', data[0]);
+				console.log('📋 Raw employees data from API:', data);
 				return data;
 			}
 		} catch (error) {
@@ -126,17 +132,25 @@ const DepartmentPage: React.FC = () => {
 		return parts.join(' ') || 'Не указано';
 	};
 
-	const calculateEmployeeProgress = (empProgress?: { studied: number; count: number }) => {
-		if (!empProgress || empProgress.count === 0) return 0;
-		return Math.round((empProgress.studied / empProgress.count) * 100);
+	// Расчет прогресса по компетенциям для текущей должности
+	const calculateCurrentProgress = (progress?: { studied: number; count: number }): number => {
+		if (!progress || progress.count === 0) return 0;
+		return Math.round((progress.studied / progress.count) * 100);
 	};
 
-	const calculateAvgCompetencyLevel = (employees: Employee[]) => {
-		if (employees.length === 0) return 0;
-		const totalProgress = employees.reduce((sum, emp) => sum + emp.progress, 0);
-		const avgProgress = totalProgress / employees.length;
-		const avgLevel = avgProgress / 20;
-		return Math.round(avgLevel * 10) / 10;
+	// Расчет прогресса по компетенциям для следующей должности
+	const calculateNextProgress = (progress?: { studied: number; count: number }): number => {
+		if (!progress || progress.count === 0) return 0;
+		return Math.round((progress.studied / progress.count) * 100);
+	};
+
+	// Получение уровня из прогресса (1-5)
+	const getLevelFromProgress = (progressPercent: number): number => {
+		if (progressPercent >= 80) return 5;
+		if (progressPercent >= 60) return 4;
+		if (progressPercent >= 40) return 3;
+		if (progressPercent >= 20) return 2;
+		return 1;
 	};
 
 	useEffect(() => {
@@ -148,7 +162,7 @@ const DepartmentPage: React.FC = () => {
 				const profile = await fetchUserProfile();
 				
 				if (profile && profile.department?.id) {
-					const department = await fetchDepartmentInfo(profile.department.id);
+					setDepartmentName(profile.department.name);
 					const employeesData = await fetchDepartmentEmployees(profile.department.id);
 					
 					const totalEmployees = employeesData.length;
@@ -159,69 +173,71 @@ const DepartmentPage: React.FC = () => {
 					
 					if (employeesData.length > 0) {
 						const formattedEmployees: Employee[] = employeesData.map((emp, index) => {
+							const currentProgress = calculateCurrentProgress(emp.currentJobLevelProgress);
+							const nextProgress = calculateNextProgress(emp.nextJobLevelProgress);
+							
 							console.log(`\n👤 Сотрудник ${index + 1}:`);
-							console.log(`  ID: ${emp.id}`);
 							console.log(`  ФИО: ${emp.lastName} ${emp.firstName} ${emp.middleName || ''}`);
-							console.log(`  Отдел: ${emp.department?.name}`);
-							
-							const currentPosition = emp.jobTitle?.name || 'Не указана';
-							const progressPercent = calculateEmployeeProgress(emp.progress);
-							
-							console.log(`  Текущая должность: ${currentPosition}`);
-							console.log(`  Прогресс: ${progressPercent}%`);
+							console.log(`  Текущая должность: ${emp.jobTitle?.name || 'Не указана'}`);
+							console.log(`  Следующая должность: ${emp.nextJobLevel?.name || 'Не указана'}`);
+							console.log(`  Прогресс по текущей должности: ${currentProgress}% (${emp.currentJobLevelProgress?.studied || 0}/${emp.currentJobLevelProgress?.count || 0} компетенций)`);
+							console.log(`  Прогресс по следующей должности: ${nextProgress}% (${emp.nextJobLevelProgress?.studied || 0}/${emp.nextJobLevelProgress?.count || 0} компетенций)`);
 							
 							return {
 								id: emp.id,
 								fullName: formatFullName(emp.firstName, emp.lastName, emp.middleName),
 								department: emp.department?.name || profile.department.name,
-								currentPosition: currentPosition,
-								progress: progressPercent,
+								currentPosition: emp.jobTitle?.name || 'Не указана',
+								nextPosition: emp.nextJobLevel?.name || 'Не указана',
+								currentProgress: currentProgress,
+								nextProgress: nextProgress,
 								createdAt: new Date().toISOString().split('T')[0],
 							};
 						});
 						
 						setEmployees(formattedEmployees);
 						
-						let totalInProgress = 0;
-						let totalStudied = 0;
-						let totalMaterials = 0;
+						// Расчет статистики
+						let totalCurrentProgress = 0;
+						let totalNextProgress = 0;
+						let readyForNextCount = 0;
 						
-						employeesData.forEach(emp => {
-							if (emp.progress) {
-								totalInProgress += emp.progress.inProgress || 0;
-								totalStudied += emp.progress.studied || 0;
-								totalMaterials += emp.progress.count || 0;
+						formattedEmployees.forEach(emp => {
+							totalCurrentProgress += emp.currentProgress;
+							totalNextProgress += emp.nextProgress;
+							if (emp.currentProgress >= 100) {
+								readyForNextCount++;
 							}
 						});
 						
-						const avgLevel = calculateAvgCompetencyLevel(formattedEmployees);
-						const totalProgressPercent = totalMaterials > 0 
-							? Math.round((totalStudied / totalMaterials) * 100) 
+						const avgCurrentLevel = formattedEmployees.length > 0 
+							? Math.round((totalCurrentProgress / formattedEmployees.length) * 10) / 10
+							: 0;
+						const avgNextLevel = formattedEmployees.length > 0 
+							? Math.round((totalNextProgress / formattedEmployees.length) * 10) / 10
 							: 0;
 						
 						console.log('\n' + '='.repeat(80));
 						console.log('📊 Детальная статистика отдела:');
 						console.log('='.repeat(80));
 						console.log(`  Всего сотрудников: ${totalEmployees}`);
-						console.log(`  Сумма материалов в процессе: ${totalInProgress}`);
-						console.log(`  Сумма изученных материалов: ${totalStudied}`);
-						console.log(`  Сумма выданных материалов: ${totalMaterials}`);
-						console.log(`  Общий прогресс отдела: ${totalProgressPercent}%`);
-						console.log(`  Средний уровень компетенций: ${avgLevel}`);
+						console.log(`  Средний прогресс по текущей должности: ${avgCurrentLevel}%`);
+						console.log(`  Средний прогресс по следующей должности: ${avgNextLevel}%`);
+						console.log(`  Готовы к повышению: ${readyForNextCount}`);
 						console.log('='.repeat(80));
 						
 						setDepartmentStats({
 							totalEmployees: totalEmployees,
-							avgCompetencyLevel: avgLevel,
-							inProgressIpr: totalInProgress,
-							completedIpr: totalStudied,
+							avgCurrentLevel: avgCurrentLevel,
+							avgNextLevel: avgNextLevel,
+							totalEmployeesReadyForNext: readyForNextCount,
 						});
 					} else {
 						setDepartmentStats({
 							totalEmployees: 0,
-							avgCompetencyLevel: 0,
-							inProgressIpr: 0,
-							completedIpr: 0,
+							avgCurrentLevel: 0,
+							avgNextLevel: 0,
+							totalEmployeesReadyForNext: 0,
 						});
 					}
 				} else {
@@ -260,6 +276,7 @@ const DepartmentPage: React.FC = () => {
 		<div className={styles.page}>
 			<div className={styles.header}>
 				<h1 className={styles.title}>Мой отдел</h1>
+				{departmentName && <div className={styles.departmentName}>{departmentName}</div>}
 			</div>
 
 			<div className={styles.content}>
@@ -272,21 +289,21 @@ const DepartmentPage: React.FC = () => {
 					</div>
 					<div className={styles.statCard}>
 						<span className={styles.statValue}>
-							{departmentStats.avgCompetencyLevel}
+							{departmentStats.avgCurrentLevel}%
 						</span>
-						<span className={styles.statLabel}>Средний уровень</span>
+						<span className={styles.statLabel}>Прогресс по текущей должности</span>
 					</div>
 					<div className={styles.statCard}>
 						<span className={styles.statValue}>
-							{departmentStats.inProgressIpr}
+							{departmentStats.avgNextLevel}%
 						</span>
-						<span className={styles.statLabel}>ИПР в работе</span>
+						<span className={styles.statLabel}>Прогресс по следующей должности</span>
 					</div>
 					<div className={styles.statCard}>
 						<span className={styles.statValue}>
-							{departmentStats.completedIpr}
+							{departmentStats.totalEmployeesReadyForNext}
 						</span>
-						<span className={styles.statLabel}>ИПР выполнено</span>
+						<span className={styles.statLabel}>Готовы к повышению</span>
 					</div>
 				</div>
 

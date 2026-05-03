@@ -14,7 +14,48 @@
 	font-size: $font-xxxxl;
 	font-weight: 600;
 	color: $variables-textprimary;
-	margin: 0;
+	margin: 0 0 $spacing-sm 0;
+}
+
+.positionInfo {
+	display: flex;
+	gap: $spacing-lg;
+	margin-top: $spacing-sm;
+	flex-wrap: wrap;
+	
+	.currentPosition {
+		display: inline-flex;
+		align-items: center;
+		gap: $spacing-xs;
+		color: $primary-dark;
+		background: $primary-light;
+		padding: $spacing-xs $spacing-md;
+		border-radius: $spacing-xl;
+		font-size: $font-sm;
+		font-weight: 500;
+		
+		&::before {
+			content: '📍';
+			font-size: $font-md;
+		}
+	}
+	
+	.targetPosition {
+		display: inline-flex;
+		align-items: center;
+		gap: $spacing-xs;
+		color: $success;
+		background: $success-light;
+		padding: $spacing-xs $spacing-md;
+		border-radius: $spacing-xl;
+		font-size: $font-sm;
+		font-weight: 500;
+		
+		&::before {
+			content: '🎯';
+			font-size: $font-md;
+		}
+	}
 }
 
 .content {
@@ -135,36 +176,8 @@
 	}
 }
 
-.userStats {
-	display: flex;
-	gap: $spacing-xxl;
-	margin-bottom: $spacing-xxxl;
-	padding: $spacing-xl;
-	background: $background-light;
-	border-radius: $border-radius-lg;
-}
-
-.statItem {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	flex: 1;
-}
-
-.statValue {
-	font-size: $font-xxxxl;
-	font-weight: 700;
-	color: $variables-textprimary;
-}
-
-.statLabel {
-	font-size: $font-sm;
-	color: $variables-textsecondary;
-	margin-top: $spacing-xs;
-}
-
-.requiredSection,
-.otherSection {
+.currentJobSection,
+.nextJobSection {
 	margin-bottom: $spacing-xxxl;
 }
 
@@ -175,26 +188,63 @@
 	margin-bottom: $spacing-xl;
 	padding-bottom: $spacing-md;
 	border-bottom: 2px solid $border-color;
+	flex-wrap: wrap;
+	
+	.sectionIcon {
+		font-size: $font-xxl;
+	}
+	
+	.sectionTitle {
+		font-size: $font-xl;
+		font-weight: 600;
+		color: $variables-textprimary;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: $spacing-md;
+		flex-wrap: wrap;
+	}
+	
+	.jobTitleBadge {
+		background: $derivatives-gray-20;
+		color: $variables-textprimary;
+		padding: $spacing-xs $spacing-md;
+		border-radius: $spacing-xl;
+		font-size: $font-xs;
+		font-weight: 500;
+	}
+	
+	.statsRow {
+		display: flex;
+		gap: $spacing-sm;
+		margin-left: auto;
+		
+		.statBadge {
+			background: $derivatives-gray-20;
+			color: $variables-textsecondary;
+			padding: $spacing-xs $spacing-md;
+			border-radius: $spacing-xl;
+			font-size: $font-xs;
+			font-weight: 500;
+		}
+	}
+	
+	.sectionBadge {
+		background: $primary;
+		color: $white;
+		padding: $spacing-xs $spacing-md;
+		border-radius: $spacing-xl;
+		font-size: $font-xs;
+		font-weight: 500;
+	}
 }
 
-.sectionIcon {
-	font-size: $font-xxl;
+.currentJobSection .sectionHeader {
+	border-bottom-color: $primary;
 }
 
-.sectionTitle {
-	font-size: $font-xl;
-	font-weight: 600;
-	color: $variables-textprimary;
-	margin: 0;
-}
-
-.sectionBadge {
-	background: $derivatives-gray-20;
-	color: $variables-textprimary;
-	padding: 2px $spacing-sm;
-	border-radius: $spacing-xl;
-	font-size: $font-xs;
-	font-weight: 500;
+.nextJobSection .sectionHeader {
+	border-bottom-color: $success;
 }
 
 .tableWrapper {
@@ -430,15 +480,18 @@
 		padding: $spacing-lg;
 	}
 	
-	.userStats {
+	.positionInfo {
 		flex-direction: column;
-		gap: $spacing-md;
+		gap: $spacing-sm;
 	}
 	
-	.statItem {
-		flex-direction: row;
-		justify-content: space-between;
-		padding: $spacing-sm 0;
+	.sectionHeader {
+		flex-direction: column;
+		align-items: flex-start;
+		
+		.statsRow {
+			margin-left: 0;
+		}
 	}
 	
 	.table {

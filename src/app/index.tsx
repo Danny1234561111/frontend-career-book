@@ -15,6 +15,7 @@ import {
     AdminDashboard,
     ManagerDashboard,
     EmployeeDashboard,
+    JobHierarchyPage
 } from '../pages';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/strore';
@@ -345,6 +346,7 @@ export const App = () => {
                 <Route path='/profile' element={<ProfilePage />} />
                 <Route path='/materials' element={<MaterialsPage />} />
                 <Route path='/my-competencies' element={<MyCompetenciesPage />} />
+                <Route path='/job-competencies' element={<JobHierarchyPage />} />
                 <Route path='/ipr' element={<IprPage />} />
                 <Route path='/department/main' element={<DepartmentPage />} />
                 <Route path='/department/materials' element={<DepartmentMaterialsPage />} />

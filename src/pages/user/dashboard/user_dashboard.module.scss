@@ -226,3 +226,74 @@
 		font-size: $font-xxl;
 	}
 }
+// Добавьте или обновите эти стили
+
+.positionInfo {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-md;
+	margin-top: $spacing-md;
+}
+
+.infoRow {
+	display: flex;
+	align-items: center;
+	gap: $spacing-lg;
+	padding: $spacing-xs 0;
+	
+	.infoLabel {
+		min-width: 140px;
+		font-size: $font-sm;
+		font-weight: 500;
+		color: $variables-textsecondary;
+	}
+	
+	.infoValueWrapper {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: $spacing-sm;
+	}
+	
+	.infoValue {
+		font-size: $font-md;
+		font-weight: 500;
+		color: $variables-textprimary;
+	}
+	
+	.specializationBadge {
+		display: inline-flex;
+		align-items: center;
+		gap: $spacing-xs;
+		padding: $spacing-xs $spacing-md;
+		background: $primary-light;
+		color: $primary-dark;
+		border-radius: $spacing-xl;
+		font-size: $font-xs;
+		font-weight: 500;
+		
+		&::before {
+			content: '📌';
+			font-size: $font-xs;
+			margin-right: $spacing-xs;
+		}
+	}
+}
+
+// Мобильная версия
+@include mobile {
+	.infoRow {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $spacing-xs;
+		
+		.infoLabel {
+			min-width: auto;
+		}
+		
+		.infoValueWrapper {
+			width: 100%;
+		}
+	}
+}

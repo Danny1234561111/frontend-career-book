@@ -1,0 +1,182 @@
+@import '../../../variables.module';
+
+.page {
+	padding: $spacing-xxl;
+	background: $variables-background;
+	min-height: 100vh;
+}
+
+.header {
+	margin-bottom: $spacing-xxl;
+}
+
+.title {
+	font-size: $font-xxxxl;
+	font-weight: 600;
+	color: $variables-textprimary;
+	margin: 0;
+}
+
+.content {
+	background: $variables-containers-background;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	padding: $spacing-xxl;
+	box-shadow: $shadow-md;
+}
+
+.loading {
+	text-align: center;
+	padding: 60px $spacing-xl;
+	font-size: $font-xl;
+	color: $variables-textsecondary;
+}
+
+.successMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $success;
+	font-size: $font-md;
+	background: $success-light;
+	border-radius: $border-radius-md;
+	border-left: 4px solid $success;
+}
+
+.errorMessage {
+	margin-bottom: $spacing-lg;
+	padding: $spacing-md $spacing-lg;
+	color: $danger;
+	font-size: $font-md;
+	background: $danger-light;
+	border-radius: $border-radius-md;
+	border-left: 4px solid $danger;
+}
+
+.tabs {
+	display: flex;
+	gap: $spacing-sm;
+	margin-bottom: $spacing-xxl;
+	border-bottom: 1px solid $border-color;
+}
+
+.tab {
+	padding: $spacing-md $spacing-xl;
+	font-size: $font-md;
+	font-weight: 500;
+	color: $variables-textsecondary;
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	cursor: pointer;
+	transition: all 0.3s;
+
+	&:hover {
+		color: $primary;
+	}
+
+	&.active {
+		color: $primary;
+		border-bottom-color: $primary;
+	}
+}
+
+.toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: $spacing-xl;
+}
+
+.addBtn {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+	padding: $spacing-sm $spacing-xl;
+	color: $white;
+	font-weight: 500;
+	font-size: $font-md;
+	background: $primary;
+	border: none;
+	border-radius: $border-radius-md;
+	cursor: pointer;
+	transition: all 0.3s;
+
+	&:hover {
+		background: $primary-hover;
+		transform: translateY(-1px);
+		box-shadow: $shadow-sm;
+	}
+}
+
+.addIcon {
+	font-weight: 400;
+	font-size: $font-xl;
+}
+
+.tableWrapper {
+	overflow-x: auto;
+	border: 1px solid $border-color;
+	border-radius: $windows-windows-and-blocks-corner-angle;
+	background: $white;
+}
+
+.table {
+	width: 100%;
+	min-width: 500px;
+	border-collapse: collapse;
+
+	th {
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
+		font-weight: 600;
+		font-size: $font-sm;
+		text-align: left;
+		background: $derivatives-gray-10;
+		border-bottom: 2px solid $border-color;
+	}
+
+	td {
+		padding: $spacing-md $spacing-lg;
+		color: $variables-textprimary;
+		font-size: $font-md;
+		vertical-align: middle;
+		border-bottom: 1px solid $border-color;
+	}
+
+	tbody tr {
+		transition: background 0.2s;
+
+		&:hover {
+			background: $derivatives-gray-10;
+		}
+	}
+}
+
+.emptyState {
+	padding: $spacing-xxl;
+	text-align: center;
+	color: $variables-textsecondary;
+	font-size: $font-md;
+}
+
+@include mobile {
+	.page {
+		padding: $spacing-lg;
+	}
+
+	.title {
+		font-size: $font-xxl;
+	}
+
+	.content {
+		padding: $spacing-lg;
+	}
+
+	.tab {
+		padding: $spacing-sm $spacing-lg;
+		font-size: $font-sm;
+	}
+
+	.addBtn {
+		width: 100%;
+		justify-content: center;
+	}
+}
