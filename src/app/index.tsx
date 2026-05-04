@@ -37,9 +37,9 @@ export const App = () => {
     // Функция для получения тестового токена
     const getTestTokens = async () => {
         try {
-            console.log('Attempting to get test token from: http://localhost:5097/api/AuthTest/getTestTokens');
+            console.log('Attempting to get test token from: http://localhost:5217/api/auth/test-tokens');
             
-            const response = await fetch('http://localhost:5097/api/AuthTest/getTestTokens', {
+            const response = await fetch('http://localhost:5217/api/auth/test-tokens', {
                 method: 'POST',
                 headers: {
                     'accept': 'text/plain',
