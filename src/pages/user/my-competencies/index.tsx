@@ -434,8 +434,8 @@ const MyCompetenciesPage = () => {
 		const labels: Record<number, string> = {
 			0: 'Не определен',
 			1: 'Базовые знания',
-			2: 'Эксперт',
-			3: 'Профессионал',
+			2: 'Профессионал',
+			3: 'Эксперт',
 		};
 		return labels[level] || `Уровень ${level}`;
 	};
