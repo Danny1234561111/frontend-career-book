@@ -505,4 +505,25 @@
 	.descriptionCell {
 		max-width: 150px;
 	}
+	.otherSection {
+	margin-bottom: $spacing-xxxl;
+	
+	.sectionHeader {
+		border-bottom-color: $warning;
+	}
+	
+	.sectionIcon {
+		color: $warning;
+	}
+}
+
+.typeBadge {
+	display: inline-block;
+	margin-left: $spacing-sm;
+	padding: 2px $spacing-sm;
+	background: $derivatives-gray-20;
+	color: $variables-textsecondary;
+	border-radius: $spacing-xl;
+	font-size: $font-xs;
+}
 }

@@ -36,6 +36,13 @@ interface EducationalMaterialCompetency {
 	} | null;
 }
 
+interface UserProfile {
+	fullName: string;
+	currentPosition: string;
+	targetPosition: string;
+	department: { id: string; name: string };
+}
+
 const MyCompetenciesPage = () => {
 	const navigate = useNavigate();
 	const user = useAppSelector((state) => state.auth.user);
@@ -43,21 +50,55 @@ const MyCompetenciesPage = () => {
 	
 	const [activeTab, setActiveTab] = useState<'my' | 'all'>('my');
 	const [filterByBlock, setFilterByBlock] = useState<string>('all');
-	const [competencies, setCompetencies] = useState<Competency[]>([]);
+	// Три блока компетенций
+	const [currentLevelCompetencies, setCurrentLevelCompetencies] = useState<Competency[]>([]);
 	const [nextLevelCompetencies, setNextLevelCompetencies] = useState<Competency[]>([]);
+	const [allMyCompetencies, setAllMyCompetencies] = useState<Competency[]>([]);
 	const [allCompetencies, setAllCompetencies] = useState<CompetencyFull[]>([]);
 	const [blocks, setBlocks] = useState<string[]>(['all']);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [addingCompetencyId, setAddingCompetencyId] = useState<string | null>(null);
+	const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-	const fetchMaterialsCountForNextLevel = async (competencyId: string): Promise<number> => {
+	// Получение профиля пользователя
+	const fetchUserProfile = async () => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return null;
+
+			const response = await fetch('http://localhost:5217/api/users/profile', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				setUserProfile({
+					fullName: data.fullName,
+					currentPosition: data.currentPosition || data.jobTitle?.name || 'Не указана',
+					targetPosition: data.targetPosition || data.nextJobLevel?.name || 'Не указана',
+					department: data.department,
+				});
+				return data;
+			}
+		} catch (error) {
+			console.error('Error fetching user profile:', error);
+		}
+		return null;
+	};
+
+	const fetchMaterialsCountForTargetLevel = async (competencyId: string, targetLevelValue: number): Promise<number> => {
 		try {
 			const token = localStorage.getItem('accessToken');
 			if (!token) return 0;
 			
-			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}/next-level`, {
+			// Получаем материалы для целевого уровня
+			const response = await fetch(`http://localhost:5217/api/educational-material-competencies/by-competency/${competencyId}`, {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
@@ -67,11 +108,16 @@ const MyCompetenciesPage = () => {
 
 			if (response.ok) {
 				const data: EducationalMaterialCompetency[] = await response.json();
-				return data.length;
+				// Фильтруем материалы по целевому уровню
+				const filtered = data.filter(item => {
+					const targetValue = item.targetLevel?.value;
+					return targetValue && parseInt(targetValue) === targetLevelValue;
+				});
+				return filtered.length;
 			}
 			return 0;
 		} catch (error) {
-			console.error(`Error fetching next-level materials for competency ${competencyId}:`, error);
+			console.error(`Error fetching materials for competency ${competencyId}:`, error);
 			return 0;
 		}
 	};
@@ -100,16 +146,13 @@ const MyCompetenciesPage = () => {
 		}
 	};
 
-	const fetchMyCompetencies = async () => {
+	// Получение компетенций для текущего уровня должности
+	const fetchCurrentLevelCompetencies = async () => {
 		try {
 			const token = localStorage.getItem('accessToken');
-			if (!token) {
-				setError('Нет токена доступа');
-				setIsLoading(false);
-				return;
-			}
+			if (!token) return;
 
-			const response = await fetch('http://localhost:5217/api/competencies/own', {
+			const response = await fetch('http://localhost:5217/api/competencies/own/current-level', {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${token}`,
@@ -122,6 +165,8 @@ const MyCompetenciesPage = () => {
 				const transformedCompetencies: Competency[] = [];
 				const blockNames: Set<string> = new Set();
 				
+				console.log('📊 Current level competencies data:', data);
+				
 				if (data.blocks && Array.isArray(data.blocks)) {
 					for (const block of data.blocks) {
 						blockNames.add(block.name);
@@ -130,11 +175,12 @@ const MyCompetenciesPage = () => {
 								for (const comp of group.competencies || []) {
 									const currentLevel = comp.currentLevel || 0;
 									const targetLevel = comp.requiredLevel || 0;
-									const nextLevel = Math.min(currentLevel + 1, targetLevel);
+									const nextLevelValue = Math.min(currentLevel + 1, targetLevel);
 									
+									// Получаем количество материалов для следующего уровня
 									let materialsCount = 0;
 									if (currentLevel < targetLevel) {
-										materialsCount = await fetchMaterialsCountForNextLevel(comp.id);
+										materialsCount = await fetchMaterialsCountForTargetLevel(comp.id, nextLevelValue);
 									}
 									
 									transformedCompetencies.push({
@@ -143,7 +189,7 @@ const MyCompetenciesPage = () => {
 										block: block.name,
 										currentLevel: currentLevel,
 										targetLevel: targetLevel,
-										nextLevel: nextLevel,
+										nextLevel: nextLevelValue,
 										progress: comp.progress?.percent || 0,
 										materialsCount: materialsCount,
 									});
@@ -152,17 +198,18 @@ const MyCompetenciesPage = () => {
 						}
 					}
 				}
-				setCompetencies(transformedCompetencies);
+				setCurrentLevelCompetencies(transformedCompetencies);
 				setBlocks(['all', ...Array.from(blockNames)]);
 			} else if (response.status === 401) {
 				setError('Сессия истекла. Обновите страницу.');
 			}
 		} catch (error) {
-			console.error('Error fetching competencies:', error);
+			console.error('Error fetching current level competencies:', error);
 			setError('Не удалось подключиться к серверу');
 		}
 	};
 
+	// Получение компетенций для следующего уровня должности
 	const fetchNextLevelCompetencies = async () => {
 		try {
 			const token = localStorage.getItem('accessToken');
@@ -180,6 +227,8 @@ const MyCompetenciesPage = () => {
 				const data = await response.json();
 				const transformedCompetencies: Competency[] = [];
 				
+				console.log('🎯 Next level competencies data:', data);
+				
 				if (data.blocks && Array.isArray(data.blocks)) {
 					for (const block of data.blocks) {
 						for (const category of block.categories || []) {
@@ -187,11 +236,11 @@ const MyCompetenciesPage = () => {
 								for (const comp of group.competencies || []) {
 									const currentLevel = comp.currentLevel || 0;
 									const targetLevel = comp.requiredLevel || 0;
-									const nextLevel = Math.min(currentLevel + 1, targetLevel);
+									const nextLevelValue = Math.min(currentLevel + 1, targetLevel);
 									
 									let materialsCount = 0;
 									if (currentLevel < targetLevel) {
-										materialsCount = await fetchMaterialsCountForNextLevel(comp.id);
+										materialsCount = await fetchMaterialsCountForTargetLevel(comp.id, nextLevelValue);
 									}
 									
 									transformedCompetencies.push({
@@ -200,7 +249,7 @@ const MyCompetenciesPage = () => {
 										block: block.name,
 										currentLevel: currentLevel,
 										targetLevel: targetLevel,
-										nextLevel: nextLevel,
+										nextLevel: nextLevelValue,
 										progress: comp.progress?.percent || 0,
 										materialsCount: materialsCount,
 									});
@@ -213,6 +262,62 @@ const MyCompetenciesPage = () => {
 			}
 		} catch (error) {
 			console.error('Error fetching next level competencies:', error);
+		}
+	};
+
+	// Получение всех компетенций пользователя (включая добавленные)
+	const fetchAllMyCompetencies = async () => {
+		try {
+			const token = localStorage.getItem('accessToken');
+			if (!token) return;
+
+			const response = await fetch('http://localhost:5217/api/competencies/own', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${token}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				const transformedCompetencies: Competency[] = [];
+				
+				console.log('📚 All my competencies data:', data);
+				
+				if (data.blocks && Array.isArray(data.blocks)) {
+					for (const block of data.blocks) {
+						for (const category of block.categories || []) {
+							for (const group of category.groups || []) {
+								for (const comp of group.competencies || []) {
+									const currentLevel = comp.currentLevel || 0;
+									const targetLevel = comp.requiredLevel || 0;
+									const nextLevelValue = Math.min(currentLevel + 1, targetLevel);
+									
+									let materialsCount = 0;
+									if (currentLevel < targetLevel) {
+										materialsCount = await fetchMaterialsCountForTargetLevel(comp.id, nextLevelValue);
+									}
+									
+									transformedCompetencies.push({
+										id: comp.id,
+										name: comp.name,
+										block: block.name,
+										currentLevel: currentLevel,
+										targetLevel: targetLevel,
+										nextLevel: nextLevelValue,
+										progress: comp.progress?.percent || 0,
+										materialsCount: materialsCount,
+									});
+								}
+							}
+						}
+					}
+				}
+				setAllMyCompetencies(transformedCompetencies);
+			}
+		} catch (error) {
+			console.error('Error fetching all my competencies:', error);
 		}
 	};
 
@@ -286,13 +391,14 @@ const MyCompetenciesPage = () => {
 
 			if (response.ok || response.status === 204 || response.status === 201) {
 				setSuccessMessage('Компетенция успешно добавлена');
-				await fetchMyCompetencies();
-				await fetchNextLevelCompetencies();
-				await fetchAllCompetencies();
+				await Promise.all([
+					fetchCurrentLevelCompetencies(),
+					fetchNextLevelCompetencies(),
+					fetchAllMyCompetencies(),
+					fetchAllCompetencies()
+				]);
 				setTimeout(() => setSuccessMessage(null), 3000);
 			} else {
-				const errorText = await response.text();
-				console.error('Add competency error:', response.status, errorText);
 				setError(`Не удалось добавить компетенцию: ${response.status}`);
 				setTimeout(() => setError(null), 3000);
 			}
@@ -306,15 +412,17 @@ const MyCompetenciesPage = () => {
 	};
 
 	const getAddedCompetencyIds = () => {
-		return new Set(competencies.map(c => c.id));
+		return new Set(allMyCompetencies.map(c => c.id));
 	};
 
 	useEffect(() => {
 		const loadData = async () => {
 			setIsLoading(true);
+			await fetchUserProfile();
 			await Promise.all([
-				fetchMyCompetencies(),
+				fetchCurrentLevelCompetencies(),
 				fetchNextLevelCompetencies(),
+				fetchAllMyCompetencies(),
 				fetchAllCompetencies()
 			]);
 			setIsLoading(false);
@@ -327,7 +435,7 @@ const MyCompetenciesPage = () => {
 			0: 'Не определен',
 			1: 'Базовые знания',
 			2: 'Эксперт',
-			3: 'Проффесионал',
+			3: 'Профессионал',
 		};
 		return labels[level] || `Уровень ${level}`;
 	};
@@ -374,10 +482,10 @@ const MyCompetenciesPage = () => {
 							<th>Компетенция</th>
 							<th>Блок</th>
 							<th>Текущий уровень</th>
-							<th>Следующий уровень</th>
+							<th>Целевой уровень</th>
 							{showProgress && <th>Прогресс</th>}
 							<th>Материалы для изучения</th>
-							</tr>
+						</tr>
 					</thead>
 					<tbody>
 						{filteredList.map((comp) => {
@@ -396,8 +504,8 @@ const MyCompetenciesPage = () => {
 										</span>
 										</td>
 									<td className={styles.levelCell}>
-										<span className={`${styles.levelBadge} ${getLevelClass(comp.nextLevel)}`}>
-											{isTargetReached ? '✓ Достигнут' : getLevelLabel(comp.nextLevel)}
+										<span className={`${styles.levelBadge} ${getLevelClass(comp.targetLevel)}`}>
+											{isTargetReached ? '✓ Достигнут' : getLevelLabel(comp.targetLevel)}
 										</span>
 										</td>
 									{showProgress && (
@@ -427,7 +535,7 @@ const MyCompetenciesPage = () => {
 										)}
 										{!isTargetReached && hasMaterials && (
 											<div className={styles.materialsHint}>
-												Для перехода на уровень {getLevelLabel(comp.nextLevel)}
+												Для перехода на уровень {getLevelLabel(comp.targetLevel)}
 											</div>
 										)}
 										{!isTargetReached && !hasMaterials && comp.currentLevel < comp.targetLevel && (
@@ -440,13 +548,8 @@ const MyCompetenciesPage = () => {
 												Максимальный уровень достигнут
 											</div>
 										)}
-										{!isTargetReached && hasMaterials && comp.materialsCount > 0 && (
-											<div className={styles.materialsInfo}>
-												Осталось изучить: {Math.ceil(comp.materialsCount * (1 - comp.progress / 100))} {getMaterialsWord(Math.ceil(comp.materialsCount * (1 - comp.progress / 100)))}
-											</div>
-										)}
-									</td>
-								</tr>
+										</td>
+									</tr>
 							);
 						})}
 					</tbody>
@@ -478,7 +581,9 @@ const MyCompetenciesPage = () => {
 					<tbody>
 						{availableCompetencies.map((comp) => (
 							<tr key={comp.id}>
-								<td className={styles.competencyName}>{comp.name}</td>
+								<td className={styles.competencyName}>{comp.name}
+									{comp.type && <span className={styles.typeBadge}>{comp.type}</span>}
+								</td>
 								<td className={styles.blockCell}>
 									<span className={styles.blockBadge}>{comp.hierarchy?.name || 'Без блока'}</span>
 								</td>
@@ -504,9 +609,9 @@ const MyCompetenciesPage = () => {
 		);
 	};
 
-	const completedCount = competencies.filter(c => c.currentLevel >= c.targetLevel).length;
-	const averageProgress = competencies.length > 0
-		? Math.round(competencies.reduce((acc, c) => acc + c.progress, 0) / competencies.length)
+	const currentLevelCompletedCount = currentLevelCompetencies.filter(c => c.currentLevel >= c.targetLevel).length;
+	const currentLevelAverageProgress = currentLevelCompetencies.length > 0
+		? Math.round(currentLevelCompetencies.reduce((acc, c) => acc + c.progress, 0) / currentLevelCompetencies.length)
 		: 0;
 
 	if (isLoading) {
@@ -521,6 +626,14 @@ const MyCompetenciesPage = () => {
 		<div className={styles.page}>
 			<div className={styles.header}>
 				<h1 className={styles.title}>Мои компетенции</h1>
+				{userProfile && (
+					<div className={styles.positionInfo}>
+						<span className={styles.currentPosition}>📍 {userProfile.currentPosition}</span>
+						{userProfile.targetPosition && userProfile.targetPosition !== 'Не указана' && (
+							<span className={styles.targetPosition}>🎯 {userProfile.targetPosition}</span>
+						)}
+					</div>
+				)}
 			</div>
 
 			<div className={styles.content}>
@@ -560,46 +673,56 @@ const MyCompetenciesPage = () => {
 							</div>
 						)}
 
-						{competencies.length > 0 && (
-							<div className={styles.userStats}>
-								<div className={styles.statItem}>
-									<span className={styles.statValue}>{completedCount}</span>
-									<span className={styles.statLabel}>Выполнено</span>
+						{/* Блок 1: Компетенции для текущего уровня */}
+						{currentLevelCompetencies.length > 0 && (
+							<div className={styles.currentJobSection}>
+								<div className={styles.sectionHeader}>
+									<span className={styles.sectionIcon}>💼</span>
+									<h2 className={styles.sectionTitle}>
+										Компетенции для текущего уровня
+										{userProfile?.currentPosition && userProfile.currentPosition !== 'Не указана' && (
+											<span className={styles.jobTitleBadge}>{userProfile.currentPosition}</span>
+										)}
+									</h2>
+									<div className={styles.statsRow}>
+										<span className={styles.statBadge}>✅ {currentLevelCompletedCount}/{currentLevelCompetencies.length}</span>
+										<span className={styles.statBadge}>📊 {currentLevelAverageProgress}%</span>
+									</div>
 								</div>
-								<div className={styles.statItem}>
-									<span className={styles.statValue}>{competencies.length}</span>
-									<span className={styles.statLabel}>Всего</span>
-								</div>
-								<div className={styles.statItem}>
-									<span className={styles.statValue}>{averageProgress}%</span>
-									<span className={styles.statLabel}>Общий прогресс</span>
-								</div>
+								{renderCompetencyTable(currentLevelCompetencies, true)}
 							</div>
 						)}
 
+						{/* Блок 2: Компетенции для следующего уровня */}
 						{nextLevelCompetencies.length > 0 && (
-							<div className={styles.requiredSection}>
+							<div className={styles.nextJobSection}>
 								<div className={styles.sectionHeader}>
 									<span className={styles.sectionIcon}>🎯</span>
-									<h2 className={styles.sectionTitle}>Компетенции для следующей должности</h2>
+									<h2 className={styles.sectionTitle}>
+										Компетенции для следующего уровня
+										{userProfile?.targetPosition && userProfile.targetPosition !== 'Не указана' && (
+											<span className={styles.jobTitleBadge}>{userProfile.targetPosition}</span>
+										)}
+									</h2>
 									<span className={styles.sectionBadge}>{nextLevelCompetencies.length}</span>
 								</div>
 								{renderCompetencyTable(nextLevelCompetencies, true)}
 							</div>
 						)}
 
-						{competencies.length > 0 && (
+						{/* Блок 3: Все мои компетенции */}
+						{allMyCompetencies.length > 0 && (
 							<div className={styles.otherSection}>
 								<div className={styles.sectionHeader}>
 									<span className={styles.sectionIcon}>📚</span>
 									<h2 className={styles.sectionTitle}>Все мои компетенции</h2>
-									<span className={styles.sectionBadge}>{competencies.length}</span>
+									<span className={styles.sectionBadge}>{allMyCompetencies.length}</span>
 								</div>
-								{renderCompetencyTable(competencies, true)}
+								{renderCompetencyTable(allMyCompetencies, true)}
 							</div>
 						)}
 
-						{competencies.length === 0 && (
+						{currentLevelCompetencies.length === 0 && nextLevelCompetencies.length === 0 && allMyCompetencies.length === 0 && (
 							<div className={styles.emptyState}>
 								<p>У вас нет назначенных компетенций</p>
 								<p className={styles.emptyHint}>Перейдите на вкладку "Все компетенции", чтобы добавить их</p>

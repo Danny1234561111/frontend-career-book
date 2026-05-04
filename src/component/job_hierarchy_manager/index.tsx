@@ -1,5 +1,3 @@
-// job-hierarchy-manager.tsx
-
 import React, { useState, useEffect } from 'react';
 import styles from './job_hierarchy_manager.module.scss';
 
@@ -48,6 +46,14 @@ interface Level {
 	value: number;
 }
 
+interface JobTitleRequirement {
+	id: string;
+	jobTitleId: string;
+	jobLevelProfLevelId: string;
+	required: boolean;
+	significance: number;
+}
+
 const JobHierarchyManager: React.FC = () => {
 	const accessToken = localStorage.getItem('accessToken');
 	
@@ -55,6 +61,7 @@ const JobHierarchyManager: React.FC = () => {
 	const [jobLevels, setJobLevels] = useState<JobLevel[]>([]);
 	const [jobHierarchies, setJobHierarchies] = useState<JobHierarchy[]>([]);
 	const [jobLevelProfLevels, setJobLevelProfLevels] = useState<JobLevelProfLevel[]>([]);
+	const [jobTitleRequirements, setJobTitleRequirements] = useState<JobTitleRequirement[]>([]);
 	const [competencies, setCompetencies] = useState<Competency[]>([]);
 	const [levels, setLevels] = useState<Level[]>([]);
 	
@@ -64,7 +71,12 @@ const JobHierarchyManager: React.FC = () => {
 	
 	const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
 	const [expandedLevels, setExpandedLevels] = useState<Set<string>>(new Set());
-	const [selectedJobLevel, setSelectedJobLevel] = useState<{ jobLevelId: string; jobLevelName: string; jobTitleName: string } | null>(null);
+	const [selectedJobLevel, setSelectedJobLevel] = useState<{ 
+		jobLevelId: string; 
+		jobLevelName: string; 
+		jobTitleName: string;
+		jobTitleId: string;
+	} | null>(null);
 	const [showAddCompetencyModal, setShowAddCompetencyModal] = useState(false);
 	const [showAddJobTitleModal, setShowAddJobTitleModal] = useState(false);
 	const [showAddJobLevelModal, setShowAddJobLevelModal] = useState(false);
@@ -82,6 +94,8 @@ const JobHierarchyManager: React.FC = () => {
 		selectedJobTitleId: '',
 		selectedJobLevelId: '',
 		hierarchyLevel: 1,
+		requirementSignificance: 1,
+		requirementRequired: true,
 	});
 
 	// Получение должностей
@@ -117,7 +131,28 @@ const JobHierarchyManager: React.FC = () => {
 		}
 	}, [searchQuery, jobTitles]);
 
-	// Остальные функции получения данных
+	// Получение требований к должностям
+	const fetchJobTitleRequirements = async () => {
+		try {
+			const response = await fetch('http://localhost:5217/api/job-title-requirements?withDeleted=false', {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'accept': 'application/json',
+				},
+			});
+
+			if (response.ok) {
+				const data: JobTitleRequirement[] = await response.json();
+				setJobTitleRequirements(data);
+				console.log('📋 Job Title Requirements:', data);
+			}
+		} catch (error) {
+			console.error('Error fetching job title requirements:', error);
+		}
+	};
+
+	// Получение остальных данных
 	const fetchJobLevels = async () => {
 		try {
 			const response = await fetch('http://localhost:5217/api/joblevels?withDeleted=false', {
@@ -226,6 +261,69 @@ const JobHierarchyManager: React.FC = () => {
 			}
 		} catch (error) {
 			console.error('Error fetching levels:', error);
+		}
+	};
+
+	// Создание требования к должности
+	const createJobTitleRequirement = async (jobTitleId: string, jobLevelProfLevelId: string) => {
+		try {
+			const response = await fetch('http://localhost:5217/api/job-title-requirements', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					jobTitleId: jobTitleId,
+					jobLevelProfLevelId: jobLevelProfLevelId,
+					significance: formData.requirementSignificance,
+					required: formData.requirementRequired,
+				}),
+			});
+
+			if (response.ok) {
+				console.log('✅ Job title requirement created successfully');
+				return true;
+			} else {
+				console.error('Failed to create job title requirement:', await response.text());
+				return false;
+			}
+		} catch (error) {
+			console.error('Error creating job title requirement:', error);
+			return false;
+		}
+	};
+
+	// Удаление требования к должности
+	const deleteJobTitleRequirement = async (jobTitleId: string, jobLevelProfLevelId: string) => {
+		try {
+			// Находим requirement по jobTitleId и jobLevelProfLevelId
+			const requirement = jobTitleRequirements.find(
+				req => req.jobTitleId === jobTitleId && req.jobLevelProfLevelId === jobLevelProfLevelId
+			);
+
+			if (!requirement) {
+				console.log('No requirement found to delete');
+				return true;
+			}
+
+			const response = await fetch(`http://localhost:5217/api/job-title-requirements/${requirement.id}`, {
+				method: 'DELETE',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+				},
+			});
+
+			if (response.ok) {
+				console.log('✅ Job title requirement deleted successfully');
+				return true;
+			} else {
+				console.error('Failed to delete job title requirement:', await response.text());
+				return false;
+			}
+		} catch (error) {
+			console.error('Error deleting job title requirement:', error);
+			return false;
 		}
 	};
 
@@ -352,6 +450,7 @@ const JobHierarchyManager: React.FC = () => {
 		setIsSaving(true);
 
 		try {
+			// 1. Создаем связь компетенции с уровнем должности
 			const response = await fetch('http://localhost:5217/api/job-level-prof-levels', {
 				method: 'POST',
 				headers: {
@@ -366,13 +465,29 @@ const JobHierarchyManager: React.FC = () => {
 			});
 
 			if (response.ok) {
-				setSuccessMessage('Компетенция добавлена');
+				const newJobLevelProfLevel: JobLevelProfLevel = await response.json();
+				console.log('✅ Job Level Prof Level created:', newJobLevelProfLevel);
+				
+				// 2. Создаем требование к должности (requirement)
+				const requirementCreated = await createJobTitleRequirement(
+					selectedJobLevel.jobTitleId,
+					newJobLevelProfLevel.id
+				);
+				
+				if (requirementCreated) {
+					setSuccessMessage('Компетенция и требование успешно добавлены');
+				} else {
+					setSuccessMessage('Компетенция добавлена, но возникла ошибка при создании требования');
+				}
+				
 				await refreshData();
 				setShowAddCompetencyModal(false);
 				setSelectedJobLevel(null);
 				setFormData({ ...formData, competencyId: '', minLevelId: '' });
 				setTimeout(() => setSuccessMessage(null), 3000);
 			} else {
+				const errorText = await response.text();
+				console.error('Failed to create job level prof level:', errorText);
 				setError('Ошибка при добавлении компетенции');
 				setTimeout(() => setError(null), 3000);
 			}
@@ -389,6 +504,25 @@ const JobHierarchyManager: React.FC = () => {
 		if (!confirm(`Удалить компетенцию "${competencyName}"?`)) return;
 
 		try {
+			// Находим связь, которую удаляем
+			const linkToDelete = jobLevelProfLevels.find(item => item.id === linkId);
+			
+			if (!linkToDelete) {
+				setError('Связь не найдена');
+				return;
+			}
+
+			// 1. Удаляем требование к должности
+			const requirementDeleted = await deleteJobTitleRequirement(
+				selectedJobLevel?.jobTitleId || '',
+				linkId
+			);
+			
+			if (!requirementDeleted) {
+				console.warn('Failed to delete requirement, but continuing with competency deletion');
+			}
+			
+			// 2. Удаляем связь компетенции с уровнем должности
 			const response = await fetch(`http://localhost:5217/api/job-level-prof-levels/${linkId}`, {
 				method: 'DELETE',
 				headers: {
@@ -397,7 +531,9 @@ const JobHierarchyManager: React.FC = () => {
 			});
 
 			if (response.ok) {
-				setSuccessMessage('Компетенция удалена');
+				setSuccessMessage(requirementDeleted 
+					? 'Компетенция и требование успешно удалены'
+					: 'Компетенция удалена, но требование не найдено');
 				await refreshData();
 				setTimeout(() => setSuccessMessage(null), 3000);
 			} else {
@@ -417,6 +553,7 @@ const JobHierarchyManager: React.FC = () => {
 			fetchJobLevels(),
 			fetchJobHierarchies(),
 			fetchJobLevelProfLevels(),
+			fetchJobTitleRequirements(),
 			fetchCompetencies(),
 			fetchLevels(),
 		]);
@@ -454,7 +591,9 @@ const JobHierarchyManager: React.FC = () => {
 	};
 
 	const getHierarchyForJob = (jobTitleId: string): JobHierarchy[] => {
-		return jobHierarchies.filter(item => item.jobTitleId === jobTitleId).sort((a, b) => a.level - b.level);
+		const hierarchies = jobHierarchies.filter(item => item.jobTitleId === jobTitleId).sort((a, b) => a.level - b.level);
+		// Добавляем jobTitleId к каждому уровню для использования при создании requirements
+		return hierarchies.map(h => ({ ...h, jobTitleId }));
 	};
 
 	const getLevelName = (levelId: string): string => {
@@ -489,7 +628,7 @@ const JobHierarchyManager: React.FC = () => {
 			)}
 
 			<div className={styles.header}>
-				<h3></h3>
+				<h3>Иерархия должностей</h3>
 				<div className={styles.headerButtons}>
 					<button className={styles.addBtn} onClick={() => setShowAddJobTitleModal(true)}>
 						+ Должность
@@ -572,12 +711,18 @@ const JobHierarchyManager: React.FC = () => {
 																<span className={styles.expandIcon}>
 																	{isLevelExpanded ? '▼' : '▶'}
 																</span>
-																<span className={styles.levelName}>
-																	{getLevelName(hierarchy.jobLevelId)}
-																</span>
-																<span className={styles.levelBadge}>
-																	Уровень {hierarchy.level}
-																</span>
+																<div className={styles.levelInfo}>
+																	<span className={styles.jobTitleInLevel}>
+																		{job.name}
+																	</span>
+																	<span className={styles.levelSeparator}>→</span>
+																	<span className={styles.levelName}>
+																		{getLevelName(hierarchy.jobLevelId)}
+																	</span>
+																	<span className={styles.levelBadge}>
+																		Уровень {hierarchy.level}
+																	</span>
+																</div>
 																<span className={styles.competencyCount}>
 																	📚 {competenciesForLevel.length} компетенций
 																</span>
@@ -592,6 +737,7 @@ const JobHierarchyManager: React.FC = () => {
 																				jobLevelId: hierarchy.jobLevelId,
 																				jobLevelName: getLevelName(hierarchy.jobLevelId),
 																				jobTitleName: job.name,
+																				jobTitleId: job.id,
 																			});
 																			setShowAddCompetencyModal(true);
 																		}}>
@@ -603,28 +749,48 @@ const JobHierarchyManager: React.FC = () => {
 														
 														{isLevelExpanded && competenciesForLevel.length > 0 && (
 															<div className={styles.competenciesContainer}>
-																{competenciesForLevel.map(comp => (
-																	<div key={comp.id} className={styles.competencyCard}>
-																		<div className={styles.competencyHeader}>
-																			<span className={styles.competencyName}>
-																				{comp.competency.name}
-																			</span>
-																			<span className={styles.requiredLevel}>
-																				Уровень: {comp.minLevelName}
-																			</span>
-																			<button
-																				className={styles.removeBtn}
-																				onClick={() => handleRemoveCompetency(comp.id, comp.competency.name)}>
-																				🗑️
-																			</button>
-																		</div>
-																		{comp.competency.description && (
-																			<div className={styles.competencyDesc}>
-																				{comp.competency.description}
+																{competenciesForLevel.map(comp => {
+																	// Проверяем, есть ли requirement для этой компетенции
+																	const hasRequirement = jobTitleRequirements.some(
+																		req => req.jobTitleId === job.id && req.jobLevelProfLevelId === comp.id
+																	);
+																	
+																	return (
+																		<div key={comp.id} className={styles.competencyCard}>
+																			<div className={styles.competencyHeader}>
+																				<span className={styles.competencyName}>
+																					{comp.competency.name}
+																					{hasRequirement && (
+																						<span className={styles.requirementBadge}>
+																							✓ Требование
+																						</span>
+																					)}
+																				</span>
+																				<span className={styles.requiredLevel}>
+																					Уровень: {comp.minLevelName}
+																				</span>
+																				<button
+																					className={styles.removeBtn}
+																					onClick={() => {
+																						setSelectedJobLevel({
+																							jobLevelId: hierarchy.jobLevelId,
+																							jobLevelName: getLevelName(hierarchy.jobLevelId),
+																							jobTitleName: job.name,
+																							jobTitleId: job.id,
+																						});
+																						handleRemoveCompetency(comp.id, comp.competency.name);
+																					}}>
+																					🗑️
+																				</button>
 																			</div>
-																		)}
-																	</div>
-																))}
+																			{comp.competency.description && (
+																				<div className={styles.competencyDesc}>
+																					{comp.competency.description}
+																				</div>
+																			)}
+																		</div>
+																	);
+																})}
 															</div>
 														)}
 													</div>
@@ -639,7 +805,7 @@ const JobHierarchyManager: React.FC = () => {
 				)}
 			</div>
 
-			{/* Модальные окна (остаются без изменений) */}
+			{/* Модальные окна */}
 			{showAddJobTitleModal && (
 				<div className={styles.modal} onClick={() => setShowAddJobTitleModal(false)}>
 					<div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -755,6 +921,26 @@ const JobHierarchyManager: React.FC = () => {
 									<option key={level.id} value={level.id}>{level.name}</option>
 								))}
 							</select>
+						</div>
+						<div className={styles.formGroup}>
+							<label>Значимость требования (вес)</label>
+							<input
+								type="number"
+								min="1"
+								max="10"
+								value={formData.requirementSignificance}
+								onChange={e => setFormData({ ...formData, requirementSignificance: parseInt(e.target.value) || 1 })}
+							/>
+						</div>
+						<div className={styles.formGroup}>
+							<label className={styles.checkboxLabel}>
+								<input
+									type="checkbox"
+									checked={formData.requirementRequired}
+									onChange={e => setFormData({ ...formData, requirementRequired: e.target.checked })}
+								/>
+								Обязательное требование
+							</label>
 						</div>
 						<div className={styles.modalActions}>
 							<button onClick={() => setShowAddCompetencyModal(false)}>Отмена</button>

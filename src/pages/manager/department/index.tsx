@@ -13,6 +13,24 @@ interface Employee {
 	createdAt: string;
 }
 
+// Интерфейс для объекта уровня должности
+interface JobLevelObject {
+	id: string;
+	name: string;
+	createdAt?: string;
+	lastModified?: string;
+	deletedAt?: string | null;
+}
+
+// Интерфейс для объекта должности
+interface JobTitleObject {
+	id: string;
+	name: string;
+	createdAt?: string;
+	lastModified?: string;
+	deletedAt?: string | null;
+}
+
 interface DepartmentEmployee {
 	id: string;
 	firstName: string;
@@ -34,30 +52,10 @@ interface DepartmentEmployee {
 		studied: number;
 		count: number;
 	};
-	jobTitle?: {
-		id: string;
-		name: string;
-	};
-	currentJobLevel?: {
-		id: string;
-		name: string;
-	};
-	nextJobLevel?: {
-		id: string;
-		name: string;
-	};
-}
-
-interface DepartmentInfo {
-	id: string;
-	name: string;
-	shortName: string;
-	progress?: {
-		toStudy: number;
-		inProgress: number;
-		studied: number;
-		count: number;
-	};
+	// Может быть строкой или объектом
+	jobTitle?: string | JobTitleObject;
+	currentJobLevel?: string | JobLevelObject;
+	nextJobLevel?: string | JobLevelObject;
 }
 
 interface UserProfile {
@@ -67,13 +65,73 @@ interface UserProfile {
 	};
 }
 
+// Функция для получения строкового значения из поля, которое может быть строкой или объектом
+const getStringValue = (value: string | { name: string } | undefined): string => {
+	if (!value) return 'Не указана';
+	if (typeof value === 'string') return value;
+	if (typeof value === 'object' && value.name) return value.name;
+	return 'Не указана';
+};
+
+// Функция для детального вывода информации о полях в консоль
+const logFieldDetails = (employee: DepartmentEmployee, index: number) => {
+	console.log(`\n🔍 ДЕТАЛЬНЫЙ АНАЛИЗ СОТРУДНИКА ${index + 1}:`);
+	console.log('═'.repeat(60));
+	
+	// Анализ jobTitle
+	console.log('\n📌 JOBTITLE (Должность):');
+	console.log('  └─ Тип:', typeof employee.jobTitle);
+	console.log('  └─ Значение:', employee.jobTitle);
+	if (typeof employee.jobTitle === 'object' && employee.jobTitle !== null) {
+		console.log('  └─ Свойства объекта:');
+		console.log('      • id:', employee.jobTitle.id);
+		console.log('      • name:', employee.jobTitle.name);
+		console.log('      • createdAt:', employee.jobTitle.createdAt);
+		console.log('      • lastModified:', employee.jobTitle.lastModified);
+		console.log('      • deletedAt:', employee.jobTitle.deletedAt);
+	}
+	
+	// Анализ currentJobLevel
+	console.log('\n📊 CURRENTJOBLEVEL (Текущий уровень):');
+	console.log('  └─ Тип:', typeof employee.currentJobLevel);
+	console.log('  └─ Значение:', employee.currentJobLevel);
+	if (typeof employee.currentJobLevel === 'object' && employee.currentJobLevel !== null) {
+		console.log('  └─ Свойства объекта:');
+		console.log('      • id:', employee.currentJobLevel.id);
+		console.log('      • name:', employee.currentJobLevel.name);
+		console.log('      • createdAt:', employee.currentJobLevel.createdAt);
+		console.log('      • lastModified:', employee.currentJobLevel.lastModified);
+		console.log('      • deletedAt:', employee.currentJobLevel.deletedAt);
+	}
+	
+	// Анализ nextJobLevel
+	console.log('\n🎯 NEXTJOBLEVEL (Следующий уровень):');
+	console.log('  └─ Тип:', typeof employee.nextJobLevel);
+	console.log('  └─ Значение:', employee.nextJobLevel);
+	if (typeof employee.nextJobLevel === 'object' && employee.nextJobLevel !== null) {
+		console.log('  └─ Свойства объекта:');
+		console.log('      • id:', employee.nextJobLevel.id);
+		console.log('      • name:', employee.nextJobLevel.name);
+		console.log('      • createdAt:', employee.nextJobLevel.createdAt);
+		console.log('      • lastModified:', employee.nextJobLevel.lastModified);
+		console.log('      • deletedAt:', employee.nextJobLevel.deletedAt);
+	}
+	
+	// Анализ прогресса
+	console.log('\n📈 ПРОГРЕСС:');
+	console.log('  └─ currentJobLevelProgress:', employee.currentJobLevelProgress);
+	console.log('  └─ nextJobLevelProgress:', employee.nextJobLevelProgress);
+	
+	console.log('\n' + '═'.repeat(60));
+};
+
 const DepartmentPage: React.FC = () => {
 	const accessToken = localStorage.getItem('accessToken');
 	
 	const [departmentStats, setDepartmentStats] = useState({
 		totalEmployees: 0,
-		avgCurrentLevel: 0,
-		avgNextLevel: 0,
+		avgCurrentProgress: 0,
+		avgNextProgress: 0,
 		totalEmployeesReadyForNext: 0,
 	});
 	
@@ -115,7 +173,17 @@ const DepartmentPage: React.FC = () => {
 
 			if (response.ok) {
 				const data: DepartmentEmployee[] = await response.json();
-				console.log('📋 Raw employees data from API:', data);
+				console.log('📋 RAW DATA FROM API - Первые 3 сотрудника:');
+				console.log('═'.repeat(80));
+				data.slice(0, 3).forEach((emp, idx) => {
+					console.log(`\n👤 СОТРУДНИК ${idx + 1}:`);
+					console.log(`  jobTitle:`, emp.jobTitle);
+					console.log(`  currentJobLevel:`, emp.currentJobLevel);
+					console.log(`  nextJobLevel:`, emp.nextJobLevel);
+					console.log(`  currentJobLevelProgress:`, emp.currentJobLevelProgress);
+					console.log(`  nextJobLevelProgress:`, emp.nextJobLevelProgress);
+				});
+				console.log('\n' + '═'.repeat(80));
 				return data;
 			}
 		} catch (error) {
@@ -144,15 +212,6 @@ const DepartmentPage: React.FC = () => {
 		return Math.round((progress.studied / progress.count) * 100);
 	};
 
-	// Получение уровня из прогресса (1-5)
-	const getLevelFromProgress = (progressPercent: number): number => {
-		if (progressPercent >= 80) return 5;
-		if (progressPercent >= 60) return 4;
-		if (progressPercent >= 40) return 3;
-		if (progressPercent >= 20) return 2;
-		return 1;
-	};
-
 	useEffect(() => {
 		const loadDepartmentData = async () => {
 			setIsLoading(true);
@@ -168,27 +227,37 @@ const DepartmentPage: React.FC = () => {
 					const totalEmployees = employeesData.length;
 					
 					console.log('\n' + '='.repeat(80));
-					console.log('📊 Обработка данных сотрудников:');
+					console.log('📊 ОБРАБОТКА ДАННЫХ СОТРУДНИКОВ:');
 					console.log('='.repeat(80));
 					
 					if (employeesData.length > 0) {
+						// Выводим детальную информацию по каждому сотруднику
+						employeesData.forEach((emp, index) => {
+							logFieldDetails(emp, index);
+						});
+						
 						const formattedEmployees: Employee[] = employeesData.map((emp, index) => {
 							const currentProgress = calculateCurrentProgress(emp.currentJobLevelProgress);
 							const nextProgress = calculateNextProgress(emp.nextJobLevelProgress);
 							
-							console.log(`\n👤 Сотрудник ${index + 1}:`);
-							console.log(`  ФИО: ${emp.lastName} ${emp.firstName} ${emp.middleName || ''}`);
-							console.log(`  Текущая должность: ${emp.jobTitle?.name || 'Не указана'}`);
-							console.log(`  Следующая должность: ${emp.nextJobLevel?.name || 'Не указана'}`);
-							console.log(`  Прогресс по текущей должности: ${currentProgress}% (${emp.currentJobLevelProgress?.studied || 0}/${emp.currentJobLevelProgress?.count || 0} компетенций)`);
-							console.log(`  Прогресс по следующей должности: ${nextProgress}% (${emp.nextJobLevelProgress?.studied || 0}/${emp.nextJobLevelProgress?.count || 0} компетенций)`);
+							// Получаем строковые значения
+							const jobTitle = getStringValue(emp.jobTitle);
+							const currentJobLevel = getStringValue(emp.currentJobLevel);
+							const nextJobLevel = getStringValue(emp.nextJobLevel);
+							
+							console.log(`\n📝 ФОРМАТИРОВАНИЕ СОТРУДНИКА ${index + 1}:`);
+							console.log(`  jobTitle (строка): "${jobTitle}"`);
+							console.log(`  currentJobLevel (строка): "${currentJobLevel}"`);
+							console.log(`  nextJobLevel (строка): "${nextJobLevel}"`);
+							console.log(`  currentProgress: ${currentProgress}%`);
+							console.log(`  nextProgress: ${nextProgress}%`);
 							
 							return {
 								id: emp.id,
 								fullName: formatFullName(emp.firstName, emp.lastName, emp.middleName),
 								department: emp.department?.name || profile.department.name,
-								currentPosition: emp.jobTitle?.name || 'Не указана',
-								nextPosition: emp.nextJobLevel?.name || 'Не указана',
+								currentPosition: `${jobTitle}${currentJobLevel !== 'Не указана' ? ` (${currentJobLevel})` : ''}`,
+								nextPosition: nextJobLevel,
 								currentProgress: currentProgress,
 								nextProgress: nextProgress,
 								createdAt: new Date().toISOString().split('T')[0],
@@ -210,33 +279,38 @@ const DepartmentPage: React.FC = () => {
 							}
 						});
 						
-						const avgCurrentLevel = formattedEmployees.length > 0 
+						const avgCurrentProgress = formattedEmployees.length > 0 
 							? Math.round((totalCurrentProgress / formattedEmployees.length) * 10) / 10
 							: 0;
-						const avgNextLevel = formattedEmployees.length > 0 
+						const avgNextProgress = formattedEmployees.length > 0 
 							? Math.round((totalNextProgress / formattedEmployees.length) * 10) / 10
 							: 0;
 						
 						console.log('\n' + '='.repeat(80));
-						console.log('📊 Детальная статистика отдела:');
+						console.log('📊 ДЕТАЛЬНАЯ СТАТИСТИКА ОТДЕЛА:');
 						console.log('='.repeat(80));
 						console.log(`  Всего сотрудников: ${totalEmployees}`);
-						console.log(`  Средний прогресс по текущей должности: ${avgCurrentLevel}%`);
-						console.log(`  Средний прогресс по следующей должности: ${avgNextLevel}%`);
+						console.log(`  Средний прогресс по текущей должности: ${avgCurrentProgress}%`);
+						console.log(`  Средний прогресс по следующей должности: ${avgNextProgress}%`);
 						console.log(`  Готовы к повышению: ${readyForNextCount}`);
 						console.log('='.repeat(80));
 						
+						// Выводим итоговый массив сотрудников для проверки
+						console.log('\n📋 ИТОГОВЫЙ МАССИВ СОТРУДНИКОВ:');
+						console.log(formattedEmployees);
+						
 						setDepartmentStats({
 							totalEmployees: totalEmployees,
-							avgCurrentLevel: avgCurrentLevel,
-							avgNextLevel: avgNextLevel,
+							avgCurrentProgress: avgCurrentProgress,
+							avgNextProgress: avgNextProgress,
 							totalEmployeesReadyForNext: readyForNextCount,
 						});
 					} else {
+						console.log('❌ Нет данных о сотрудниках');
 						setDepartmentStats({
 							totalEmployees: 0,
-							avgCurrentLevel: 0,
-							avgNextLevel: 0,
+							avgCurrentProgress: 0,
+							avgNextProgress: 0,
 							totalEmployeesReadyForNext: 0,
 						});
 					}
@@ -289,13 +363,13 @@ const DepartmentPage: React.FC = () => {
 					</div>
 					<div className={styles.statCard}>
 						<span className={styles.statValue}>
-							{departmentStats.avgCurrentLevel}%
+							{departmentStats.avgCurrentProgress}%
 						</span>
 						<span className={styles.statLabel}>Прогресс по текущей должности</span>
 					</div>
 					<div className={styles.statCard}>
 						<span className={styles.statValue}>
-							{departmentStats.avgNextLevel}%
+							{departmentStats.avgNextProgress}%
 						</span>
 						<span className={styles.statLabel}>Прогресс по следующей должности</span>
 					</div>
